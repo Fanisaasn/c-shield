@@ -22,7 +22,7 @@
                     tingkat kesadaran keamanan siber, dalam satu tempat.
                 </p>
                 <div class="mt-8 flex flex-wrap gap-3">
-                    <a href="#self-assessment" class="rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 transition hover:bg-teal-400">
+                    <a href="{{ route('self-assessment.themes') }}" class="rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 transition hover:bg-teal-400">
                         Mulai Self Assessment
                     </a>
                     <a href="{{ route('articles.index') }}" class="rounded-md border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
@@ -105,24 +105,199 @@
         </section>
     @endif
 
-    {{-- Self assessment teaser --}}
+    {{-- Self assessment: ajakan mulai + statistik agregat seluruh peserta --}}
     <section id="self-assessment" class="scroll-mt-20 bg-navy-900 py-16">
-        <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-            <span class="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1 text-xs font-semibold text-teal-300">
-                Self Assessment
-            </span>
-            <h2 class="mt-4 font-heading text-2xl font-bold text-white sm:text-3xl">
-                Ukur Tingkat Kesadaran Keamanan Siber Anda
-            </h2>
-            <p class="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base">
-                Isi Pre-Assessment sebelum mempelajari materi, pelajari materi edukasi pilihan Anda, lalu isi
-                Post-Assessment untuk melihat perkembangan skor kesadaran keamanan siber Anda. Fitur ini akan
-                segera hadir di C-SHIELD.
-            </p>
-            <span class="mt-6 inline-flex items-center gap-2 rounded-md border border-white/20 px-5 py-3 text-sm font-semibold text-white/60">
-                Segera Hadir
-            </span>
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-2xl text-center">
+                <span class="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1 text-xs font-semibold text-teal-300">
+                    Self Assessment
+                </span>
+                <h2 class="mt-4 font-heading text-2xl font-bold text-white sm:text-3xl">
+                    Ukur Tingkat Kesadaran Keamanan Siber Anda
+                </h2>
+                <p class="mx-auto mt-4 text-sm leading-relaxed text-slate-300 sm:text-base">
+                    Pilih tema yang Anda minati, lalu kerjakan Pre-Assessment untuk mengetahui tingkat pemahaman
+                    Anda saat ini sebelum mempelajari materi edukasi pilihan Anda.
+                </p>
+                <div class="mt-6">
+                    <a href="{{ route('self-assessment.themes') }}"
+                       class="inline-flex items-center gap-2 rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 transition hover:bg-teal-400">
+                        Mulai Self Assessment Sekarang
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-10">
+                <h3 class="text-center font-heading text-lg font-bold text-white">Statistik Hasil Assessment Masyarakat</h3>
+                <p class="mx-auto mt-1 max-w-xl text-center text-sm text-slate-400">
+                    Rekap hasil self-assessment seluruh peserta pada tahun {{ $assessmentStats['currentYear'] }}.
+                </p>
+            </div>
+
+            <div class="mt-6 grid gap-4 lg:grid-cols-3">
+                <div class="rounded-xl bg-white p-5">
+                    <p class="text-sm font-semibold text-navy-900">Persentase Hasil Assessment</p>
+                    <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
+
+                    @if ($assessmentStats['levelDistribution']->sum('count') === 0)
+                        <p class="mt-6 py-6 text-center text-sm text-slate-400">Statistik akan tampil setelah ada peserta yang menyelesaikan assessment.</p>
+                    @else
+                        <div class="mt-4 h-56">
+                            <canvas id="levelDistributionChart" role="img" aria-label="Diagram persentase peserta per tingkat kesadaran keamanan siber"></canvas>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="rounded-xl bg-white p-5">
+                    <p class="text-sm font-semibold text-navy-900">Nilai Per-Kategori</p>
+                    <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
+
+                    @if ($assessmentStats['scoreByCategory']->isEmpty())
+                        <p class="mt-6 py-6 text-center text-sm text-slate-400">Belum ada data.</p>
+                    @else
+                        <div class="mt-4 h-56">
+                            <canvas id="categoryChart" role="img" aria-label="Diagram rata-rata skor berdasarkan kategori/tema assessment"></canvas>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="rounded-xl bg-white p-5">
+                    <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Jenis Kelamin</p>
+                    <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
+
+                    @if ($assessmentStats['scoreByGender']->isEmpty())
+                        <p class="mt-6 py-6 text-center text-sm text-slate-400">Belum ada data.</p>
+                    @else
+                        <div class="mt-4 h-56">
+                            <canvas id="genderChart" role="img" aria-label="Diagram rata-rata skor berdasarkan jenis kelamin"></canvas>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <div class="mt-4 grid gap-4 lg:grid-cols-3">
+                <div class="rounded-xl bg-white p-5">
+                    <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Pendidikan</p>
+                    <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
+
+                    @if ($assessmentStats['scoreByEducation']->isEmpty())
+                        <p class="mt-6 py-6 text-center text-sm text-slate-400">Belum ada data.</p>
+                    @else
+                        <div class="mt-4 h-56">
+                            <canvas id="educationChart" role="img" aria-label="Diagram rata-rata skor berdasarkan pendidikan"></canvas>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="rounded-xl bg-white p-5">
+                    <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Umur</p>
+                    <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
+
+                    @if ($assessmentStats['scoreByAge']->isEmpty())
+                        <p class="mt-6 py-6 text-center text-sm text-slate-400">Belum ada data.</p>
+                    @else
+                        <div class="mt-4 h-56">
+                            <canvas id="ageChart" role="img" aria-label="Diagram rata-rata skor berdasarkan kelompok umur"></canvas>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="rounded-xl bg-white p-5">
+                    <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Domisili</p>
+                    <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
+
+                    @if ($assessmentStats['scoreByDomicile']->isEmpty())
+                        <p class="mt-6 py-6 text-center text-sm text-slate-400">Belum ada data.</p>
+                    @else
+                        <div class="mt-4 h-56">
+                            <canvas id="domicileChart" role="img" aria-label="Diagram rata-rata skor berdasarkan domisili"></canvas>
+                        </div>
+                    @endif
+                </div>
+            </div>
         </div>
     </section>
 
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const levelColors = {
+                'Sangat Rendah': '#dc2626',
+                'Rendah': '#f97316',
+                'Cukup': '#eab308',
+                'Baik': '#1e5aa8',
+                'Sangat Baik': '#2ab7ca',
+            };
+
+            const levelDistribution = @json($assessmentStats['levelDistribution']).filter(function (row) { return row.count > 0; });
+            const levelEl = document.getElementById('levelDistributionChart');
+            if (levelEl) {
+                const total = levelDistribution.reduce(function (sum, row) { return sum + row.count; }, 0);
+
+                new Chart(levelEl, {
+                    type: 'doughnut',
+                    data: {
+                        labels: levelDistribution.map(function (row) { return row.label; }),
+                        datasets: [{
+                            data: levelDistribution.map(function (row) { return row.count; }),
+                            backgroundColor: levelDistribution.map(function (row) { return levelColors[row.label] || '#94a3b8'; }),
+                            borderWidth: 0,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#0b2545', usePointStyle: true, boxWidth: 8, font: { size: 11 } } },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (ctx) {
+                                        const percent = total ? Math.round((ctx.parsed / total) * 100) : 0;
+                                        return ctx.label + ': ' + percent + '% (' + ctx.parsed + ' peserta)';
+                                    },
+                                },
+                            },
+                        },
+                    },
+                });
+            }
+
+            function renderAverageChart(elementId, rows, label) {
+                const el = document.getElementById(elementId);
+                if (!el) return;
+
+                new Chart(el, {
+                    type: 'bar',
+                    data: {
+                        labels: rows.map(function (row) { return row.label; }),
+                        datasets: [{
+                            label: label,
+                            data: rows.map(function (row) { return row.average; }),
+                            backgroundColor: '#1e5aa8',
+                            borderRadius: 4,
+                            maxBarThickness: 40,
+                        }],
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { beginAtZero: true, max: 100, ticks: { color: '#94a3b8' }, grid: { color: '#e2e8f0' } },
+                            y: { ticks: { color: '#0b2545', font: { size: 11 } }, grid: { display: false } },
+                        },
+                        plugins: { legend: { display: false } },
+                    },
+                });
+            }
+
+            renderAverageChart('categoryChart', @json($assessmentStats['scoreByCategory']), 'Rata-rata Skor');
+            renderAverageChart('genderChart', @json($assessmentStats['scoreByGender']), 'Rata-rata Skor');
+            renderAverageChart('educationChart', @json($assessmentStats['scoreByEducation']), 'Rata-rata Skor');
+            renderAverageChart('ageChart', @json($assessmentStats['scoreByAge']), 'Rata-rata Skor');
+            renderAverageChart('domicileChart', @json($assessmentStats['scoreByDomicile']), 'Rata-rata Skor');
+        });
+    </script>
+@endpush

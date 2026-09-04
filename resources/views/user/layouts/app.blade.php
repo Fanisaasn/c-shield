@@ -6,6 +6,8 @@
     <title>@yield('title', 'C-SHIELD') &mdash; Cimahi Cyber Security Hub & Awareness Field</title>
     <meta name="description" content="@yield('meta_description', 'Portal pusat keamanan siber dan wadah kesadaran digital terpadu Kota Cimahi, dikelola oleh Diskominfo Kota Cimahi.')">
 
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%232ab7ca'/%3E%3Cpath d='M12 5 7 7v3.5c0 3.2 2.1 5.6 5 6.5 2.9-.9 5-3.3 5-6.5V7l-5-2Z' stroke='%230b2545' stroke-width='1.4' stroke-linejoin='round' fill='%230b2545' fill-opacity='0.15'/%3E%3Cpath d='m9.7 11.3 1.4 1.4 3-3' stroke='%230b2545' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
@@ -48,7 +50,7 @@
                         {{ $link['label'] }}
                     </a>
                 @endforeach
-                <a href="{{ route('home') }}#self-assessment"
+                <a href="{{ route('self-assessment.themes') }}"
                    class="mt-2 rounded-md bg-teal-500 px-4 py-2 text-center text-sm font-semibold text-navy-950 transition hover:bg-teal-400 md:ml-2 md:mt-0">
                     Self Assessment
                 </a>
@@ -105,5 +107,6 @@
         </div>
     </footer>
 
+    @stack('scripts')
 </body>
 </html>

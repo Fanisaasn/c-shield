@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\FlyerController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SelfAssessmentController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\WebinarController;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +22,15 @@ Route::get('/flyer', [FlyerController::class, 'index'])->name('flyers.index');
 Route::get('/flyer/{flyer}', [FlyerController::class, 'show'])->name('flyers.show');
 
 Route::get('/webinar', [WebinarController::class, 'index'])->name('webinars.index');
+
+Route::prefix('self-assessment')->name('self-assessment.')->group(function () {
+    Route::get('/', [SelfAssessmentController::class, 'themes'])->name('themes');
+    Route::get('/pre', [SelfAssessmentController::class, 'preQuiz'])->name('pre.quiz');
+    Route::post('/pre', [SelfAssessmentController::class, 'storePreQuiz'])->name('pre.store');
+    Route::get('/pre/hasil', [SelfAssessmentController::class, 'preResult'])->name('pre.result');
+    Route::get('/{category:slug}', [SelfAssessmentController::class, 'create'])->name('create');
+    Route::post('/{category:slug}', [SelfAssessmentController::class, 'store'])->name('store');
+});
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
