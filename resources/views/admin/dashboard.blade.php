@@ -28,6 +28,11 @@
             <p class="mt-2 font-heading text-3xl font-bold text-navy-900">{{ $assessmentStats['participants'] }}</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-5">
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Kategori Assessment</p>
+            <p class="mt-2 font-heading text-3xl font-bold text-navy-900">{{ $assessmentStats['categories'] }}</p>
+            <p class="mt-1 text-xs text-slate-500">{{ $assessmentStats['questions'] }} pertanyaan</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-5">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Total Pengerjaan Assessment</p>
             <p class="mt-2 font-heading text-3xl font-bold text-navy-900">{{ $assessmentStats['attempts'] }}</p>
         </div>

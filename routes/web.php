@@ -2,6 +2,12 @@
 
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
+use App\Http\Controllers\Admin\VideoController as AdminVideoController;
+use App\Http\Controllers\Admin\FlyerController as AdminFlyerController;
+use App\Http\Controllers\Admin\WebinarController as AdminWebinarController;
+use App\Http\Controllers\Admin\AssessmentController as AdminAssessmentController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\FlyerController;
 use App\Http\Controllers\HomeController;
@@ -41,5 +47,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('auth:admin')->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::resource('articles', AdminArticleController::class)->parameters(['articles' => 'item'])->except('show');
+        Route::resource('videos', AdminVideoController::class)->parameters(['videos' => 'item'])->except('show');
+        Route::resource('flyers', AdminFlyerController::class)->parameters(['flyers' => 'item'])->except('show');
+        Route::resource('webinars', AdminWebinarController::class)->parameters(['webinars' => 'item'])->except('show');
+        Route::get('assessments', [AdminAssessmentController::class, 'index'])->name('assessments.index');
+        Route::post('assessments/categories', [AdminAssessmentController::class, 'storeCategory'])->name('assessments.categories.store');
+        Route::put('assessments/categories/{category}', [AdminAssessmentController::class, 'updateCategory'])->name('assessments.categories.update');
+        Route::delete('assessments/categories/{category}', [AdminAssessmentController::class, 'destroyCategory'])->name('assessments.categories.destroy');
+        Route::post('assessments/questions', [AdminAssessmentController::class, 'storeQuestion'])->name('assessments.questions.store');
+        Route::put('assessments/questions/{question}', [AdminAssessmentController::class, 'updateQuestion'])->name('assessments.questions.update');
+        Route::delete('assessments/questions/{question}', [AdminAssessmentController::class, 'destroyQuestion'])->name('assessments.questions.destroy');
+        Route::get('reports', [AdminReportController::class, 'index'])->name('reports.index');
     });
 });

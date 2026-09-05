@@ -12,6 +12,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        /* Keep all admin form controls visibly separated from the page. */
+        main input:not([type='checkbox']):not([type='radio']),
+        main textarea,
+        main select {
+            border: 1px solid #94a3b8;
+            background-color: #fff;
+            padding: .625rem .75rem;
+            outline: none;
+        }
+
+        main input[type='file'] {
+            border: 1px solid #94a3b8;
+            border-radius: .375rem;
+            padding: .4rem;
+        }
+
+        main input:not([type='checkbox']):not([type='radio']):focus,
+        main textarea:focus,
+        main select:focus {
+            border-color: #0f8fa0;
+            box-shadow: 0 0 0 3px rgba(42, 183, 202, .2);
+        }
+    </style>
 </head>
 <body class="flex min-h-screen bg-slate-50 font-sans text-navy-900 antialiased">
 
@@ -36,6 +60,9 @@
                 </svg>
                 Dashboard
             </a>
+            @foreach (['articles' => 'Artikel', 'videos' => 'Video Edukasi', 'flyers' => 'Flyer', 'webinars' => 'Webinar', 'assessments' => 'Self-Assessment', 'reports' => 'Monitoring & Laporan'] as $section => $label)
+                <a href="{{ route('admin.'.$section.'.index') }}" class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.'.$section.'.*') ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white' }}">{{ $label }}</a>
+            @endforeach
         </nav>
 
         <div class="border-t border-white/10 px-3 py-4">
@@ -64,6 +91,8 @@
         </header>
 
         <main class="flex-1 p-4 sm:p-6">
+            @if (session('success')) <div class="mb-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ session('success') }}</div> @endif
+            @if ($errors->any()) <div class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">Periksa kembali isian yang ditandai.</div> @endif
             @yield('content')
         </main>
     </div>
