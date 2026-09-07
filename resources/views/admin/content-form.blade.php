@@ -5,7 +5,22 @@
 <div><label class="text-sm font-medium">Judul</label><input name="title" value="{{ old('title',$item->title) }}" class="mt-1 w-full rounded-md border-slate-300" required></div>
 @if($slug)<div><label class="text-sm font-medium">Slug <span class="text-slate-400">(otomatis bila kosong)</span></label><input name="slug" value="{{ old('slug',$item->slug) }}" class="mt-1 w-full rounded-md border-slate-300"></div>@endif
 @if($route === 'articles')<div><label class="text-sm font-medium">Ringkasan</label><textarea name="excerpt" class="mt-1 w-full rounded-md border-slate-300">{{ old('excerpt',$item->excerpt) }}</textarea></div><div><label class="text-sm font-medium">Isi artikel</label><textarea name="content" rows="10" class="mt-1 w-full rounded-md border-slate-300" required>{{ old('content',$item->content) }}</textarea></div>@endif
-@if($route === 'videos')<div><label class="text-sm font-medium">URL video</label><input type="url" name="video_url" value="{{ old('video_url',$item->video_url) }}" class="mt-1 w-full rounded-md border-slate-300" required></div><div><label class="text-sm font-medium">Deskripsi</label><textarea name="description" class="mt-1 w-full rounded-md border-slate-300">{{ old('description',$item->description) }}</textarea></div>@endif
+@if($route === 'videos')
+<div>
+    <label class="text-sm font-medium" for="video">File video</label>
+    <input id="video" type="file" accept=".mp4,.webm,.mov,video/mp4,video/webm,video/quicktime" name="video" class="mt-1 block w-full text-sm" @required(!$item->exists)>
+    <p class="mt-1 text-xs text-slate-400">Format MP4, WebM, atau MOV. Ukuran maksimal 100 MB.</p>
+    @error('video')
+        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+    @enderror
+    @if($item->video_path)
+        <p class="mt-1 text-xs text-slate-500">File saat ini: <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($item->video_path) }}" target="_blank" rel="noopener" class="text-teal-700 underline">{{ basename($item->video_path) }}</a></p>
+    @elseif($item->video_url)
+        <p class="mt-1 text-xs text-slate-500">Video lama masih menggunakan URL eksternal.</p>
+    @endif
+</div>
+<div><label class="text-sm font-medium">Deskripsi</label><textarea name="description" class="mt-1 w-full rounded-md border-slate-300">{{ old('description',$item->description) }}</textarea></div>
+@endif
 @if($route === 'flyers')<div><label class="text-sm font-medium">Deskripsi</label><textarea name="description" class="mt-1 w-full rounded-md border-slate-300">{{ old('description',$item->description) }}</textarea></div>@endif
 @if($route === 'webinars')<div class="grid gap-4 sm:grid-cols-2"><div><label class="text-sm font-medium">Narasumber</label><input name="speaker" value="{{ old('speaker',$item->speaker) }}" class="mt-1 w-full rounded-md border-slate-300"></div><div><label class="text-sm font-medium">Tanggal & waktu</label><input type="datetime-local" name="webinar_date" value="{{ old('webinar_date', optional($item->webinar_date)->format('Y-m-d\\TH:i')) }}" class="mt-1 w-full rounded-md border-slate-300" required></div><div><label class="text-sm font-medium">Platform</label><input name="platform" value="{{ old('platform',$item->platform) }}" class="mt-1 w-full rounded-md border-slate-300"></div><div><label class="text-sm font-medium">Link pendaftaran</label><input type="url" name="registration_url" value="{{ old('registration_url',$item->registration_url) }}" class="mt-1 w-full rounded-md border-slate-300" required></div></div><div><label class="text-sm font-medium">Deskripsi</label><textarea name="description" class="mt-1 w-full rounded-md border-slate-300">{{ old('description',$item->description) }}</textarea></div>@endif
 @if($upload)<div><label class="text-sm font-medium">{{ $uploadLabel }}</label><input type="file" accept="image/*" name="{{ $upload }}" class="mt-1 block w-full text-sm">@if($item->{$upload})<p class="mt-1 text-xs text-slate-400">File saat ini tersimpan.</p>@endif</div>@endif
