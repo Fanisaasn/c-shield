@@ -21,9 +21,14 @@
         @else
             <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($videos as $video)
-                    <a href="{{ route('videos.show', $video) }}" class="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                    <article class="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                         <div class="flex aspect-video items-center justify-center bg-navy-900">
-                            @if ($video->thumbnail)
+                            @if ($video->video_path)
+                                <video controls preload="metadata" class="h-full w-full" @if($video->thumbnail) poster="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($video->thumbnail) }}" @endif>
+                                    <source src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($video->video_path) }}">
+                                    Browser Anda tidak mendukung pemutaran video HTML5.
+                                </video>
+                            @elseif ($video->thumbnail)
                                 <img src="{{ asset('storage/' . $video->thumbnail) }}" alt="{{ $video->title }}" class="h-full w-full object-cover">
                             @else
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-10 w-10 text-teal-400">
@@ -36,12 +41,12 @@
                             <p class="text-xs font-medium uppercase tracking-wide text-teal-600">
                                 {{ $video->published_at?->translatedFormat('d M Y') }}
                             </p>
-                            <h2 class="mt-2 font-heading text-lg font-bold text-navy-900 group-hover:text-blue-600">
+                            <a href="{{ route('videos.show', $video) }}" class="mt-2 font-heading text-lg font-bold text-navy-900 group-hover:text-blue-600">
                                 {{ $video->title }}
-                            </h2>
+                            </a>
                             <p class="mt-2 line-clamp-2 flex-1 text-sm text-slate-500">{{ $video->description }}</p>
                         </div>
-                    </a>
+                    </article>
                 @endforeach
             </div>
 

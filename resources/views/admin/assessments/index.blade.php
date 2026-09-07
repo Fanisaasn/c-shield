@@ -1,6 +1,65 @@
 @extends('admin.layouts.app')
 @section('title', 'Self-Assessment')
 @section('content')
-<div class="grid gap-6 xl:grid-cols-3"><section class="rounded-xl border border-slate-200 bg-white p-5"><h2 class="font-heading font-bold">Tambah kategori</h2><form class="mt-4 space-y-3" method="POST" action="{{ route('admin.assessments.categories.store') }}">@csrf <input name="name" placeholder="Nama kategori/tema" class="w-full rounded-md border-slate-300" required><textarea name="description" placeholder="Deskripsi (opsional)" class="w-full rounded-md border-slate-300"></textarea><input type="number" min="0" name="order" value="0" class="w-full rounded-md border-slate-300"><button class="rounded-md bg-teal-500 px-4 py-2 text-sm font-semibold">Tambah kategori</button></form></section><section class="rounded-xl border border-slate-200 bg-white p-5 xl:col-span-2"><h2 class="font-heading font-bold">Tambah pertanyaan</h2><form class="mt-4 space-y-3" method="POST" action="{{ route('admin.assessments.questions.store') }}">@csrf <select name="assessment_category_id" class="w-full rounded-md border-slate-300" required><option value="">Pilih kategori</option>@foreach($categories as $category)<option value="{{ $category->id }}">{{ $category->name }}</option>@endforeach</select><textarea name="question" placeholder="Pertanyaan" class="w-full rounded-md border-slate-300" required></textarea><div class="grid gap-2 sm:grid-cols-2">@for($i=0;$i<4;$i++)<label class="flex items-center gap-2"><input type="radio" name="correct_option" value="{{ $i }}" @checked($i===0)><input name="options[]" placeholder="Pilihan {{ chr(65+$i) }}" class="w-full rounded-md border-slate-300" required></label>@endfor</div><input type="number" min="0" name="order" value="0" class="w-full rounded-md border-slate-300"><button class="rounded-md bg-teal-500 px-4 py-2 text-sm font-semibold">Simpan pertanyaan</button></form></section></div>
-<div class="mt-6 space-y-4">@forelse($categories as $category)<section class="rounded-xl border border-slate-200 bg-white p-5"><div class="flex justify-between gap-3"><div><h2 class="font-heading font-bold">{{ $category->name }}</h2><p class="mt-1 text-sm text-slate-500">{{ $category->description }}</p></div><form method="POST" action="{{ route('admin.assessments.categories.destroy',$category) }}">@csrf @method('DELETE')<button onclick="return confirm('Hapus kategori beserta seluruh pertanyaannya?')" class="text-sm text-red-600">Hapus</button></form></div><details class="mt-3 text-sm"><summary class="cursor-pointer text-teal-700">Edit kategori</summary><form method="POST" action="{{ route('admin.assessments.categories.update',$category) }}" class="mt-2 grid gap-2 sm:grid-cols-3">@csrf @method('PUT')<input name="name" value="{{ $category->name }}" class="rounded-md border-slate-300" required><input name="description" value="{{ $category->description }}" class="rounded-md border-slate-300"><input type="number" min="0" name="order" value="{{ $category->order }}" class="rounded-md border-slate-300"><button class="w-max rounded bg-slate-800 px-3 py-1.5 text-white">Simpan</button></form></details><ol class="mt-4 list-decimal space-y-3 pl-5">@forelse($category->questions->sortBy('order') as $question)<li class="text-sm text-navy-900">{{ $question->question }}<div class="mt-1 text-xs text-slate-500">@foreach($question->options->sortBy('order') as $option)<span class="mr-3 {{ $option->is_correct ? 'font-semibold text-emerald-600' : '' }}">{{ $option->option_text }}</span>@endforeach</div><div class="mt-1 flex gap-3"><form method="POST" action="{{ route('admin.assessments.questions.destroy',$question) }}">@csrf @method('DELETE')<button onclick="return confirm('Hapus pertanyaan?')" class="text-xs text-red-600">Hapus</button></form><details class="text-xs"><summary class="cursor-pointer text-teal-700">Edit</summary><form method="POST" action="{{ route('admin.assessments.questions.update',$question) }}" class="mt-2 space-y-2 rounded border p-3">@csrf @method('PUT')<select name="assessment_category_id" class="rounded border-slate-300">@foreach($categories as $optionCategory)<option value="{{ $optionCategory->id }}" @selected($optionCategory->id === $question->assessment_category_id)>{{ $optionCategory->name }}</option>@endforeach</select><textarea name="question" class="block w-full rounded border-slate-300" required>{{ $question->question }}</textarea>@foreach($question->options->sortBy('order')->values() as $i => $option)<label class="block"><input type="radio" name="correct_option" value="{{ $i }}" @checked($option->is_correct)><input name="options[]" value="{{ $option->option_text }}" class="rounded border-slate-300" required></label>@endforeach<input type="number" name="order" value="{{ $question->order }}" min="0" class="rounded border-slate-300"><button class="rounded bg-slate-800 px-3 py-1.5 text-white">Simpan</button></form></details></div></li>@empty<li class="text-slate-400">Belum ada pertanyaan.</li>@endforelse</ol></section>@empty<div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-400">Belum ada kategori assessment.</div>@endforelse</div>
+<div class="grid gap-6 xl:grid-cols-3">
+    <section class="rounded-xl border border-slate-200 bg-white p-5">
+        <h2 class="font-heading font-bold">Tambah kategori</h2>
+        <form class="mt-4 space-y-3" method="POST" action="{{ route('admin.assessments.categories.store') }}">
+            @csrf
+            <input name="name" placeholder="Nama kategori/tema" class="w-full rounded-md border-slate-300" required>
+            <textarea name="description" placeholder="Deskripsi (opsional)" class="w-full rounded-md border-slate-300"></textarea>
+            <button class="rounded-md bg-teal-500 px-4 py-2 text-sm font-semibold">Tambah kategori</button>
+        </form>
+    </section>
+    <section class="rounded-xl border border-slate-200 bg-white p-5 xl:col-span-2">
+        <h2 class="font-heading font-bold">Tambah pertanyaan</h2>
+        <form class="mt-4 space-y-3" method="POST" action="{{ route('admin.assessments.questions.store') }}">
+            @csrf
+            <select name="assessment_category_id" class="w-full rounded-md border-slate-300" required>
+                <option value="">Pilih kategori</option>
+                @foreach($categories as $category)<option value="{{ $category->id }}">{{ $category->name }}</option>@endforeach
+            </select>
+            <textarea name="question" placeholder="Pertanyaan" class="w-full rounded-md border-slate-300" required></textarea>
+            <div class="grid gap-2 sm:grid-cols-2">
+                @for($i=0;$i<4;$i++)
+                    <label class="flex items-center gap-2"><input type="radio" name="correct_option" value="{{ $i }}" @checked($i===0)><input name="options[]" placeholder="Pilihan {{ chr(65+$i) }}" class="w-full rounded-md border-slate-300" required></label>
+                @endfor
+            </div>
+            <button class="rounded-md bg-teal-500 px-4 py-2 text-sm font-semibold">Simpan pertanyaan</button>
+        </form>
+    </section>
+</div>
+<div class="mt-6 space-y-4">
+    @forelse($categories as $category)
+        <section class="rounded-xl border border-slate-200 bg-white p-5">
+            <div class="flex justify-between gap-3">
+                <div><h2 class="font-heading font-bold">{{ $category->name }}</h2><p class="mt-1 text-sm text-slate-500">{{ $category->description }}</p></div>
+                <form method="POST" action="{{ route('admin.assessments.categories.destroy',$category) }}">@csrf @method('DELETE')<button onclick="return confirm('Hapus kategori beserta seluruh pertanyaannya?')" class="text-sm text-red-600">Hapus</button></form>
+            </div>
+            <details class="mt-3 text-sm">
+                <summary class="cursor-pointer text-teal-700">Edit kategori</summary>
+                <form method="POST" action="{{ route('admin.assessments.categories.update',$category) }}" class="mt-2 grid gap-2 sm:grid-cols-3">@csrf @method('PUT')<input name="name" value="{{ $category->name }}" class="rounded-md border-slate-300" required><input name="description" value="{{ $category->description }}" class="rounded-md border-slate-300"><button class="w-max rounded bg-slate-800 px-3 py-1.5 text-white">Simpan</button></form>
+            </details>
+            <ol class="mt-4 list-decimal space-y-3 pl-5">
+                @forelse($category->questions->sortBy('order') as $question)
+                    <li class="text-sm text-navy-900">
+                        {{ $question->question }}
+                        <div class="mt-1 text-xs text-slate-500">@foreach($question->options->sortBy('order') as $option)<span class="mr-3 {{ $option->is_correct ? 'font-semibold text-emerald-600' : '' }}">{{ $option->option_text }}</span>@endforeach</div>
+                        <div class="mt-1 flex gap-3">
+                            <form method="POST" action="{{ route('admin.assessments.questions.destroy',$question) }}">@csrf @method('DELETE')<button onclick="return confirm('Hapus pertanyaan?')" class="text-xs text-red-600">Hapus</button></form>
+                            <details class="text-xs">
+                                <summary class="cursor-pointer text-teal-700">Edit</summary>
+                                <form method="POST" action="{{ route('admin.assessments.questions.update',$question) }}" class="mt-2 space-y-2 rounded border p-3">@csrf @method('PUT')<select name="assessment_category_id" class="rounded border-slate-300">@foreach($categories as $optionCategory)<option value="{{ $optionCategory->id }}" @selected($optionCategory->id === $question->assessment_category_id)>{{ $optionCategory->name }}</option>@endforeach</select><textarea name="question" class="block w-full rounded border-slate-300" required>{{ $question->question }}</textarea>@foreach($question->options->sortBy('order')->values() as $i => $option)<label class="block"><input type="radio" name="correct_option" value="{{ $i }}" @checked($option->is_correct)><input name="options[]" value="{{ $option->option_text }}" class="rounded border-slate-300" required></label>@endforeach<button class="rounded bg-slate-800 px-3 py-1.5 text-white">Simpan</button></form>
+                            </details>
+                        </div>
+                    </li>
+                @empty
+                    <li class="text-slate-400">Belum ada pertanyaan.</li>
+                @endforelse
+            </ol>
+        </section>
+    @empty
+        <div class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-400">Belum ada kategori assessment.</div>
+    @endforelse
+</div>
 @endsection
