@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Flyer;
+use App\Models\SurveyQuestion;
 
 class FlyerController extends Controller
 {
@@ -13,6 +14,7 @@ class FlyerController extends Controller
     {
         $flyers = Flyer::query()
             ->where('is_published', true)
+            ->with(['images' => fn ($query) => $query->orderBy('sort_order')->limit(1)])
             ->latest('published_at')
             ->paginate(9)
             ->withQueryString();
@@ -27,6 +29,10 @@ class FlyerController extends Controller
     {
         abort_unless($flyer->is_published, 404);
 
-        return view('user.flyers.show', compact('flyer'));
+        $flyer->load('images');
+
+        $surveyQuestions = SurveyQuestion::query()->orderBy('sort_order')->get();
+
+        return view('user.flyers.show', compact('flyer', 'surveyQuestions'));
     }
 }

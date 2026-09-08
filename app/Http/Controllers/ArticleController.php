@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\SurveyQuestion;
 
 class ArticleController extends Controller
 {
@@ -27,6 +28,8 @@ class ArticleController extends Controller
     {
         abort_unless($article->is_published, 404);
 
-        return view('user.articles.show', compact('article'));
+        $surveyQuestions = SurveyQuestion::query()->orderBy('sort_order')->get();
+
+        return view('user.articles.show', compact('article', 'surveyQuestions'));
     }
 }

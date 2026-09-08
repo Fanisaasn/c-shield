@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             VideoSeeder::class,
             FlyerSeeder::class,
             WebinarSeeder::class,
+            SurveyQuestionSeeder::class,
         ]);
     }
 }
