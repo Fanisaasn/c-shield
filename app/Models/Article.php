@@ -11,6 +11,7 @@ class Article extends Model
         'slug',
         'excerpt',
         'content',
+        'source_url',
         'cover_image',
         'is_published',
         'published_at',

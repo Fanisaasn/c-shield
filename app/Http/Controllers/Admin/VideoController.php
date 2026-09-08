@@ -25,6 +25,7 @@ class VideoController extends ContentController
     protected array $rules = [
         'title' => ['required', 'string', 'max:255'],
         'description' => ['nullable', 'string'],
+        'video_url' => ['nullable', 'url', 'max:255'],
         'thumbnail' => ['nullable', 'image', 'max:2048'],
         'is_published' => ['nullable', 'boolean'],
         'published_at' => ['nullable', 'date'],
@@ -62,7 +63,8 @@ class VideoController extends ContentController
         $rules = $this->rules;
         $rules['slug'] = ['nullable', 'string', 'max:255', 'unique:videos,slug'.($item ? ','.$item->id : '')];
         $rules['video'] = [
-            $item ? 'nullable' : 'required',
+            $item ? 'nullable' : 'required_without:video_url',
+            'nullable',
             'file',
             'mimes:mp4,webm,mov',
             'mimetypes:video/mp4,video/webm,video/quicktime',
@@ -70,7 +72,7 @@ class VideoController extends ContentController
         ];
 
         $data = $request->validate($rules, [
-            'video.required' => 'File video wajib diunggah.',
+            'video.required_without' => 'Unggah file video, atau isi link video (Instagram/YouTube/sumber lain).',
             'video.uploaded' => 'File video gagal diunggah. Pastikan ukuran file tidak melebihi batas server.',
             'video.mimes' => 'File video harus berformat MP4, WebM, atau MOV.',
             'video.mimetypes' => 'Tipe file video tidak valid. Gunakan MP4, WebM, atau MOV.',

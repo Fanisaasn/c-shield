@@ -22,9 +22,18 @@
             <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach ($flyers as $flyer)
                     <a href="{{ route('flyers.show', $flyer) }}" class="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                        <div class="flex aspect-[3/4] items-center justify-center bg-slate-100">
-                            @if ($flyer->image)
-                                <img src="{{ asset('storage/' . $flyer->image) }}" alt="{{ $flyer->title }}" class="h-full w-full object-cover">
+                        <div class="relative flex aspect-[3/4] items-center justify-center bg-slate-100">
+                            @if ($flyer->images->isNotEmpty())
+                                <img src="{{ asset('storage/' . $flyer->images->first()->image) }}" alt="{{ $flyer->title }}" class="h-full w-full object-cover">
+                                @if ($flyer->images->count() > 1)
+                                    <span class="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs font-medium text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-3.5 w-3.5">
+                                            <rect x="3" y="3" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                                            <path d="M8 21h10a2 2 0 0 0 2-2V8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                        </svg>
+                                        {{ $flyer->images->count() }}
+                                    </span>
+                                @endif
                             @else
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-10 w-10 text-slate-300">
                                     <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/>

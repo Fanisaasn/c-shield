@@ -22,21 +22,7 @@
             <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($videos as $video)
                     <article class="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                        <div class="flex aspect-video items-center justify-center bg-navy-900">
-                            @if ($video->video_path)
-                                <video controls preload="metadata" class="h-full w-full" @if($video->thumbnail) poster="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($video->thumbnail) }}" @endif>
-                                    <source src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($video->video_path) }}">
-                                    Browser Anda tidak mendukung pemutaran video HTML5.
-                                </video>
-                            @elseif ($video->thumbnail)
-                                <img src="{{ asset('storage/' . $video->thumbnail) }}" alt="{{ $video->title }}" class="h-full w-full object-cover">
-                            @else
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-10 w-10 text-teal-400">
-                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/>
-                                    <path d="M10 9v6l5-3-5-3Z" fill="currentColor"/>
-                                </svg>
-                            @endif
-                        </div>
+                        @include('partials.video-player', ['video' => $video, 'iconClass' => 'h-10 w-10'])
                         <div class="flex flex-1 flex-col p-5">
                             <p class="text-xs font-medium uppercase tracking-wide text-teal-600">
                                 {{ $video->published_at?->translatedFormat('d M Y') }}

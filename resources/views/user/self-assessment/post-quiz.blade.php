@@ -1,21 +1,21 @@
 @extends('user.layouts.app')
 
-@section('title', 'Pre-Assessment')
-@section('meta_description', 'Kerjakan Pre-Assessment kesadaran keamanan siber C-SHIELD.')
+@section('title', 'Post-Assessment')
+@section('meta_description', 'Kerjakan Post-Assessment kesadaran keamanan siber C-SHIELD.')
 
 @section('content')
 
     <section class="bg-navy-900 py-14">
         <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
             <span class="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1 text-xs font-semibold text-teal-300">
-                Self Assessment &mdash; Langkah 3 dari 8
+                Self Assessment &mdash; Langkah 6 dari 8
             </span>
             <h1 class="mt-4 font-heading text-2xl font-bold text-white sm:text-3xl">
-                Pre-Assessment &mdash; {{ $category->name }}
+                Post-Assessment &mdash; {{ $category->name }}
             </h1>
             <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-300">
-                Jawab seluruh pertanyaan berikut sesuai pemahaman Anda saat ini. Tidak ada jawaban benar/salah
-                yang perlu dikhawatirkan &mdash; hasil ini menjadi titik awal sebelum Anda mempelajari materi.
+                Jawab kembali seluruh pertanyaan berikut setelah mempelajari video materi. Hasil ini menunjukkan
+                pemahaman Anda saat ini dibandingkan dengan Pre-Assessment sebelumnya.
             </p>
         </div>
     </section>
@@ -27,7 +27,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('self-assessment.pre.store') }}">
+        <form method="POST" action="{{ route('self-assessment.post.store') }}">
             @csrf
 
             <div class="space-y-4">
