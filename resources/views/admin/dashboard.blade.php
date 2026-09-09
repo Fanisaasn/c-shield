@@ -22,15 +22,14 @@
         @endforeach
     </div>
 
-    <div class="mt-6 grid gap-4 sm:grid-cols-2">
+    <div class="mt-6 grid gap-4 sm:grid-cols-3">
         <div class="rounded-xl border border-slate-200 bg-white p-5">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Peserta Self Assessment</p>
             <p class="mt-2 font-heading text-3xl font-bold text-navy-900">{{ $assessmentStats['participants'] }}</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-5">
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Kategori Assessment</p>
-            <p class="mt-2 font-heading text-3xl font-bold text-navy-900">{{ $assessmentStats['categories'] }}</p>
-            <p class="mt-1 text-xs text-slate-500">{{ $assessmentStats['questions'] }} pertanyaan</p>
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Pertanyaan Assessment</p>
+            <p class="mt-2 font-heading text-3xl font-bold text-navy-900">{{ $assessmentStats['questions'] }}</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-5">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Total Pengerjaan Assessment</p>
@@ -44,7 +43,7 @@
         <p class="mt-1 text-sm text-slate-500">Rekap hasil self-assessment seluruh peserta pada tahun {{ $currentYear }}.</p>
     </div>
 
-    <div class="mt-4 grid gap-4 lg:grid-cols-3">
+    <div class="mt-4 grid gap-4 lg:grid-cols-2">
         <div class="rounded-xl border border-slate-200 bg-white p-5">
             <p class="text-sm font-semibold text-navy-900">Persentase Hasil Assessment</p>
             <p class="text-xs text-slate-400">Tahun {{ $currentYear }}</p>
@@ -54,19 +53,6 @@
             @else
                 <div class="mt-4 h-56">
                     <canvas id="levelDistributionChart" role="img" aria-label="Diagram persentase peserta per tingkat kesadaran keamanan siber"></canvas>
-                </div>
-            @endif
-        </div>
-
-        <div class="rounded-xl border border-slate-200 bg-white p-5">
-            <p class="text-sm font-semibold text-navy-900">Nilai Per-Kategori</p>
-            <p class="text-xs text-slate-400">Tahun {{ $currentYear }}</p>
-
-            @if ($scoreByCategory->isEmpty())
-                <p class="mt-6 py-6 text-center text-sm text-slate-400">Belum ada data.</p>
-            @else
-                <div class="mt-4 h-56">
-                    <canvas id="categoryChart" role="img" aria-label="Diagram rata-rata skor berdasarkan kategori/tema assessment"></canvas>
                 </div>
             @endif
         </div>
@@ -200,7 +186,6 @@
                 });
             }
 
-            renderAverageChart('categoryChart', @json($scoreByCategory), 'Rata-rata Skor');
             renderAverageChart('genderChart', @json($scoreByGender), 'Rata-rata Skor');
             renderAverageChart('educationChart', @json($scoreByEducation), 'Rata-rata Skor');
             renderAverageChart('ageChart', @json($scoreByAge), 'Rata-rata Skor');
