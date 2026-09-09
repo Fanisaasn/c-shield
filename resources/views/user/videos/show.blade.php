@@ -15,22 +15,23 @@
     </section>
 
     <article class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-        <div class="flex aspect-video items-center justify-center rounded-xl bg-navy-900">
-            @if ($video->thumbnail)
-                <img src="{{ asset('storage/' . $video->thumbnail) }}" alt="{{ $video->title }}" class="h-full w-full rounded-xl object-cover">
-            @else
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-14 w-14 text-teal-400">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/>
-                    <path d="M10 9v6l5-3-5-3Z" fill="currentColor"/>
-                </svg>
-            @endif
-        </div>
+        @if (session('survey_success'))
+            <div class="mb-6 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-800">
+                {{ session('survey_success') }}
+            </div>
+        @endif
 
-        <a href="{{ $video->video_url }}" target="_blank" rel="noopener"
-           class="mt-6 inline-flex items-center gap-2 rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 hover:bg-teal-400">
-            Tonton Video
-        </a>
+        @include('partials.video-player', ['video' => $video])
 
         <p class="mt-6 whitespace-pre-line text-base leading-relaxed text-slate-700">{{ $video->description }}</p>
+
+        <button type="button" onclick="document.getElementById('survey-modal').style.display='flex'" class="mt-2 inline-flex items-center gap-2 rounded-md border border-teal-500 px-4 py-2 text-sm font-semibold text-teal-700 transition hover:bg-teal-50">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-4 w-4">
+                <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.2 0-2.3-.25-3.3-.7L3 20l1.2-4.4A8.5 8.5 0 1 1 21 11.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            </svg>
+            Beri Masukan
+        </button>
     </article>
+
+    @include('partials.survey-modal')
 @endsection

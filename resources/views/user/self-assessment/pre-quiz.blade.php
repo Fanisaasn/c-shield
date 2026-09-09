@@ -8,7 +8,7 @@
     <section class="bg-navy-900 py-14">
         <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
             <span class="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1 text-xs font-semibold text-teal-300">
-                Self Assessment &mdash; Langkah 3 dari 4
+                Self Assessment &mdash; Langkah 3 dari 8
             </span>
             <h1 class="mt-4 font-heading text-2xl font-bold text-white sm:text-3xl">
                 Pre-Assessment &mdash; {{ $category->name }}
@@ -33,9 +33,10 @@
             <div class="space-y-4">
                 @foreach ($questions as $question)
                     <fieldset class="rounded-xl border border-slate-200 bg-white p-5">
-                        <legend class="px-1 text-sm font-medium text-navy-900">
+                        <legend class="sr-only">Pertanyaan {{ $loop->iteration }}</legend>
+                        <p class="text-sm font-medium text-navy-900">
                             {{ $loop->iteration }}. {{ $question->question }}
-                        </legend>
+                        </p>
                         <div class="mt-3 space-y-2">
                             @foreach ($question->options as $option)
                                 <label class="flex items-start gap-2.5 rounded-md border border-slate-200 px-3 py-2.5 text-sm text-slate-700 transition hover:bg-slate-50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50">

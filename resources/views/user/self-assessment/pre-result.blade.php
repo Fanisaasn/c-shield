@@ -20,7 +20,7 @@
     <section class="bg-navy-900 py-14">
         <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
             <span class="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1 text-xs font-semibold text-teal-300">
-                Self Assessment &mdash; Langkah 4 dari 4
+                Self Assessment &mdash; Langkah 4 dari 8
             </span>
             <h1 class="mt-4 font-heading text-2xl font-bold text-white sm:text-3xl">
                 Hasil Pre-Assessment &mdash; {{ $category->name }}
@@ -62,7 +62,7 @@
                             @if ($review['is_correct'])
                                 <span class="shrink-0 rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-semibold text-teal-600">Benar</span>
                             @else
-                                <span class="shrink-0 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-600">Keliru</span>
+                                <span class="shrink-0 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-600">Salah</span>
                             @endif
                         </div>
                         <p class="mt-2 text-sm text-slate-500">Jawaban Anda: {{ $review['chosen'] }}</p>
@@ -75,15 +75,14 @@
         </div>
 
         <div class="mt-6 rounded-md border border-teal-200 bg-teal-50 px-5 py-4 text-sm text-teal-700">
-            Langkah selanjutnya: pelajari materi edukasi pilihan Anda, lalu kerjakan Post-Assessment untuk
-            melihat perkembangan skor kesadaran keamanan siber Anda. Post-Assessment akan hadir pada tahap
-            berikutnya di C-SHIELD.
+            Langkah selanjutnya: tonton video materi edukasi, lalu kerjakan Post-Assessment untuk melihat
+            perkembangan skor kesadaran keamanan siber Anda.
         </div>
 
         <div class="mt-8 flex flex-wrap justify-center gap-3">
-            <a href="{{ route('articles.index') }}"
+            <a href="{{ route('self-assessment.video') }}"
                class="rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 transition hover:bg-teal-400">
-                Pelajari Materi Edukasi
+                Lanjut ke Video Materi
             </a>
             <a href="{{ route('self-assessment.themes') }}"
                class="rounded-md border border-slate-300 px-5 py-3 text-sm font-semibold text-navy-900 transition hover:bg-slate-50">

@@ -11,6 +11,7 @@ class Video extends Model
         'slug',
         'description',
         'video_url',
+        'video_path',
         'thumbnail',
         'is_published',
         'published_at',
