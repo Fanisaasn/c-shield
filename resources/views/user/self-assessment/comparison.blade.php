@@ -14,14 +14,14 @@
     <section class="bg-navy-900 py-14">
         <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
             <span class="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1 text-xs font-semibold text-teal-300">
-                Self Assessment &mdash; Langkah 8 dari 8
+                Self Assessment &mdash; Perbandingan
             </span>
             <h1 class="mt-4 font-heading text-2xl font-bold text-white sm:text-3xl">
-                Perbandingan Pre vs Post &mdash; {{ $category->name }}
+                Perbandingan Pre vs Post
             </h1>
             <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-300">
                 {{ $respondent ? 'Halo ' . $respondent->name . '. ' : '' }}Berikut perkembangan skor kesadaran
-                keamanan siber Anda sebelum dan sesudah mempelajari video materi.
+                keamanan siber Anda sebelum dan sesudah mempelajari materi edukasi.
             </p>
         </div>
     </section>
@@ -63,15 +63,21 @@
         </div>
 
         <div class="mt-8 flex flex-wrap justify-center gap-3">
-            <a href="{{ route('self-assessment.themes') }}"
-               class="rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 transition hover:bg-teal-400">
-                Coba Tema Lain
-            </a>
+            <form method="POST" action="{{ route('self-assessment.restart') }}">
+                @csrf
+                <button type="submit"
+                        class="rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 transition hover:bg-teal-400">
+                    Ulangi dari Awal
+                </button>
+            </form>
             <a href="{{ route('home') }}"
                class="rounded-md border border-slate-300 px-5 py-3 text-sm font-semibold text-navy-900 transition hover:bg-slate-50">
                 Kembali ke Beranda
             </a>
         </div>
+        <p class="mt-3 text-center text-xs text-slate-400">
+            "Ulangi dari Awal" menghapus sesi ini dan membuka form data diri baru untuk Pre-Assessment.
+        </p>
     </section>
 
 @endsection

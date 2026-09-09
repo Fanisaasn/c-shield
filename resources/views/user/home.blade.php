@@ -22,7 +22,7 @@
                     tingkat kesadaran keamanan siber, dalam satu tempat.
                 </p>
                 <div class="mt-8 flex flex-wrap gap-3">
-                    <a href="{{ route('self-assessment.themes') }}" class="rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 transition hover:bg-teal-400">
+                    <a href="{{ route('self-assessment.index') }}" class="rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 transition hover:bg-teal-400">
                         Mulai Self Assessment
                     </a>
                     <a href="{{ route('articles.index') }}" class="rounded-md border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
@@ -116,11 +116,11 @@
                     Ukur Tingkat Kesadaran Keamanan Siber Anda
                 </h2>
                 <p class="mx-auto mt-4 text-sm leading-relaxed text-slate-300 sm:text-base">
-                    Pilih tema yang Anda minati, lalu kerjakan Pre-Assessment untuk mengetahui tingkat pemahaman
-                    Anda saat ini sebelum mempelajari materi edukasi pilihan Anda.
+                    Kerjakan Pre-Assessment untuk mengetahui tingkat pemahaman Anda saat ini, sebelum mempelajari
+                    materi edukasi yang tersedia.
                 </p>
                 <div class="mt-6">
-                    <a href="{{ route('self-assessment.themes') }}"
+                    <a href="{{ route('self-assessment.index') }}"
                        class="inline-flex items-center gap-2 rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 transition hover:bg-teal-400">
                         Mulai Self Assessment Sekarang
                     </a>
@@ -134,7 +134,7 @@
                 </p>
             </div>
 
-            <div class="mt-6 grid gap-4 lg:grid-cols-3">
+            <div class="mt-6 grid gap-4 lg:grid-cols-2">
                 <div class="rounded-xl bg-white p-5">
                     <p class="text-sm font-semibold text-navy-900">Persentase Hasil Assessment</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
@@ -144,19 +144,6 @@
                     @else
                         <div class="mt-4 h-56">
                             <canvas id="levelDistributionChart" role="img" aria-label="Diagram persentase peserta per tingkat kesadaran keamanan siber"></canvas>
-                        </div>
-                    @endif
-                </div>
-
-                <div class="rounded-xl bg-white p-5">
-                    <p class="text-sm font-semibold text-navy-900">Nilai Per-Kategori</p>
-                    <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
-
-                    @if ($assessmentStats['scoreByCategory']->isEmpty())
-                        <p class="mt-6 py-6 text-center text-sm text-slate-400">Belum ada data.</p>
-                    @else
-                        <div class="mt-4 h-56">
-                            <canvas id="categoryChart" role="img" aria-label="Diagram rata-rata skor berdasarkan kategori/tema assessment"></canvas>
                         </div>
                     @endif
                 </div>
@@ -293,7 +280,6 @@
                 });
             }
 
-            renderAverageChart('categoryChart', @json($assessmentStats['scoreByCategory']), 'Rata-rata Skor');
             renderAverageChart('genderChart', @json($assessmentStats['scoreByGender']), 'Rata-rata Skor');
             renderAverageChart('educationChart', @json($assessmentStats['scoreByEducation']), 'Rata-rata Skor');
             renderAverageChart('ageChart', @json($assessmentStats['scoreByAge']), 'Rata-rata Skor');

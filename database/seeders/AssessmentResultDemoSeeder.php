@@ -4,13 +4,13 @@ namespace Database\Seeders;
 
 use App\Models\AssessmentAnswer;
 use App\Models\AssessmentAttempt;
-use App\Models\AssessmentCategory;
+use App\Models\AssessmentQuestion;
 use App\Models\AssessmentUser;
 use Illuminate\Database\Seeder;
 
 class AssessmentResultDemoSeeder extends Seeder
 {
-    private const RESPONDENTS_PER_CATEGORY = 10;
+    private const RESPONDENT_COUNT = 50;
 
     private const GENDERS = ['Laki-laki', 'Perempuan'];
 
@@ -32,68 +32,62 @@ class AssessmentResultDemoSeeder extends Seeder
 
     /**
      * Seed example respondents & completed Pre-Assessment attempts (spread
-     * across every theme, gender, age, education, and domicile) purely so
-     * the aggregate statistics charts on the homepage and admin dashboard
-     * have something to display. Safe to remove later with
-     * `php artisan tinker` (see the README note in this class) once real
-     * respondent data exists.
+     * across gender, age, education, and domicile) purely so the aggregate
+     * statistics charts on the homepage and admin dashboard have something
+     * to display. Safe to remove later with `php artisan tinker` (see the
+     * README note in this class) once real respondent data exists.
      */
     public function run(): void
     {
-        $categories = AssessmentCategory::with(['questions.options'])->orderBy('order')->get();
+        $questions = AssessmentQuestion::with('options')->orderBy('order')->get();
 
-        if ($categories->isEmpty()) {
-            $this->command?->warn('Tidak ada kategori assessment. Jalankan AssessmentSeeder terlebih dahulu.');
+        if ($questions->isEmpty()) {
+            $this->command?->warn('Tidak ada pertanyaan assessment. Jalankan AssessmentSeeder terlebih dahulu.');
 
             return;
         }
 
-        $nameIndex = 0;
+        for ($i = 0; $i < self::RESPONDENT_COUNT; $i++) {
+            $name = self::NAMES[$i % count(self::NAMES)] . ' ' . (intdiv($i, count(self::NAMES)) + 1);
 
-        foreach ($categories as $category) {
-            for ($i = 0; $i < self::RESPONDENTS_PER_CATEGORY; $i++) {
-                $name = self::NAMES[$nameIndex % count(self::NAMES)] . ' ' . (intdiv($nameIndex, count(self::NAMES)) + 1);
-                $nameIndex++;
+            $user = AssessmentUser::create([
+                'name' => $name,
+                'phone_last_digits' => str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT),
+                'gender' => self::GENDERS[array_rand(self::GENDERS)],
+                'age' => random_int(15, 65),
+                'education' => self::EDUCATIONS[array_rand(self::EDUCATIONS)],
+                'domicile' => self::DOMICILES[array_rand(self::DOMICILES)],
+                'occupation_status' => self::OCCUPATIONS[array_rand(self::OCCUPATIONS)],
+            ]);
 
-                $user = AssessmentUser::create([
-                    'name' => $name,
-                    'phone_last_digits' => str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT),
-                    'gender' => self::GENDERS[array_rand(self::GENDERS)],
-                    'age' => random_int(15, 65),
-                    'education' => self::EDUCATIONS[array_rand(self::EDUCATIONS)],
-                    'domicile' => self::DOMICILES[array_rand(self::DOMICILES)],
-                    'occupation_status' => self::OCCUPATIONS[array_rand(self::OCCUPATIONS)],
+            $attempt = AssessmentAttempt::create([
+                'assessment_user_id' => $user->id,
+                'type' => 'pre',
+                'started_at' => now()->subMinutes(random_int(5, 15)),
+            ]);
+
+            // Vary how many questions each respondent answers correctly
+            // so results spread across all five awareness levels.
+            $correctRate = [0.1, 0.3, 0.5, 0.7, 0.9][random_int(0, 4)];
+
+            foreach ($questions as $question) {
+                $answerCorrectly = (mt_rand() / mt_getrandmax()) < $correctRate;
+                $option = $answerCorrectly
+                    ? $question->options->firstWhere('is_correct', true)
+                    : $question->options->firstWhere('is_correct', false);
+                $option ??= $question->options->first();
+
+                AssessmentAnswer::create([
+                    'assessment_attempt_id' => $attempt->id,
+                    'assessment_question_id' => $question->id,
+                    'assessment_option_id' => $option->id,
+                    'is_correct' => $option->is_correct,
                 ]);
-
-                $attempt = AssessmentAttempt::create([
-                    'assessment_user_id' => $user->id,
-                    'type' => 'pre',
-                    'started_at' => now()->subMinutes(random_int(5, 15)),
-                ]);
-
-                // Vary how many questions each respondent answers correctly
-                // so results spread across all five awareness levels.
-                $correctRate = [0.1, 0.3, 0.5, 0.7, 0.9][random_int(0, 4)];
-
-                foreach ($category->questions as $question) {
-                    $answerCorrectly = (mt_rand() / mt_getrandmax()) < $correctRate;
-                    $option = $answerCorrectly
-                        ? $question->options->firstWhere('is_correct', true)
-                        : $question->options->firstWhere('is_correct', false);
-                    $option ??= $question->options->first();
-
-                    AssessmentAnswer::create([
-                        'assessment_attempt_id' => $attempt->id,
-                        'assessment_question_id' => $question->id,
-                        'assessment_option_id' => $option->id,
-                        'is_correct' => $option->is_correct,
-                    ]);
-                }
-
-                $attempt->finalizeScore();
             }
+
+            $attempt->finalizeScore();
         }
 
-        $this->command?->info('Berhasil membuat ' . ($categories->count() * self::RESPONDENTS_PER_CATEGORY) . ' contoh hasil assessment.');
+        $this->command?->info('Berhasil membuat ' . self::RESPONDENT_COUNT . ' contoh hasil assessment.');
     }
 }
