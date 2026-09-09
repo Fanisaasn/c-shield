@@ -58,6 +58,8 @@ class DashboardController extends Controller
         $assessmentStats = [
             'participants' => AssessmentUser::count(),
             'attempts' => AssessmentAttempt::count(),
+            'categories' => AssessmentCategory::count(),
+            'questions' => \App\Models\AssessmentQuestion::count(),
         ];
 
         $currentYear = now()->year;

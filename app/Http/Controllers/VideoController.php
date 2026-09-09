@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SurveyQuestion;
 use App\Models\Video;
 
 class VideoController extends Controller
@@ -27,6 +28,8 @@ class VideoController extends Controller
     {
         abort_unless($video->is_published, 404);
 
-        return view('user.videos.show', compact('video'));
+        $surveyQuestions = SurveyQuestion::query()->orderBy('sort_order')->get();
+
+        return view('user.videos.show', compact('video', 'surveyQuestions'));
     }
 }

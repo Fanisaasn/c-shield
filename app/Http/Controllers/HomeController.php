@@ -43,7 +43,12 @@ class HomeController extends Controller
 
         $currentYear = now()->year;
 
+        // The homepage diagram reflects final understanding, so it is built
+        // from Post-Assessment attempts (a "pre" attempt without its
+        // matching "post" attempt is a still-in-progress session and is
+        // intentionally excluded here).
         $completedAttempts = AssessmentAttempt::query()
+            ->where('type', 'post')
             ->whereNotNull('completed_at')
             ->whereYear('completed_at', $currentYear)
             ->with(['user', 'answers.question.category'])
