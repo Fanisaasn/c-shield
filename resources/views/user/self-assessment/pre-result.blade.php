@@ -20,21 +20,21 @@
     <section class="bg-navy-900 py-14">
         <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
             <span class="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1 text-xs font-semibold text-teal-300">
-                Self Assessment &mdash; Langkah 4 dari 8
+                Self Assessment &mdash; Langkah 4 dari 7
             </span>
             <h1 class="mt-4 font-heading text-2xl font-bold text-white sm:text-3xl">
-                Hasil Pre-Assessment &mdash; {{ $category->name }}
+                Hasil Pre-Assessment
             </h1>
             <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-300">
                 {{ $respondent ? 'Halo ' . $respondent->name . '. ' : '' }}Ini adalah titik awal pemahaman Anda
-                pada tema {{ $category->name }} sebelum mempelajari materi edukasi C-SHIELD.
+                sebelum mempelajari materi edukasi C-SHIELD.
             </p>
         </div>
     </section>
 
     <section class="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
         <div class="rounded-xl border border-slate-200 bg-white p-6">
-            <h2 class="font-heading text-base font-bold text-navy-900">Skor {{ $category->name }}</h2>
+            <h2 class="font-heading text-base font-bold text-navy-900">Skor Anda</h2>
             <p class="mt-1 text-sm text-slate-500">Hasil berdasarkan jawaban Pre-Assessment Anda.</p>
 
             <div class="relative mx-auto mt-6 h-56 w-56">
@@ -75,18 +75,18 @@
         </div>
 
         <div class="mt-6 rounded-md border border-teal-200 bg-teal-50 px-5 py-4 text-sm text-teal-700">
-            Langkah selanjutnya: tonton video materi edukasi, lalu kerjakan Post-Assessment untuk melihat
-            perkembangan skor kesadaran keamanan siber Anda.
+            Langkah selanjutnya: pelajari dahulu materi Video, Artikel, dan Flyer yang tersedia, lalu kerjakan
+            Post-Assessment untuk melihat perkembangan skor kesadaran keamanan siber Anda.
         </div>
 
         <div class="mt-8 flex flex-wrap justify-center gap-3">
-            <a href="{{ route('self-assessment.video') }}"
+            <a href="{{ route('self-assessment.materi') }}"
                class="rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 transition hover:bg-teal-400">
-                Lanjut ke Video Materi
+                Lanjut ke Materi Belajar
             </a>
-            <a href="{{ route('self-assessment.themes') }}"
+            <a href="{{ route('self-assessment.index') }}"
                class="rounded-md border border-slate-300 px-5 py-3 text-sm font-semibold text-navy-900 transition hover:bg-slate-50">
-                Pilih Tema Lain
+                Kembali ke Self Assessment
             </a>
         </div>
     </section>

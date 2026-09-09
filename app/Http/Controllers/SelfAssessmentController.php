@@ -4,10 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\AssessmentAnswer;
 use App\Models\AssessmentAttempt;
-use App\Models\AssessmentCategory;
 use App\Models\AssessmentOption;
+use App\Models\AssessmentQuestion;
 use App\Models\AssessmentUser;
-use App\Models\AssessmentVideo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,36 +14,57 @@ use Illuminate\Support\Facades\DB;
 class SelfAssessmentController extends Controller
 {
     /**
-     * Show the list of assessment themes (categories) the user can pick
-     * from before starting a Pre-Assessment.
+     * Show the Self-Assessment landing page: a dropdown to start the
+     * Pre-Assessment, or (once the session's Pre-Assessment is completed)
+     * the Post-Assessment.
      */
-    public function themes()
+    public function index(Request $request)
     {
-        $categories = AssessmentCategory::query()
-            ->withCount('questions')
-            ->orderBy('order')
-            ->get();
+        $preCompleted = $this->currentPreAttempt($request)?->completed_at !== null;
 
-        return view('user.self-assessment.themes', compact('categories'));
+        return view('user.self-assessment.index', compact('preCompleted'));
     }
 
     /**
-     * Show the respondent identity form that starts a Pre-Assessment for
-     * the chosen theme. Always shown fresh: a respondent is allowed to
-     * take the Self-Assessment as many times as they like, each run
-     * starting its own identity + Pre/Post attempt pair.
+     * Dispatch on the chosen mode: Pre-Assessment always starts a fresh
+     * identity form; Post-Assessment is only reachable once the session's
+     * Pre-Assessment attempt is completed.
      */
-    public function create(AssessmentCategory $category)
+    public function start(Request $request): RedirectResponse
     {
-        return view('user.self-assessment.create', compact('category'));
+        $validated = $request->validate([
+            'mode' => 'required|in:pre,post',
+        ]);
+
+        if ($validated['mode'] === 'pre') {
+            return redirect()->route('self-assessment.create');
+        }
+
+        if ($this->currentPreAttempt($request)?->completed_at === null) {
+            return redirect()->route('self-assessment.index')
+                ->with('error', 'Kerjakan Pre-Assessment terlebih dahulu.');
+        }
+
+        return redirect()->route('self-assessment.materi');
     }
 
     /**
-     * Store the respondent identity, open a Pre-Assessment attempt scoped
-     * to the chosen theme, and remember both in the session so the
-     * quiz/result pages can find them without requiring an account.
+     * Show the respondent identity form that starts a Pre-Assessment.
+     * Always shown fresh: a respondent is allowed to take the
+     * Self-Assessment as many times as they like, each run starting its
+     * own identity + Pre/Post attempt pair.
      */
-    public function store(Request $request, AssessmentCategory $category): RedirectResponse
+    public function create()
+    {
+        return view('user.self-assessment.create');
+    }
+
+    /**
+     * Store the respondent identity, open a Pre-Assessment attempt, and
+     * remember both in the session so the quiz/result pages can find them
+     * without requiring an account.
+     */
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -66,35 +86,30 @@ class SelfAssessmentController extends Controller
 
         $request->session()->put('assessment_user_id', $user->id);
         $request->session()->put('assessment_pre_attempt_id', $attempt->id);
-        $request->session()->put('assessment_theme_category_id', $category->id);
-        $request->session()->forget(['assessment_post_attempt_id', 'assessment_video_watched']);
+        $request->session()->forget('assessment_post_attempt_id');
 
         return redirect()->route('self-assessment.pre.quiz');
     }
 
     /**
-     * Show every question belonging to the chosen theme on a single page.
+     * Show every assessment question on a single page.
      */
     public function preQuiz(Request $request)
     {
         $attempt = $this->currentPreAttempt($request);
-        $category = $this->currentTheme($request);
 
-        if ($attempt === null || $category === null) {
-            return redirect()->route('self-assessment.themes')
-                ->with('error', 'Silakan pilih tema dan isi data diri terlebih dahulu.');
+        if ($attempt === null) {
+            return redirect()->route('self-assessment.index')
+                ->with('error', 'Silakan isi data diri terlebih dahulu.');
         }
 
         if ($attempt->completed_at !== null) {
             return redirect()->route('self-assessment.pre.result');
         }
 
-        $questions = $category->questions()
-            ->with(['options' => fn ($query) => $query->orderBy('order')])
-            ->orderBy('order')
-            ->get();
+        $questions = $this->questions();
 
-        return view('user.self-assessment.pre-quiz', compact('category', 'questions'));
+        return view('user.self-assessment.pre-quiz', compact('questions'));
     }
 
     /**
@@ -104,186 +119,112 @@ class SelfAssessmentController extends Controller
     public function storePreQuiz(Request $request): RedirectResponse
     {
         $attempt = $this->currentPreAttempt($request);
-        $category = $this->currentTheme($request);
 
-        if ($attempt === null || $category === null) {
-            return redirect()->route('self-assessment.themes')
-                ->with('error', 'Silakan pilih tema dan isi data diri terlebih dahulu.');
+        if ($attempt === null) {
+            return redirect()->route('self-assessment.index')
+                ->with('error', 'Silakan isi data diri terlebih dahulu.');
         }
 
         if ($attempt->completed_at !== null) {
             return redirect()->route('self-assessment.pre.result');
         }
 
-        $questionIds = $category->questions()->pluck('id');
-
-        $validated = $request->validate([
-            'answers' => 'required|array|size:' . $questionIds->count(),
-            'answers.*' => 'required|integer|exists:assessment_options,id',
-        ]);
-
-        if ($questionIds->diff(array_keys($validated['answers']))->isNotEmpty()) {
-            return back()->withInput()->with('error', 'Jawaban tidak valid. Silakan coba lagi.');
-        }
-
-        $options = AssessmentOption::query()
-            ->whereIn('id', array_values($validated['answers']))
-            ->get()
-            ->keyBy('id');
-
-        foreach ($validated['answers'] as $questionId => $optionId) {
-            $option = $options->get($optionId);
-
-            if ($option === null || (int) $option->assessment_question_id !== (int) $questionId) {
-                return back()->withInput()->with('error', 'Jawaban tidak valid. Silakan coba lagi.');
-            }
-        }
-
-        DB::transaction(function () use ($validated, $options, $attempt) {
-            foreach ($validated['answers'] as $questionId => $optionId) {
-                $option = $options->get($optionId);
-
-                AssessmentAnswer::create([
-                    'assessment_attempt_id' => $attempt->id,
-                    'assessment_question_id' => $questionId,
-                    'assessment_option_id' => $optionId,
-                    'is_correct' => $option->is_correct,
-                ]);
-            }
-
-            $attempt->finalizeScore();
-        });
-
-        return redirect()->route('self-assessment.pre.result');
+        return $this->storeAnswers($request, $attempt) ?? redirect()->route('self-assessment.pre.result');
     }
 
     /**
-     * Show the Pre-Assessment result for the chosen theme: overall score,
-     * level, and a per-question review.
+     * Show the Pre-Assessment result: overall score, level, and a
+     * per-question review.
      */
     public function preResult(Request $request)
     {
         $attempt = $this->currentPreAttempt($request);
-        $category = $this->currentTheme($request);
 
-        if ($attempt === null || $category === null) {
-            return redirect()->route('self-assessment.themes')
-                ->with('error', 'Silakan pilih tema dan isi data diri terlebih dahulu.');
+        if ($attempt === null) {
+            return redirect()->route('self-assessment.index')
+                ->with('error', 'Silakan isi data diri terlebih dahulu.');
         }
 
         if ($attempt->completed_at === null) {
             return redirect()->route('self-assessment.pre.quiz');
         }
-
-        $answerReview = $attempt->answers()
-            ->with(['question' => fn ($query) => $query->orderBy('order'), 'option'])
-            ->get()
-            ->sortBy('question.order')
-            ->map(fn (AssessmentAnswer $answer) => [
-                'question' => $answer->question->question,
-                'chosen' => $answer->option->option_text,
-                'is_correct' => $answer->is_correct,
-                'correct_option' => $answer->is_correct
-                    ? null
-                    : $answer->question->options()->where('is_correct', true)->value('option_text'),
-            ])
-            ->values();
 
         $respondent = AssessmentUser::find($request->session()->get('assessment_user_id'));
 
         return view('user.self-assessment.pre-result', [
             'attempt' => $attempt,
-            'category' => $category,
             'respondent' => $respondent,
-            'answerReview' => $answerReview,
+            'answerReview' => $this->answerReview($attempt),
         ]);
     }
 
     /**
-     * Show the mandatory "Video Materi" step between the Pre-Assessment
-     * result and the Post-Assessment. If no active video is configured by
-     * the admin yet, the user is not blocked: they are sent straight into
-     * the Post-Assessment.
+     * Show the study-reminder step between the Pre-Assessment result and
+     * the Post-Assessment: a nudge to study the site's existing Video,
+     * Artikel, and Flyer content (nothing here is tracked).
      */
-    public function video(Request $request)
+    public function materi(Request $request)
     {
         $attempt = $this->currentPreAttempt($request);
-        $category = $this->currentTheme($request);
 
-        if ($attempt === null || $category === null) {
-            return redirect()->route('self-assessment.themes')
-                ->with('error', 'Silakan pilih tema dan isi data diri terlebih dahulu.');
-        }
-
-        if ($attempt->completed_at === null) {
-            return redirect()->route('self-assessment.pre.quiz');
+        if ($attempt === null || $attempt->completed_at === null) {
+            return redirect()->route('self-assessment.index')
+                ->with('error', 'Kerjakan Pre-Assessment terlebih dahulu.');
         }
 
         if ($request->session()->get('assessment_post_attempt_id')) {
             return redirect()->route('self-assessment.post.quiz');
         }
 
-        $video = AssessmentVideo::query()
-            ->where('is_active', true)
-            ->where(function ($query) use ($category) {
-                $query->where('assessment_category_id', $category->id)
-                    ->orWhereNull('assessment_category_id');
-            })
-            // Prefer a video made specifically for this theme over the
-            // fallback (no-theme) video.
-            ->orderByRaw('assessment_category_id IS NULL')
-            ->latest()
-            ->first();
-
-        if ($video === null) {
-            return $this->startPostAssessment($request)
-                ->with('info', 'Video materi belum tersedia. Anda dapat langsung mengerjakan Post-Assessment.');
-        }
-
-        return view('user.self-assessment.video', compact('category', 'video'));
+        return view('user.self-assessment.materi');
     }
 
     /**
-     * Mark the video step as done, open the Post-Assessment attempt, and
-     * move the user into the Post-Assessment quiz.
+     * Open the Post-Assessment attempt and move the user into the
+     * Post-Assessment quiz.
      */
-    public function completeVideo(Request $request): RedirectResponse
+    public function materiLanjut(Request $request): RedirectResponse
     {
         $attempt = $this->currentPreAttempt($request);
-        $category = $this->currentTheme($request);
 
-        if ($attempt === null || $category === null || $attempt->completed_at === null) {
-            return redirect()->route('self-assessment.themes')
-                ->with('error', 'Silakan pilih tema dan isi data diri terlebih dahulu.');
+        if ($attempt === null || $attempt->completed_at === null) {
+            return redirect()->route('self-assessment.index')
+                ->with('error', 'Kerjakan Pre-Assessment terlebih dahulu.');
         }
 
-        return $this->startPostAssessment($request);
+        if ($request->session()->get('assessment_post_attempt_id') === null) {
+            $postAttempt = AssessmentAttempt::create([
+                'assessment_user_id' => $request->session()->get('assessment_user_id'),
+                'type' => 'post',
+                'started_at' => now(),
+            ]);
+
+            $request->session()->put('assessment_post_attempt_id', $postAttempt->id);
+        }
+
+        return redirect()->route('self-assessment.post.quiz');
     }
 
     /**
-     * Show every question belonging to the chosen theme for the
-     * Post-Assessment, once the video step is done.
+     * Show every assessment question for the Post-Assessment, once the
+     * study-reminder step is done.
      */
     public function postQuiz(Request $request)
     {
         $attempt = $this->currentPostAttempt($request);
-        $category = $this->currentTheme($request);
 
-        if ($attempt === null || $category === null || ! $request->session()->get('assessment_video_watched')) {
-            return redirect()->route('self-assessment.themes')
-                ->with('error', 'Selesaikan Pre-Assessment dan video materi terlebih dahulu.');
+        if ($attempt === null) {
+            return redirect()->route('self-assessment.index')
+                ->with('error', 'Selesaikan Pre-Assessment terlebih dahulu.');
         }
 
         if ($attempt->completed_at !== null) {
             return redirect()->route('self-assessment.post.result');
         }
 
-        $questions = $category->questions()
-            ->with(['options' => fn ($query) => $query->orderBy('order')])
-            ->orderBy('order')
-            ->get();
+        $questions = $this->questions();
 
-        return view('user.self-assessment.post-quiz', compact('category', 'questions'));
+        return view('user.self-assessment.post-quiz', compact('questions'));
     }
 
     /**
@@ -293,57 +234,17 @@ class SelfAssessmentController extends Controller
     public function storePostQuiz(Request $request): RedirectResponse
     {
         $attempt = $this->currentPostAttempt($request);
-        $category = $this->currentTheme($request);
 
-        if ($attempt === null || $category === null || ! $request->session()->get('assessment_video_watched')) {
-            return redirect()->route('self-assessment.themes')
-                ->with('error', 'Selesaikan Pre-Assessment dan video materi terlebih dahulu.');
+        if ($attempt === null) {
+            return redirect()->route('self-assessment.index')
+                ->with('error', 'Selesaikan Pre-Assessment terlebih dahulu.');
         }
 
         if ($attempt->completed_at !== null) {
             return redirect()->route('self-assessment.post.result');
         }
 
-        $questionIds = $category->questions()->pluck('id');
-
-        $validated = $request->validate([
-            'answers' => 'required|array|size:' . $questionIds->count(),
-            'answers.*' => 'required|integer|exists:assessment_options,id',
-        ]);
-
-        if ($questionIds->diff(array_keys($validated['answers']))->isNotEmpty()) {
-            return back()->withInput()->with('error', 'Jawaban tidak valid. Silakan coba lagi.');
-        }
-
-        $options = AssessmentOption::query()
-            ->whereIn('id', array_values($validated['answers']))
-            ->get()
-            ->keyBy('id');
-
-        foreach ($validated['answers'] as $questionId => $optionId) {
-            $option = $options->get($optionId);
-
-            if ($option === null || (int) $option->assessment_question_id !== (int) $questionId) {
-                return back()->withInput()->with('error', 'Jawaban tidak valid. Silakan coba lagi.');
-            }
-        }
-
-        DB::transaction(function () use ($validated, $options, $attempt) {
-            foreach ($validated['answers'] as $questionId => $optionId) {
-                $option = $options->get($optionId);
-
-                AssessmentAnswer::create([
-                    'assessment_attempt_id' => $attempt->id,
-                    'assessment_question_id' => $questionId,
-                    'assessment_option_id' => $optionId,
-                    'is_correct' => $option->is_correct,
-                ]);
-            }
-
-            $attempt->finalizeScore();
-        });
-
-        return redirect()->route('self-assessment.post.result');
+        return $this->storeAnswers($request, $attempt) ?? redirect()->route('self-assessment.post.result');
     }
 
     /**
@@ -353,38 +254,22 @@ class SelfAssessmentController extends Controller
     public function postResult(Request $request)
     {
         $attempt = $this->currentPostAttempt($request);
-        $category = $this->currentTheme($request);
 
-        if ($attempt === null || $category === null) {
-            return redirect()->route('self-assessment.themes')
-                ->with('error', 'Silakan pilih tema dan isi data diri terlebih dahulu.');
+        if ($attempt === null) {
+            return redirect()->route('self-assessment.index')
+                ->with('error', 'Selesaikan Pre-Assessment terlebih dahulu.');
         }
 
         if ($attempt->completed_at === null) {
             return redirect()->route('self-assessment.post.quiz');
         }
 
-        $answerReview = $attempt->answers()
-            ->with(['question' => fn ($query) => $query->orderBy('order'), 'option'])
-            ->get()
-            ->sortBy('question.order')
-            ->map(fn (AssessmentAnswer $answer) => [
-                'question' => $answer->question->question,
-                'chosen' => $answer->option->option_text,
-                'is_correct' => $answer->is_correct,
-                'correct_option' => $answer->is_correct
-                    ? null
-                    : $answer->question->options()->where('is_correct', true)->value('option_text'),
-            ])
-            ->values();
-
         $respondent = AssessmentUser::find($request->session()->get('assessment_user_id'));
 
         return view('user.self-assessment.post-result', [
             'attempt' => $attempt,
-            'category' => $category,
             'respondent' => $respondent,
-            'answerReview' => $answerReview,
+            'answerReview' => $this->answerReview($attempt),
         ]);
     }
 
@@ -396,18 +281,16 @@ class SelfAssessmentController extends Controller
     {
         $preAttempt = $this->currentPreAttempt($request);
         $postAttempt = $this->currentPostAttempt($request);
-        $category = $this->currentTheme($request);
 
-        if ($preAttempt === null || $postAttempt === null || $category === null
+        if ($preAttempt === null || $postAttempt === null
             || $preAttempt->completed_at === null || $postAttempt->completed_at === null) {
-            return redirect()->route('self-assessment.themes')
+            return redirect()->route('self-assessment.index')
                 ->with('error', 'Selesaikan Pre-Assessment dan Post-Assessment terlebih dahulu.');
         }
 
         $respondent = AssessmentUser::find($request->session()->get('assessment_user_id'));
 
         return view('user.self-assessment.comparison', [
-            'category' => $category,
             'respondent' => $respondent,
             'preAttempt' => $preAttempt,
             'postAttempt' => $postAttempt,
@@ -415,26 +298,100 @@ class SelfAssessmentController extends Controller
     }
 
     /**
-     * Open the Post-Assessment attempt (once) and mark the video step as
-     * watched, then send the user into the Post-Assessment quiz.
+     * Clear the respondent's Self-Assessment session so a new round (fresh
+     * identity + Pre-Assessment) can start; Post-Assessment locks again
+     * until that new Pre-Assessment is completed.
      */
-    private function startPostAssessment(Request $request): RedirectResponse
+    public function restart(Request $request): RedirectResponse
     {
-        $postAttemptId = $request->session()->get('assessment_post_attempt_id');
+        $request->session()->forget([
+            'assessment_user_id',
+            'assessment_pre_attempt_id',
+            'assessment_post_attempt_id',
+        ]);
 
-        if ($postAttemptId === null) {
-            $attempt = AssessmentAttempt::create([
-                'assessment_user_id' => $request->session()->get('assessment_user_id'),
-                'type' => 'post',
-                'started_at' => now(),
-            ]);
+        return redirect()->route('self-assessment.create');
+    }
 
-            $request->session()->put('assessment_post_attempt_id', $attempt->id);
+    /**
+     * Every assessment question, in order, with its options. The same
+     * single set of questions is used for both Pre- and Post-Assessment.
+     */
+    private function questions()
+    {
+        return AssessmentQuestion::query()
+            ->with(['options' => fn ($query) => $query->orderBy('order')])
+            ->orderBy('order')
+            ->get();
+    }
+
+    /**
+     * Validate and store the submitted answers for the given attempt, then
+     * finalize its score. Returns a redirect back to the form on a
+     * validation failure, or null on success.
+     */
+    private function storeAnswers(Request $request, AssessmentAttempt $attempt): ?RedirectResponse
+    {
+        $questionIds = AssessmentQuestion::query()->pluck('id');
+
+        $validated = $request->validate([
+            'answers' => 'required|array|size:' . $questionIds->count(),
+            'answers.*' => 'required|integer|exists:assessment_options,id',
+        ]);
+
+        if ($questionIds->diff(array_keys($validated['answers']))->isNotEmpty()) {
+            return back()->withInput()->with('error', 'Jawaban tidak valid. Silakan coba lagi.');
         }
 
-        $request->session()->put('assessment_video_watched', true);
+        $options = AssessmentOption::query()
+            ->whereIn('id', array_values($validated['answers']))
+            ->get()
+            ->keyBy('id');
 
-        return redirect()->route('self-assessment.post.quiz');
+        foreach ($validated['answers'] as $questionId => $optionId) {
+            $option = $options->get($optionId);
+
+            if ($option === null || (int) $option->assessment_question_id !== (int) $questionId) {
+                return back()->withInput()->with('error', 'Jawaban tidak valid. Silakan coba lagi.');
+            }
+        }
+
+        DB::transaction(function () use ($validated, $options, $attempt) {
+            foreach ($validated['answers'] as $questionId => $optionId) {
+                $option = $options->get($optionId);
+
+                AssessmentAnswer::create([
+                    'assessment_attempt_id' => $attempt->id,
+                    'assessment_question_id' => $questionId,
+                    'assessment_option_id' => $optionId,
+                    'is_correct' => $option->is_correct,
+                ]);
+            }
+
+            $attempt->finalizeScore();
+        });
+
+        return null;
+    }
+
+    /**
+     * Build the per-question answer review shown on a result page.
+     */
+    private function answerReview(AssessmentAttempt $attempt)
+    {
+        return $attempt->answers()
+            ->with(['question' => fn ($query) => $query->orderBy('order'), 'option'])
+            ->get()
+            ->sortBy('question.order')
+            ->map(fn (AssessmentAnswer $answer) => [
+                'question' => $answer->question->question,
+                'chosen' => $answer->option->option_text,
+                'is_correct' => $answer->is_correct,
+                'correct_option' => $answer->is_correct
+                    ? null
+                    : $answer->question->options()->where('is_correct', true)->value('option_text'),
+            ])
+            ->values();
     }
 
     /**
@@ -457,16 +414,5 @@ class SelfAssessmentController extends Controller
         $attemptId = $request->session()->get('assessment_post_attempt_id');
 
         return $attemptId ? AssessmentAttempt::find($attemptId) : null;
-    }
-
-    /**
-     * Resolve the assessment theme (category) chosen for the current
-     * browser session, or null if none was chosen / it no longer exists.
-     */
-    private function currentTheme(Request $request): ?AssessmentCategory
-    {
-        $categoryId = $request->session()->get('assessment_theme_category_id');
-
-        return $categoryId ? AssessmentCategory::find($categoryId) : null;
     }
 }
