@@ -4,12 +4,228 @@
     transition-timing-function: ease-out;
 }
 
-[data-public-motion] > header {
+[data-public-motion]>header {
     transition: box-shadow 220ms ease-out;
 }
 
-[data-public-motion] > header.motion-scrolled {
+[data-public-motion]>header>nav {
+    transition: padding 240ms ease-out;
+}
+
+[data-public-motion]>header>nav>a:first-child>span:first-child {
+    transition: width 240ms ease-out, height 240ms ease-out;
+}
+
+[data-public-motion]>header>nav>a:first-child svg {
+    transition: width 240ms ease-out, height 240ms ease-out;
+}
+
+[data-public-motion]>header>nav>div {
+    transition: gap 240ms ease-out, padding-top 240ms ease-out;
+}
+
+[data-public-motion]>header>nav>div>a {
+    transition: padding 240ms ease-out, margin 240ms ease-out,
+        background-color 180ms ease-out, color 180ms ease-out;
+}
+
+[data-public-motion]>header.motion-scrolled {
     box-shadow: 0 3px 12px rgb(11 37 69 / 10%);
+}
+
+[data-hero-slides] {
+    isolation: isolate;
+    pointer-events: none;
+}
+
+[data-hero-slide] {
+    position: absolute;
+    inset: -2%;
+    background-position: center;
+    opacity: 0;
+    scale: 1.03;
+    transition: opacity 1.6s ease-in-out;
+    animation: hero-slide-drift 16s ease-in-out infinite alternate;
+}
+
+[data-hero-slide].hero-slide-active {
+    opacity: .72;
+}
+
+[data-hero-overlay] {
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgb(5 13 26 / 86%) 0%, rgb(5 13 26 / 68%) 38%, rgb(5 13 26 / 28%) 72%, rgb(5 13 26 / 46%) 100%);
+}
+
+[data-motion-background] {
+    pointer-events: none;
+}
+
+.hero-nav-button {
+    position: absolute;
+    top: 50%;
+    z-index: 30;
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(255 255 255 / 14%);
+
+    border-radius: 9999px;
+    background: rgb(11 37 69 / 62%);
+    color: rgb(255 255 255 / 88%);
+    translate: 0 -50%;
+    transition: background-color 180ms ease-out,
+        border-color 180ms ease-out,
+        color 180ms ease-out,
+        scale 180ms ease-out;
+}
+
+.hero-nav-button:hover {
+    border-color: rgb(42 183 202 / 60%);
+    background: rgb(42 183 202 / 82%);
+    color: #050d1a;
+    scale: 1.06;
+}
+
+.hero-nav-button svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.hero-nav-prev {
+    left: 1rem;
+}
+
+.hero-nav-next {
+    right: 1rem;
+}
+
+[data-hero-indicators] {
+    pointer-events: none;
+}
+
+.hero-indicator {
+    width: 2rem;
+    height: .25rem;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 35%);
+    transition: width 400ms ease, background-color 400ms ease;
+}
+
+.hero-indicator-active {
+    width: 3rem;
+    background: #2ab7ca;
+}
+
+@keyframes hero-slide-drift {
+    0% {
+        transform: scale(1.03) translate3d(-.5%, 0, 0);
+    }
+
+    100% {
+        transform: scale(1.08) translate3d(.5%, -1%, 0);
+    }
+}
+
+@media (max-width: 767px) {
+    [data-hero-slide] {
+        background-position: 62% center;
+    }
+
+    [data-hero-overlay] {
+        background: linear-gradient(90deg, rgb(5 13 26 / 92%) 0%, rgb(5 13 26 / 76%) 62%, rgb(5 13 26 / 56%) 100%);
+    }
+
+    .hero-nav-button {
+        top: auto;
+        bottom: 1rem;
+        translate: none;
+    }
+
+    .hero-nav-prev {
+        left: .5rem;
+    }
+
+    .hero-nav-next {
+        right: .5rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1439px) {
+    .hero-nav-button {
+        top: 50%;
+        bottom: auto;
+        translate: 0 -50%;
+    }
+
+    .hero-nav-prev {
+        left: .5rem;
+    }
+
+    .hero-nav-next {
+        right: .5rem;
+    }
+
+    [data-motion-hero]>div.relative.z-20 {
+        padding-inline: 4.5rem;
+    }
+}
+
+@media (min-width: 1440px) {
+    .hero-nav-prev {
+        left: max(.5rem, calc((100vw - 80rem) / 2 - 4rem));
+    }
+
+    .hero-nav-next {
+        right: max(.5rem, calc((100vw - 80rem) / 2 - 4rem));
+    }
+}
+
+[data-public-motion]>header:not(.motion-scrolled)>nav {
+    padding-block: 1.25rem;
+}
+
+[data-public-motion]>header:not(.motion-scrolled)>nav>div {
+    gap: .375rem;
+    padding-top: 1.25rem;
+}
+
+[data-public-motion]>header:not(.motion-scrolled)>nav>div>a {
+    padding-block: .625rem;
+}
+
+[data-public-motion]>header.motion-scrolled>nav {
+    padding-block: 1rem;
+}
+
+[data-public-motion]>header.motion-scrolled>nav>a:first-child>span:first-child {
+    width: 2.375rem;
+    height: 2.375rem;
+}
+
+[data-public-motion]>header.motion-scrolled>nav>a:first-child svg {
+    width: 1.3rem;
+    height: 1.3rem;
+}
+
+[data-public-motion]>header.motion-scrolled>nav>div {
+    gap: .25rem;
+    padding-top: 1rem;
+}
+
+[data-public-motion]>header.motion-scrolled>nav>div>a {
+    padding-block: .5rem;
+}
+
+@media (min-width: 768px) {
+
+    [data-public-motion]>header:not(.motion-scrolled)>nav>div,
+    [data-public-motion]>header.motion-scrolled>nav>div {
+        padding-top: 0;
+    }
 }
 
 [data-public-motion] .motion-card {
@@ -43,7 +259,9 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-    html:has([data-public-motion]) { scroll-behavior: smooth; }
+    html:has([data-public-motion]) {
+        scroll-behavior: smooth;
+    }
 
     [data-public-motion] .motion-button:active {
         translate: 0 0;
@@ -62,20 +280,34 @@
 }
 
 @keyframes existing-gradient-breathe {
-    0%, 100% { opacity: 1; }
-    50% { opacity: .88; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .88;
+    }
 }
 
 @media (max-width: 767px) {
-    [data-motion-background] { animation: none; transform: none; }
+    [data-motion-background] {
+        animation: none;
+        transform: none;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    html:has([data-public-motion]), [data-public-motion] .scroll-smooth {
+
+    html:has([data-public-motion]),
+    [data-public-motion] .scroll-smooth {
         scroll-behavior: auto !important;
     }
 
-    [data-public-motion] *, [data-public-motion] *::before, [data-public-motion] *::after {
+    [data-public-motion] *,
+    [data-public-motion] *::before,
+    [data-public-motion] *::after {
         animation: none !important;
         transition-duration: 0s !important;
     }
