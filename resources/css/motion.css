@@ -1,0 +1,91 @@
+/* Motion only: the existing palette, dimensions, and component styling remain authoritative. */
+[data-public-motion] :is(a, button) {
+    transition-duration: 180ms;
+    transition-timing-function: ease-out;
+}
+
+[data-public-motion] > header {
+    transition: box-shadow 220ms ease-out;
+}
+
+[data-public-motion] > header.motion-scrolled {
+    box-shadow: 0 3px 12px rgb(11 37 69 / 10%);
+}
+
+[data-public-motion] .motion-card {
+    translate: 0 var(--motion-depth, 0px);
+    transition: translate 240ms ease-out, scale 240ms ease-out,
+        box-shadow 240ms ease-out, border-color 240ms ease-out;
+}
+
+[data-public-motion] .motion-card img {
+    transition: transform 400ms ease-out;
+}
+
+[data-public-motion] .motion-button {
+    transition-property: background-color, color, border-color, box-shadow, translate, scale;
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    [data-public-motion] .motion-card:hover {
+        translate: 0 calc(var(--motion-depth, 0px) - 3px);
+        scale: 1.003;
+        box-shadow: 0 7px 18px rgb(11 37 69 / 9%);
+    }
+
+    [data-public-motion] .motion-card:hover img {
+        transform: scale(1.025);
+    }
+
+    [data-public-motion] .motion-button:hover {
+        translate: 0 -1px;
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    html:has([data-public-motion]) { scroll-behavior: smooth; }
+
+    [data-public-motion] .motion-button:active {
+        translate: 0 0;
+        scale: .985;
+    }
+
+    [data-motion-background] {
+        pointer-events: none;
+        transform: translate3d(var(--motion-x, 0px), var(--motion-y, 0px), 0);
+        animation: existing-gradient-breathe 14s ease-in-out infinite;
+    }
+
+    [data-motion-hero].motion-paused [data-motion-background] {
+        animation-play-state: paused;
+    }
+}
+
+@keyframes existing-gradient-breathe {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .88; }
+}
+
+@media (max-width: 767px) {
+    [data-motion-background] { animation: none; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html:has([data-public-motion]), [data-public-motion] .scroll-smooth {
+        scroll-behavior: auto !important;
+    }
+
+    [data-public-motion] *, [data-public-motion] *::before, [data-public-motion] *::after {
+        animation: none !important;
+        transition-duration: 0s !important;
+    }
+
+    [data-public-motion] .motion-card,
+    [data-public-motion] .motion-button,
+    [data-public-motion] .motion-card img,
+    [data-motion-background] {
+        translate: none !important;
+        scale: none !important;
+        transform: none !important;
+    }
+}

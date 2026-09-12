@@ -14,7 +14,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="flex min-h-screen flex-col bg-slate-50 font-sans text-navy-900 antialiased">
+<body data-public-motion class="flex min-h-screen flex-col bg-slate-50 font-sans text-navy-900 antialiased">
 
     <header class="sticky top-0 z-50 border-b border-navy-800/10 bg-navy-900">
         <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">

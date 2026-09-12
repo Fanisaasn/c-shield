@@ -6,10 +6,10 @@
 @section('content')
 
     {{-- Hero --}}
-    <section class="relative overflow-hidden bg-navy-900">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(42,183,202,0.18),_transparent_55%)]"></div>
+    <section data-motion-hero class="relative overflow-hidden bg-navy-900">
+        <div data-motion-background class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(42,183,202,0.18),_transparent_55%)]"></div>
         <div class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-            <div class="max-w-3xl">
+            <div data-motion-hero-copy class="max-w-3xl">
                 <span class="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1 text-xs font-semibold text-teal-300">
                     Diskominfo Kota Cimahi
                 </span>
