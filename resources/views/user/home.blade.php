@@ -7,8 +7,29 @@
 
     {{-- Hero --}}
     <section data-motion-hero class="relative overflow-hidden bg-navy-900">
+        <div data-hero-slides aria-hidden="true" class="absolute inset-0">
+            <div data-hero-slide class="hero-slide hero-slide-active" style="background-image: url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&amp;fit=crop&amp;w=2200&amp;q=82');"></div>
+            <div data-hero-slide style="background-image: url('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&amp;fit=crop&amp;w=2200&amp;q=82');"></div>
+            <div data-hero-slide style="background-image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&amp;fit=crop&amp;w=2200&amp;q=82');"></div>
+        </div>
+        <div data-hero-overlay aria-hidden="true" class="absolute inset-0"></div>
         <div data-motion-background class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(42,183,202,0.18),_transparent_55%)]"></div>
-        <div class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+        <button type="button" data-hero-prev aria-label="Slide sebelumnya" class="hero-nav-button hero-nav-prev">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m15 18-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <button type="button" data-hero-next aria-label="Slide berikutnya" class="hero-nav-button hero-nav-next">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <div data-hero-indicators aria-hidden="true" class="absolute inset-x-0 bottom-6 z-20 flex justify-center gap-2">
+            <span data-hero-indicator class="hero-indicator hero-indicator-active"></span>
+            <span data-hero-indicator class="hero-indicator"></span>
+            <span data-hero-indicator class="hero-indicator"></span>
+        </div>
+        <div class="relative z-20 mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
             <div data-motion-hero-copy class="max-w-3xl">
                 <span class="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1 text-xs font-semibold text-teal-300">
                     Diskominfo Kota Cimahi
@@ -17,9 +38,7 @@
                     Cimahi Cyber Security Hub &amp; Awareness Field
                 </h1>
                 <p class="mt-5 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
-                    Portal pusat keamanan siber dan wadah kesadaran digital terpadu bagi masyarakat dan
-                    aparatur Kota Cimahi &mdash; artikel, video edukasi, flyer, webinar, hingga self-assessment
-                    tingkat kesadaran keamanan siber, dalam satu tempat.
+                   Pusat informasi dan edukasi keamanan siber untuk masyarakat dan aparatur Kota Cimahi. Temukan artikel, video, flyer, webinar, serta self-assessment untuk membantu meningkatkan kesadaran dan keamanan digital.
                 </p>
                 <div class="mt-8 flex flex-wrap gap-3">
                     <a href="{{ route('self-assessment.themes') }}" class="rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 transition hover:bg-teal-400">

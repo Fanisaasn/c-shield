@@ -23,7 +23,7 @@ export function initPublicMotion(Chart) {
             animations.delete(element);
             const bounds = element.getBoundingClientRect();
             if (bounds.bottom <= 0 || bounds.top >= innerHeight) entered.delete(element);
-        }).catch(() => {});
+        }).catch(() => { });
     }
 
     // Keep native video, iframe, modal, and form containers out of transform effects.
@@ -35,7 +35,7 @@ export function initPublicMotion(Chart) {
 
     const heroCopy = document.querySelector('[data-motion-hero-copy]');
     const targets = [...new Set([...(heroCopy?.children ?? []), ...cards,
-        ...document.querySelectorAll('main h1, main h2, main h3')])]
+    ...document.querySelectorAll('main h1, main h2, main h3')])]
         .filter(el => !el.closest('form, #survey-modal') &&
             !cards.some(card => card !== el && card.contains(el)));
     if ('IntersectionObserver' in window) {
@@ -71,9 +71,44 @@ export function initPublicMotion(Chart) {
     const header = document.querySelector('body > header');
     const hero = document.querySelector('[data-motion-hero]');
     const background = document.querySelector('[data-motion-background]');
+    const heroSlides = [...document.querySelectorAll('[data-hero-slide]')];
+    const heroIndicators = [...document.querySelectorAll('[data-hero-indicator]')];
+    const heroPrevious = document.querySelector('[data-hero-prev]');
+    const heroNext = document.querySelector('[data-hero-next]');
     let heroVisible = true;
     let frame = 0;
     let pointer = null;
+    let heroSlideIndex = 0;
+    let heroSlideTimer;
+
+    function showHeroSlide(index) {
+        if (!heroSlides.length) return;
+        heroSlideIndex = (index + heroSlides.length) % heroSlides.length;
+        heroSlides.forEach((slide, slideIndex) => {
+            slide.classList.toggle('hero-slide-active', slideIndex === heroSlideIndex);
+        });
+        heroIndicators.forEach((indicator, indicatorIndex) => {
+            indicator.classList.toggle('hero-indicator-active', indicatorIndex === heroSlideIndex);
+        });
+    }
+
+    function startHeroSlider() {
+        clearInterval(heroSlideTimer);
+        if (reduced.matches || heroSlides.length < 2) return;
+        heroSlideTimer = setInterval(() => {
+            if (!reduced.matches && heroVisible && !document.hidden) {
+                showHeroSlide(heroSlideIndex + 1);
+            }
+        }, 7000);
+    }
+
+    function navigateHeroSlide(step) {
+        showHeroSlide(heroSlideIndex + step);
+        startHeroSlider();
+    }
+
+    heroPrevious?.addEventListener('click', () => navigateHeroSlide(-1));
+    heroNext?.addEventListener('click', () => navigateHeroSlide(1));
 
     function render() {
         frame = 0;
@@ -121,6 +156,7 @@ export function initPublicMotion(Chart) {
             hero.classList.toggle('motion-paused', !heroVisible || document.hidden);
         });
     }
+    startHeroSlider();
 
     // Defer existing chart animation until visible, and replay after a full exit.
     const visibleCharts = new Set();
@@ -170,6 +206,7 @@ export function initPublicMotion(Chart) {
         chartObserver?.disconnect();
         Object.values(Chart.instances).forEach(chart => chartObserver?.observe(chart.canvas));
         pointer = null;
+        startHeroSlider();
         schedule();
     });
     desktopPointer.addEventListener('change', () => { pointer = null; schedule(); });
