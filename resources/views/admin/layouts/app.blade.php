@@ -60,7 +60,7 @@
                 </svg>
                 Dashboard
             </a>
-            @foreach (['articles' => 'Artikel', 'videos' => 'Video Edukasi', 'flyers' => 'Flyer', 'webinars' => 'Webinar', 'assessments' => 'Self-Assessment', 'assessment-videos' => 'Video Materi Assessment', 'survey-questions' => 'Survei Kepuasan', 'reports' => 'Monitoring & Laporan'] as $section => $label)
+            @foreach (['articles' => 'Artikel', 'videos' => 'Video Edukasi', 'flyers' => 'Flyer', 'webinars' => 'Webinar', 'assessments' => 'Self-Assessment', 'survey-questions' => 'Survei Kepuasan', 'reports' => 'Monitoring & Laporan'] as $section => $label)
                 <a href="{{ route('admin.'.$section.'.index') }}" class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.'.$section.'.*') ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white' }}">{{ $label }}</a>
             @endforeach
         </nav>
