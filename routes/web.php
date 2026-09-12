@@ -9,7 +9,6 @@ use App\Http\Controllers\Admin\WebinarController as AdminWebinarController;
 use App\Http\Controllers\Admin\AssessmentController as AdminAssessmentController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\SurveyQuestionController as AdminSurveyQuestionController;
-use App\Http\Controllers\Admin\AssessmentVideoController as AdminAssessmentVideoController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\FlyerController;
 use App\Http\Controllers\HomeController;
@@ -35,18 +34,20 @@ Route::post('/survei', [SurveyController::class, 'store'])->name('survey.store')
 Route::get('/webinar', [WebinarController::class, 'index'])->name('webinars.index');
 
 Route::prefix('self-assessment')->name('self-assessment.')->group(function () {
-    Route::get('/', [SelfAssessmentController::class, 'themes'])->name('themes');
+    Route::get('/', [SelfAssessmentController::class, 'index'])->name('index');
+    Route::post('/', [SelfAssessmentController::class, 'start'])->name('start');
+    Route::get('/mulai', [SelfAssessmentController::class, 'create'])->name('create');
+    Route::post('/mulai', [SelfAssessmentController::class, 'store'])->name('store');
     Route::get('/pre', [SelfAssessmentController::class, 'preQuiz'])->name('pre.quiz');
     Route::post('/pre', [SelfAssessmentController::class, 'storePreQuiz'])->name('pre.store');
     Route::get('/pre/hasil', [SelfAssessmentController::class, 'preResult'])->name('pre.result');
-    Route::get('/video', [SelfAssessmentController::class, 'video'])->name('video');
-    Route::post('/video/selesai', [SelfAssessmentController::class, 'completeVideo'])->name('video.complete');
+    Route::get('/materi', [SelfAssessmentController::class, 'materi'])->name('materi');
+    Route::post('/materi/lanjut', [SelfAssessmentController::class, 'materiLanjut'])->name('materi.lanjut');
     Route::get('/post', [SelfAssessmentController::class, 'postQuiz'])->name('post.quiz');
     Route::post('/post', [SelfAssessmentController::class, 'storePostQuiz'])->name('post.store');
     Route::get('/post/hasil', [SelfAssessmentController::class, 'postResult'])->name('post.result');
     Route::get('/perbandingan', [SelfAssessmentController::class, 'comparison'])->name('comparison');
-    Route::get('/{category:slug}', [SelfAssessmentController::class, 'create'])->name('create');
-    Route::post('/{category:slug}', [SelfAssessmentController::class, 'store'])->name('store');
+    Route::post('/ulangi', [SelfAssessmentController::class, 'restart'])->name('restart');
 });
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -63,9 +64,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('flyers', AdminFlyerController::class)->parameters(['flyers' => 'item'])->except('show');
         Route::resource('webinars', AdminWebinarController::class)->parameters(['webinars' => 'item'])->except('show');
         Route::get('assessments', [AdminAssessmentController::class, 'index'])->name('assessments.index');
-        Route::post('assessments/categories', [AdminAssessmentController::class, 'storeCategory'])->name('assessments.categories.store');
-        Route::put('assessments/categories/{category}', [AdminAssessmentController::class, 'updateCategory'])->name('assessments.categories.update');
-        Route::delete('assessments/categories/{category}', [AdminAssessmentController::class, 'destroyCategory'])->name('assessments.categories.destroy');
         Route::post('assessments/questions', [AdminAssessmentController::class, 'storeQuestion'])->name('assessments.questions.store');
         Route::put('assessments/questions/{question}', [AdminAssessmentController::class, 'updateQuestion'])->name('assessments.questions.update');
         Route::delete('assessments/questions/{question}', [AdminAssessmentController::class, 'destroyQuestion'])->name('assessments.questions.destroy');
@@ -73,11 +71,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('survey-questions', [AdminSurveyQuestionController::class, 'store'])->name('survey-questions.store');
         Route::put('survey-questions/{question}', [AdminSurveyQuestionController::class, 'update'])->name('survey-questions.update');
         Route::delete('survey-questions/{question}', [AdminSurveyQuestionController::class, 'destroy'])->name('survey-questions.destroy');
-        Route::get('assessment-videos', [AdminAssessmentVideoController::class, 'index'])->name('assessment-videos.index');
-        Route::post('assessment-videos', [AdminAssessmentVideoController::class, 'store'])->name('assessment-videos.store');
-        Route::put('assessment-videos/{video}', [AdminAssessmentVideoController::class, 'update'])->name('assessment-videos.update');
-        Route::delete('assessment-videos/{video}', [AdminAssessmentVideoController::class, 'destroy'])->name('assessment-videos.destroy');
-        Route::post('assessment-videos/{video}/activate', [AdminAssessmentVideoController::class, 'activate'])->name('assessment-videos.activate');
         Route::get('reports', [AdminReportController::class, 'index'])->name('reports.index');
     });
 });

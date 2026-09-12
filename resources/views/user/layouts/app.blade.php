@@ -50,7 +50,7 @@
                         {{ $link['label'] }}
                     </a>
                 @endforeach
-                <a href="{{ route('self-assessment.themes') }}"
+                <a href="{{ route('self-assessment.index') }}"
                    class="mt-2 rounded-md bg-teal-500 px-4 py-2 text-center text-sm font-semibold text-navy-950 transition hover:bg-teal-400 md:ml-2 md:mt-0">
                     Self Assessment
                 </a>

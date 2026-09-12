@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\AssessmentAttempt;
-use App\Models\AssessmentCategory;
+use App\Models\AssessmentQuestion;
 use App\Models\AssessmentUser;
 use App\Models\Flyer;
 use App\Models\Video;
@@ -58,8 +58,7 @@ class DashboardController extends Controller
         $assessmentStats = [
             'participants' => AssessmentUser::count(),
             'attempts' => AssessmentAttempt::count(),
-            'categories' => AssessmentCategory::count(),
-            'questions' => \App\Models\AssessmentQuestion::count(),
+            'questions' => AssessmentQuestion::count(),
         ];
 
         $currentYear = now()->year;
@@ -67,7 +66,7 @@ class DashboardController extends Controller
         $completedAttempts = AssessmentAttempt::query()
             ->whereNotNull('completed_at')
             ->whereYear('completed_at', $currentYear)
-            ->with(['user', 'answers.question.category'])
+            ->with('user')
             ->get()
             ->filter(fn (AssessmentAttempt $attempt) => $attempt->user !== null);
 
@@ -76,7 +75,6 @@ class DashboardController extends Controller
             'assessmentStats' => $assessmentStats,
             'currentYear' => $currentYear,
             'levelDistribution' => $this->levelDistribution($completedAttempts),
-            'scoreByCategory' => $this->averageScoreByCategory($completedAttempts),
             'scoreByGender' => $this->averageScoreByGender($completedAttempts),
             'scoreByEducation' => $this->averageScoreByEducation($completedAttempts),
             'scoreByAge' => $this->averageScoreByAge($completedAttempts),
@@ -94,31 +92,6 @@ class DashboardController extends Controller
             'label' => $level,
             'count' => $attempts->where('level', $level)->count(),
         ]);
-    }
-
-    /**
-     * Average score per assessment theme (category), in the themes' own
-     * display order. Every attempt now covers exactly one theme, so the
-     * theme is read off the attempt's first answered question.
-     */
-    private function averageScoreByCategory(Collection $attempts): Collection
-    {
-        $categoryOrder = AssessmentCategory::query()->orderBy('order')->pluck('order', 'name');
-
-        return $attempts
-            ->map(fn (AssessmentAttempt $attempt) => [
-                'category' => $attempt->answers->first()?->question?->category?->name,
-                'score' => (float) $attempt->score,
-            ])
-            ->filter(fn (array $row) => $row['category'] !== null)
-            ->groupBy('category')
-            ->map(fn (Collection $group, string $label) => [
-                'label' => $label,
-                'average' => round($group->avg('score'), 1),
-                'count' => $group->count(),
-            ])
-            ->sortBy(fn (array $row) => $categoryOrder[$row['label']] ?? 999)
-            ->values();
     }
 
     /**
