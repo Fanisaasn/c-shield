@@ -8,8 +8,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h1 class="font-heading text-3xl font-bold text-white">Webinar</h1>
             <p class="mt-2 max-w-2xl text-sm text-slate-300">
-                Sesi edukasi keamanan siber terjadwal, daring maupun luring. Daftar langsung melalui tautan
-                registrasi resmi pada setiap webinar.
+                Jadwal webinar keamanan siber dari C-SHIELD Diskominfo Kota Cimahi. Temukan berbagai informasi dan tips seputar keamanan digital untuk meningkatkan kesadaran dan perlindungan diri di dunia maya.      
             </p>
         </div>
     </section>
