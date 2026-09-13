@@ -54,20 +54,20 @@
 
     {{-- Feature grid --}}
     <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
             @foreach ([
                 ['route' => 'articles.index', 'title' => 'Artikel', 'desc' => 'Bacaan edukatif seputar praktik keamanan siber.'],
                 ['route' => 'videos.index', 'title' => 'Video Edukasi', 'desc' => 'Materi pembelajaran dalam format video.'],
                 ['route' => 'flyers.index', 'title' => 'Flyer', 'desc' => 'Materi sosialisasi visual yang ringkas.'],
                 ['route' => 'webinars.index', 'title' => 'Webinar', 'desc' => 'Sesi edukasi daring maupun luring terjadwal.'],
             ] as $feature)
-                <a href="{{ route($feature['route']) }}" class="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600/10 text-blue-600 transition group-hover:bg-teal-500/10 group-hover:text-teal-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-5 w-5">
+                <a href="{{ route($feature['route']) }}" class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-6">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600/10 text-blue-600 transition group-hover:bg-teal-500/10 group-hover:text-teal-500 sm:h-10 sm:w-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-4 w-4 sm:h-5 sm:w-5">
                             <path d="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </span>
-                    <h3 class="mt-4 font-heading text-base font-bold text-navy-900">{{ $feature['title'] }}</h3>
+                    <h3 class="mt-3 font-heading text-sm font-bold text-navy-900 sm:mt-4 sm:text-base">{{ $feature['title'] }}</h3>
                     <p class="mt-1 text-sm text-slate-500">{{ $feature['desc'] }}</p>
                 </a>
             @endforeach
@@ -82,13 +82,13 @@
                     <h2 class="font-heading text-2xl font-bold text-navy-900">Artikel Terbaru</h2>
                     <a href="{{ route('articles.index') }}" class="text-sm font-semibold text-blue-600 hover:text-teal-500">Lihat semua &rarr;</a>
                 </div>
-                <div class="mt-8 grid gap-6 md:grid-cols-3">
+                <div class="mt-6 grid grid-cols-2 gap-4 sm:mt-8 sm:gap-6 lg:grid-cols-3">
                     @foreach ($latestArticles as $article)
-                        <a href="{{ route('articles.show', $article) }}" class="group rounded-xl border border-slate-200 p-6 transition hover:shadow-md">
+                        <a href="{{ route('articles.show', $article) }}" class="group rounded-xl border border-slate-200 p-4 transition hover:shadow-md sm:p-6">
                             <p class="text-xs font-medium uppercase tracking-wide text-teal-600">
                                 {{ $article->published_at?->translatedFormat('d M Y') }}
                             </p>
-                            <h3 class="mt-2 font-heading text-lg font-bold text-navy-900 group-hover:text-blue-600">
+                            <h3 class="mt-2 font-heading text-base font-bold text-navy-900 group-hover:text-blue-600 sm:text-lg">
                                 {{ $article->title }}
                             </h3>
                             <p class="mt-2 line-clamp-3 text-sm text-slate-500">{{ $article->excerpt }}</p>
@@ -106,9 +106,9 @@
                 <h2 class="font-heading text-2xl font-bold text-navy-900">Webinar Mendatang</h2>
                 <a href="{{ route('webinars.index') }}" class="text-sm font-semibold text-blue-600 hover:text-teal-500">Lihat semua &rarr;</a>
             </div>
-            <div class="mt-8 grid gap-6 md:grid-cols-2">
+            <div class="mt-6 grid grid-cols-2 gap-4 sm:mt-8 sm:gap-6">
                 @foreach ($upcomingWebinars as $webinar)
-                    <div class="rounded-xl border border-slate-200 bg-white p-6">
+                    <div class="rounded-xl border border-slate-200 bg-white p-4 sm:p-6">
                         <p class="text-xs font-medium uppercase tracking-wide text-teal-600">
                             {{ $webinar->webinar_date->translatedFormat('d M Y, H:i') }} WIB &middot; {{ $webinar->platform }}
                         </p>
@@ -153,8 +153,8 @@
                 </p>
             </div>
 
-            <div class="mt-6 grid gap-4 lg:grid-cols-2">
-                <div class="rounded-xl bg-white p-5">
+            <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2">
+                <div class="rounded-xl bg-white p-4 sm:p-5">
                     <p class="text-sm font-semibold text-navy-900">Persentase Hasil Assessment</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
 
@@ -167,7 +167,7 @@
                     @endif
                 </div>
 
-                <div class="rounded-xl bg-white p-5">
+                <div class="rounded-xl bg-white p-4 sm:p-5">
                     <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Jenis Kelamin</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
 
@@ -181,8 +181,8 @@
                 </div>
             </div>
 
-            <div class="mt-4 grid gap-4 lg:grid-cols-3">
-                <div class="rounded-xl bg-white p-5">
+            <div class="mt-4 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+                <div class="rounded-xl bg-white p-4 sm:p-5">
                     <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Pendidikan</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
 
@@ -195,7 +195,7 @@
                     @endif
                 </div>
 
-                <div class="rounded-xl bg-white p-5">
+                <div class="rounded-xl bg-white p-4 sm:p-5">
                     <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Umur</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
 
@@ -208,7 +208,7 @@
                     @endif
                 </div>
 
-                <div class="rounded-xl bg-white p-5">
+                <div class="rounded-xl bg-white p-4 sm:p-5">
                     <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Domisili</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
 
