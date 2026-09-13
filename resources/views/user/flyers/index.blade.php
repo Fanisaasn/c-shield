@@ -19,7 +19,7 @@
                 Belum ada flyer yang dipublikasikan.
             </p>
         @else
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
                 @foreach ($flyers as $flyer)
                     <a href="{{ route('flyers.show', $flyer) }}" class="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                         <div class="relative flex aspect-[3/4] items-center justify-center bg-slate-100">
@@ -41,7 +41,7 @@
                                 </svg>
                             @endif
                         </div>
-                        <div class="p-4">
+                        <div class="p-3 sm:p-4">
                             <h2 class="font-heading text-sm font-bold text-navy-900 group-hover:text-blue-600">
                                 {{ $flyer->title }}
                             </h2>
