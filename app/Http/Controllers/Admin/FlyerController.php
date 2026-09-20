@@ -16,7 +16,7 @@ class FlyerController extends ContentController
         'description' => ['nullable', 'string'],
         'source_url' => ['nullable', 'url', 'max:255'],
         'images' => ['nullable', 'array'],
-        'images.*' => ['image', 'max:4096'],
+        'images.*' => ['image', 'max:20480'],
         'is_published' => ['nullable', 'boolean'],
         'published_at' => ['nullable', 'date'],
     ];
