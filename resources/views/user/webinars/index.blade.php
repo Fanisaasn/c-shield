@@ -8,8 +8,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h1 class="font-heading text-3xl font-bold text-white">Webinar</h1>
             <p class="mt-2 max-w-2xl text-sm text-slate-300">
-                Sesi edukasi keamanan siber terjadwal, daring maupun luring. Daftar langsung melalui tautan
-                registrasi resmi pada setiap webinar.
+                Jadwal webinar keamanan siber dari C-SHIELD Diskominfo Kota Cimahi. Temukan berbagai informasi dan tips seputar keamanan digital untuk meningkatkan kesadaran dan perlindungan diri di dunia maya.      
             </p>
         </div>
     </section>
@@ -20,10 +19,10 @@
                 Belum ada webinar yang dijadwalkan.
             </p>
         @else
-            <div class="space-y-6">
+            <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-1">
                 @foreach ($webinars as $webinar)
                     @php $isPast = $webinar->webinar_date->isPast(); @endphp
-                    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm {{ $isPast ? 'opacity-60' : '' }}">
+                    <div class="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 {{ $isPast ? 'opacity-60' : '' }}">
                         <div class="flex flex-wrap items-center gap-3">
                             <span class="rounded-full bg-blue-600/10 px-3 py-1 text-xs font-semibold text-blue-600">
                                 {{ $webinar->webinar_date->translatedFormat('d M Y, H:i') }} WIB
@@ -38,7 +37,7 @@
                             @endif
                         </div>
 
-                        <h2 class="mt-3 font-heading text-xl font-bold text-navy-900">{{ $webinar->title }}</h2>
+                        <h2 class="mt-3 font-heading text-base font-bold text-navy-900 sm:text-xl">{{ $webinar->title }}</h2>
 
                         @if ($webinar->speaker)
                             <p class="mt-1 text-sm text-slate-500">Narasumber: {{ $webinar->speaker }}</p>

@@ -93,7 +93,7 @@
 
                 function goTo(index) {
                     index = Math.max(0, Math.min(slides.length - 1, index));
-                    track.scrollTo({ left: slides[index].offsetLeft, behavior: 'smooth' });
+                    track.scrollTo({ left: slides[index].offsetLeft, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
                 }
 
                 function currentIndex() {

@@ -6,10 +6,31 @@
 @section('content')
 
     {{-- Hero --}}
-    <section class="relative overflow-hidden bg-navy-900">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(42,183,202,0.18),_transparent_55%)]"></div>
-        <div class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-            <div class="max-w-3xl">
+    <section data-motion-hero class="relative overflow-hidden bg-navy-900">
+        <div data-hero-slides aria-hidden="true" class="absolute inset-0">
+            <div data-hero-slide class="hero-slide hero-slide-active" style="background-image: url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&amp;fit=crop&amp;w=2200&amp;q=82');"></div>
+            <div data-hero-slide style="background-image: url('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&amp;fit=crop&amp;w=2200&amp;q=82');"></div>
+            <div data-hero-slide style="background-image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&amp;fit=crop&amp;w=2200&amp;q=82');"></div>
+        </div>
+        <div data-hero-overlay aria-hidden="true" class="absolute inset-0"></div>
+        <div data-motion-background class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(42,183,202,0.18),_transparent_55%)]"></div>
+        <button type="button" data-hero-prev aria-label="Slide sebelumnya" class="hero-nav-button hero-nav-prev">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m15 18-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <button type="button" data-hero-next aria-label="Slide berikutnya" class="hero-nav-button hero-nav-next">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <div data-hero-indicators aria-hidden="true" class="absolute inset-x-0 bottom-6 z-20 flex justify-center gap-2">
+            <span data-hero-indicator class="hero-indicator hero-indicator-active"></span>
+            <span data-hero-indicator class="hero-indicator"></span>
+            <span data-hero-indicator class="hero-indicator"></span>
+        </div>
+        <div class="relative z-20 mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+            <div data-motion-hero-copy class="max-w-3xl">
                 <span class="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1 text-xs font-semibold text-teal-300">
                     Diskominfo Kota Cimahi
                 </span>
@@ -17,9 +38,7 @@
                     Cimahi Cyber Security Hub &amp; Awareness Field
                 </h1>
                 <p class="mt-5 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
-                    Portal pusat keamanan siber dan wadah kesadaran digital terpadu bagi masyarakat dan
-                    aparatur Kota Cimahi &mdash; artikel, video edukasi, flyer, webinar, hingga self-assessment
-                    tingkat kesadaran keamanan siber, dalam satu tempat.
+                   Pusat informasi dan edukasi keamanan siber untuk masyarakat dan aparatur Kota Cimahi. Temukan artikel, video, flyer, webinar, serta self-assessment untuk membantu meningkatkan kesadaran dan keamanan digital.
                 </p>
                 <div class="mt-8 flex flex-wrap gap-3">
                     <a href="{{ route('self-assessment.index') }}" class="rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 transition hover:bg-teal-400">
@@ -35,20 +54,20 @@
 
     {{-- Feature grid --}}
     <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
             @foreach ([
                 ['route' => 'articles.index', 'title' => 'Artikel', 'desc' => 'Bacaan edukatif seputar praktik keamanan siber.'],
                 ['route' => 'videos.index', 'title' => 'Video Edukasi', 'desc' => 'Materi pembelajaran dalam format video.'],
                 ['route' => 'flyers.index', 'title' => 'Flyer', 'desc' => 'Materi sosialisasi visual yang ringkas.'],
                 ['route' => 'webinars.index', 'title' => 'Webinar', 'desc' => 'Sesi edukasi daring maupun luring terjadwal.'],
             ] as $feature)
-                <a href="{{ route($feature['route']) }}" class="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600/10 text-blue-600 transition group-hover:bg-teal-500/10 group-hover:text-teal-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-5 w-5">
+                <a href="{{ route($feature['route']) }}" class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-6">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600/10 text-blue-600 transition group-hover:bg-teal-500/10 group-hover:text-teal-500 sm:h-10 sm:w-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-4 w-4 sm:h-5 sm:w-5">
                             <path d="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </span>
-                    <h3 class="mt-4 font-heading text-base font-bold text-navy-900">{{ $feature['title'] }}</h3>
+                    <h3 class="mt-3 font-heading text-sm font-bold text-navy-900 sm:mt-4 sm:text-base">{{ $feature['title'] }}</h3>
                     <p class="mt-1 text-sm text-slate-500">{{ $feature['desc'] }}</p>
                 </a>
             @endforeach
@@ -63,13 +82,13 @@
                     <h2 class="font-heading text-2xl font-bold text-navy-900">Artikel Terbaru</h2>
                     <a href="{{ route('articles.index') }}" class="text-sm font-semibold text-blue-600 hover:text-teal-500">Lihat semua &rarr;</a>
                 </div>
-                <div class="mt-8 grid gap-6 md:grid-cols-3">
+                <div class="mt-6 grid grid-cols-2 gap-4 sm:mt-8 sm:gap-6 lg:grid-cols-3">
                     @foreach ($latestArticles as $article)
-                        <a href="{{ route('articles.show', $article) }}" class="group rounded-xl border border-slate-200 p-6 transition hover:shadow-md">
+                        <a href="{{ route('articles.show', $article) }}" class="group rounded-xl border border-slate-200 p-4 transition hover:shadow-md sm:p-6">
                             <p class="text-xs font-medium uppercase tracking-wide text-teal-600">
                                 {{ $article->published_at?->translatedFormat('d M Y') }}
                             </p>
-                            <h3 class="mt-2 font-heading text-lg font-bold text-navy-900 group-hover:text-blue-600">
+                            <h3 class="mt-2 font-heading text-base font-bold text-navy-900 group-hover:text-blue-600 sm:text-lg">
                                 {{ $article->title }}
                             </h3>
                             <p class="mt-2 line-clamp-3 text-sm text-slate-500">{{ $article->excerpt }}</p>
@@ -87,9 +106,9 @@
                 <h2 class="font-heading text-2xl font-bold text-navy-900">Webinar Mendatang</h2>
                 <a href="{{ route('webinars.index') }}" class="text-sm font-semibold text-blue-600 hover:text-teal-500">Lihat semua &rarr;</a>
             </div>
-            <div class="mt-8 grid gap-6 md:grid-cols-2">
+            <div class="mt-6 grid grid-cols-2 gap-4 sm:mt-8 sm:gap-6">
                 @foreach ($upcomingWebinars as $webinar)
-                    <div class="rounded-xl border border-slate-200 bg-white p-6">
+                    <div class="rounded-xl border border-slate-200 bg-white p-4 sm:p-6">
                         <p class="text-xs font-medium uppercase tracking-wide text-teal-600">
                             {{ $webinar->webinar_date->translatedFormat('d M Y, H:i') }} WIB &middot; {{ $webinar->platform }}
                         </p>
@@ -134,8 +153,8 @@
                 </p>
             </div>
 
-            <div class="mt-6 grid gap-4 lg:grid-cols-2">
-                <div class="rounded-xl bg-white p-5">
+            <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2">
+                <div class="rounded-xl bg-white p-4 sm:p-5">
                     <p class="text-sm font-semibold text-navy-900">Persentase Hasil Assessment</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
 
@@ -148,7 +167,7 @@
                     @endif
                 </div>
 
-                <div class="rounded-xl bg-white p-5">
+                <div class="rounded-xl bg-white p-4 sm:p-5">
                     <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Jenis Kelamin</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
 
@@ -162,8 +181,8 @@
                 </div>
             </div>
 
-            <div class="mt-4 grid gap-4 lg:grid-cols-3">
-                <div class="rounded-xl bg-white p-5">
+            <div class="mt-4 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+                <div class="rounded-xl bg-white p-4 sm:p-5">
                     <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Pendidikan</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
 
@@ -176,7 +195,7 @@
                     @endif
                 </div>
 
-                <div class="rounded-xl bg-white p-5">
+                <div class="rounded-xl bg-white p-4 sm:p-5">
                     <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Umur</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
 
@@ -189,7 +208,7 @@
                     @endif
                 </div>
 
-                <div class="rounded-xl bg-white p-5">
+                <div class="rounded-xl bg-white p-4 sm:p-5">
                     <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Domisili</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
 
