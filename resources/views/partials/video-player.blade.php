@@ -1,4 +1,6 @@
 @php
+    $isInteractive = $video->slug === 'jaga-data-jaga-diri';
+    $showInteractivePlayer ??= false;
     $youtubeId = null;
     $isInstagram = false;
 
@@ -13,7 +15,20 @@
     $iconClass ??= 'h-14 w-14';
 @endphp
 
-@if ($youtubeId)
+@if ($isInteractive && $showInteractivePlayer)
+    <div class="aspect-video overflow-hidden rounded-xl bg-navy-950 shadow-sm ring-1 ring-slate-900/10">
+        <iframe class="h-full w-full border-0" src="{{ asset('interactive-video/jaga-data-jaga-diri/index.html') }}" title="Video interaktif: {{ $video->title }}" allow="autoplay" loading="eager"></iframe>
+    </div>
+@elseif ($isInteractive)
+    <div class="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-navy-950 text-white">
+        <div class="text-center">
+            <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-6 w-6"><path d="M8 5v14l11-7-11-7Z" fill="currentColor"/></svg>
+            </span>
+            <span class="mt-3 block text-xs font-semibold uppercase tracking-[0.2em] text-teal-300">Interactive Security Awareness</span>
+        </div>
+    </div>
+@elseif ($youtubeId)
     <div class="aspect-video overflow-hidden rounded-xl bg-navy-900">
         <iframe class="h-full w-full" src="https://www.youtube.com/embed/{{ $youtubeId }}" title="{{ $video->title }}" frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>

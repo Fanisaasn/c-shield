@@ -18,6 +18,8 @@ class VideoSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->seedInteractiveVideo();
+
         $jsonPath = database_path('seeders/data/videos.json');
 
         if (File::exists($jsonPath)) {
@@ -71,6 +73,20 @@ class VideoSeeder extends Seeder
         }
 
         return $relativePath;
+    }
+
+    protected function seedInteractiveVideo(): void
+    {
+        Video::query()->updateOrCreate(
+            ['slug' => 'jaga-data-jaga-diri'],
+            [
+                'title' => 'Jaga Data, Jaga Diri',
+                'description' => 'Video interaktif ini membahas perilaku aman dalam menggunakan perangkat, akun, dan informasi digital. Pengguna akan menghadapi situasi keamanan dan menentukan apakah perilaku tersebut aman atau berisiko.',
+                'video_url' => 'interactive://jaga-data-jaga-diri',
+                'is_published' => true,
+                'published_at' => now(),
+            ]
+        );
     }
 
     protected function seedSampleVideos(): void
