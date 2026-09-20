@@ -4,14 +4,75 @@ namespace Database\Seeders;
 
 use App\Models\Article;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ArticleSeeder extends Seeder
 {
     /**
-     * Seed sample educational articles.
+     * Seed articles. If database/seeders/data/articles.json exists
+     * (generated via `php artisan content:export-seeders`), the real
+     * articles added by the team are seeded from there, cover images
+     * included. Otherwise falls back to a few sample placeholder articles.
      */
     public function run(): void
+    {
+        $jsonPath = database_path('seeders/data/articles.json');
+
+        if (File::exists($jsonPath)) {
+            $this->seedFromExport($jsonPath);
+
+            return;
+        }
+
+        $this->seedSampleArticles();
+    }
+
+    protected function seedFromExport(string $jsonPath): void
+    {
+        $articles = json_decode(File::get($jsonPath), true) ?? [];
+
+        foreach ($articles as $data) {
+            Article::query()->updateOrCreate(
+                ['slug' => $data['slug']],
+                [
+                    'title' => $data['title'],
+                    'excerpt' => $data['excerpt'] ?? null,
+                    'content' => $data['content'] ?? null,
+                    'source_url' => $data['source_url'] ?? null,
+                    'cover_image' => $this->restoreAsset($data['cover_image'] ?? null),
+                    'is_published' => $data['is_published'] ?? true,
+                    'published_at' => $data['published_at'] ?? null,
+                ]
+            );
+        }
+    }
+
+    /**
+     * Copy a file that was exported into database/seeders/assets back into
+     * the public disk, if it isn't already there.
+     */
+    protected function restoreAsset(?string $relativePath): ?string
+    {
+        if (! $relativePath || Str::startsWith($relativePath, ['http://', 'https://'])) {
+            return $relativePath;
+        }
+
+        $source = database_path('seeders/assets/'.$relativePath);
+
+        if (! File::exists($source)) {
+            return null;
+        }
+
+        if (! Storage::disk('public')->exists($relativePath)) {
+            Storage::disk('public')->put($relativePath, File::get($source));
+        }
+
+        return $relativePath;
+    }
+
+    protected function seedSampleArticles(): void
     {
         $articles = [
             [
