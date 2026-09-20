@@ -1,0 +1,22 @@
+[
+    {
+        "title": "Membangun Budaya Keamanan Siber di Lingkungan Kerja",
+        "description": "Webinar edukasi bagi ASN dan masyarakat Kota Cimahi mengenai pentingnya budaya keamanan siber sehari-hari.",
+        "speaker": "Tim Keamanan Informasi Diskominfo Kota Cimahi",
+        "webinar_date": "2026-09-14 09:00:00",
+        "platform": "Zoom Meeting",
+        "registration_url": "https://example.com/register/webinar-budaya-keamanan-siber",
+        "poster_image": null,
+        "is_published": true
+    },
+    {
+        "title": "Mengenali dan Menghindari Penipuan Digital",
+        "description": "Sesi berbagi pengalaman dan studi kasus penipuan digital yang sering terjadi di masyarakat.",
+        "speaker": "Narasumber Diskominfo Kota Cimahi",
+        "webinar_date": "2026-09-30 13:30:00",
+        "platform": "Google Meet",
+        "registration_url": "https://example.com/register/webinar-penipuan-digital",
+        "poster_image": null,
+        "is_published": true
+    }
+]

@@ -4,16 +4,78 @@ namespace Database\Seeders;
 
 use App\Models\Video;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class VideoSeeder extends Seeder
 {
     /**
-     * Seed sample educational videos. video_url values are placeholders
-     * for the admin to replace with real links via the admin panel.
+     * Seed videos. If database/seeders/data/videos.json exists (generated
+     * via `php artisan content:export-seeders`), the real videos added by
+     * the team are seeded from there, files included. Otherwise falls
+     * back to a few sample placeholder videos.
      */
     public function run(): void
+    {
+        $this->seedInteractiveVideo();
+
+        $jsonPath = database_path('seeders/data/videos.json');
+
+        if (File::exists($jsonPath)) {
+            $this->seedFromExport($jsonPath);
+
+            return;
+        }
+
+        $this->seedSampleVideos();
+        $this->seedUploadedFileDemoVideo();
+    }
+
+    protected function seedFromExport(string $jsonPath): void
+    {
+        $videos = json_decode(File::get($jsonPath), true) ?? [];
+
+        foreach ($videos as $data) {
+            Video::query()->updateOrCreate(
+                ['slug' => $data['slug']],
+                [
+                    'title' => $data['title'],
+                    'description' => $data['description'] ?? null,
+                    'video_url' => $data['video_url'] ?? null,
+                    'video_path' => $this->restoreAsset($data['video_path'] ?? null),
+                    'thumbnail' => $this->restoreAsset($data['thumbnail'] ?? null),
+                    'is_published' => $data['is_published'] ?? true,
+                    'published_at' => $data['published_at'] ?? null,
+                ]
+            );
+        }
+    }
+
+    /**
+     * Copy a file that was exported into database/seeders/assets back into
+     * the public disk, if it isn't already there.
+     */
+    protected function restoreAsset(?string $relativePath): ?string
+    {
+        if (! $relativePath || Str::startsWith($relativePath, ['http://', 'https://'])) {
+            return $relativePath;
+        }
+
+        $source = database_path('seeders/assets/'.$relativePath);
+
+        if (! File::exists($source)) {
+            return null;
+        }
+
+        if (! Storage::disk('public')->exists($relativePath)) {
+            Storage::disk('public')->put($relativePath, File::get($source));
+        }
+
+        return $relativePath;
+    }
+
+    protected function seedInteractiveVideo(): void
     {
         Video::query()->updateOrCreate(
             ['slug' => 'jaga-data-jaga-diri'],
@@ -25,7 +87,10 @@ class VideoSeeder extends Seeder
                 'published_at' => now(),
             ]
         );
+    }
 
+    protected function seedSampleVideos(): void
+    {
         $videos = [
             [
                 'title' => 'Dasar-Dasar Keamanan Siber untuk Pemula',
@@ -56,8 +121,6 @@ class VideoSeeder extends Seeder
                 ]
             );
         }
-
-        $this->seedUploadedFileDemoVideo();
     }
 
     /**
