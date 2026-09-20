@@ -14,10 +14,10 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="flex min-h-screen flex-col bg-slate-50 font-sans text-navy-900 antialiased">
+<body data-public-motion class="flex min-h-screen flex-col bg-slate-50 font-sans text-navy-900 antialiased">
 
     <header class="sticky top-0 z-50 border-b border-navy-800/10 bg-navy-900">
-        <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+        <nav class="mx-auto flex max-w-7xl flex-wrap items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
             <a href="{{ route('home') }}" class="flex items-center gap-2 font-heading text-lg font-bold text-white">
                 <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500 text-navy-950">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-5 w-5">
@@ -28,13 +28,13 @@
                 <span>C-SHIELD</span>
             </a>
 
-            <button type="button" onclick="document.getElementById('main-nav').classList.toggle('hidden')" class="inline-flex items-center justify-center rounded-md p-2 text-white/80 hover:bg-white/10 md:hidden" aria-label="Buka menu">
+            <button type="button" id="main-nav-toggle" class="inline-flex items-center justify-center rounded-md p-2 text-white/80 hover:bg-white/10 md:hidden" aria-controls="main-nav" aria-expanded="false" aria-label="Buka menu">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-6 w-6">
                     <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                 </svg>
             </button>
 
-            <div id="main-nav" class="hidden w-full flex-col gap-1 pt-4 md:flex md:w-auto md:flex-row md:items-center md:gap-1 md:pt-0">
+            <div id="main-nav" class="hidden basis-full flex-col gap-1 pt-4 md:flex md:basis-auto md:flex-row md:items-center md:gap-1 md:pt-0">
                 @php
                     $navLinks = [
                         'home' => ['label' => 'Beranda', 'active' => request()->routeIs('home')],

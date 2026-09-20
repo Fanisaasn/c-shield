@@ -10,7 +10,7 @@
             <p class="mt-4 text-xs font-medium uppercase tracking-wide text-teal-300">
                 {{ $article->published_at?->translatedFormat('d M Y') }}
             </p>
-            <h1 class="mt-2 font-heading text-3xl font-bold text-white">{{ $article->title }}</h1>
+            <h1 class="public-page-title mt-2 font-heading font-bold text-white">{{ $article->title }}</h1>
         </div>
     </section>
 
@@ -25,7 +25,7 @@
             <img src="{{ asset('storage/' . $article->cover_image) }}" alt="{{ $article->title }}" class="mb-8 w-full rounded-xl object-cover">
         @endif
 
-        <div class="max-w-none whitespace-pre-line text-base leading-relaxed text-slate-700">
+        <div class="public-article-content max-w-none whitespace-pre-line text-base leading-relaxed text-slate-700">
             {{ $article->content }}
         </div>
 
