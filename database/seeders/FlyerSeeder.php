@@ -4,15 +4,62 @@ namespace Database\Seeders;
 
 use App\Models\Flyer;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class FlyerSeeder extends Seeder
 {
     /**
-     * Seed sample flyers. The image field is left empty until an admin
-     * uploads the actual flyer image through the admin panel.
+     * Seed flyers. If database/seeders/data/flyers.json exists (generated
+     * via `php artisan content:export-seeders`), the real flyers added by
+     * the team are seeded from there, images included. Otherwise falls
+     * back to a few sample placeholder flyers.
      */
     public function run(): void
+    {
+        $jsonPath = database_path('seeders/data/flyers.json');
+
+        if (File::exists($jsonPath)) {
+            $this->seedFromExport($jsonPath);
+
+            return;
+        }
+
+        $this->seedSampleFlyers();
+        $this->seedSlideDemoFlyer();
+    }
+
+    protected function seedFromExport(string $jsonPath): void
+    {
+        $flyers = json_decode(File::get($jsonPath), true) ?? [];
+
+        foreach ($flyers as $data) {
+            $flyer = Flyer::query()->updateOrCreate(
+                ['title' => $data['title']],
+                [
+                    'description' => $data['description'] ?? null,
+                    'source_url' => $data['source_url'] ?? null,
+                    'is_published' => $data['is_published'] ?? true,
+                    'published_at' => $data['published_at'] ?? null,
+                ]
+            );
+
+            foreach ($data['images'] ?? [] as $image) {
+                $path = $this->restoreAsset($image['image']);
+
+                if (! $path) {
+                    continue;
+                }
+
+                $flyer->images()->updateOrCreate(
+                    ['sort_order' => $image['sort_order']],
+                    ['image' => $path]
+                );
+            }
+        }
+    }
+
+    protected function seedSampleFlyers(): void
     {
         $flyers = [
             [
@@ -39,8 +86,25 @@ class FlyerSeeder extends Seeder
                 ]
             );
         }
+    }
 
-        $this->seedSlideDemoFlyer();
+    /**
+     * Copy a file that was exported into database/seeders/assets back into
+     * the public disk, if it isn't already there.
+     */
+    protected function restoreAsset(string $relativePath): ?string
+    {
+        $source = database_path('seeders/assets/'.$relativePath);
+
+        if (! File::exists($source)) {
+            return null;
+        }
+
+        if (! Storage::disk('public')->exists($relativePath)) {
+            Storage::disk('public')->put($relativePath, File::get($source));
+        }
+
+        return $relativePath;
     }
 
     /**
