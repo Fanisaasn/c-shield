@@ -257,15 +257,21 @@ class VoiceController {
     this.synth = window.speechSynthesis;
     this.voice = null;
     this.enabled = true;
+    this._timeoutId = null;
+    this._requestId = 0;
+    this._finishCurrent = null;
     this._loadVoice();
   }
 
   _loadVoice() {
     const setVoice = () => {
       const voices = this.synth.getVoices();
-      // Try Indonesian male voice first (for Raka)
-      this.voice = voices.find(v => v.lang.startsWith('id') && v.name.toLowerCase().includes('male')) ||
-                   voices.find(v => v.lang.startsWith('id')) ||
+      // Prefer a native Indonesian voice. Voice names differ between browsers,
+      // so gender is used only as a secondary hint for Raka.
+      this.voice = voices.find(v => v.lang.toLowerCase() === 'id-id' && /male|pria|ardi/i.test(v.name)) ||
+                   voices.find(v => v.lang.toLowerCase() === 'id-id' && v.localService) ||
+                   voices.find(v => v.lang.toLowerCase() === 'id-id') ||
+                   voices.find(v => v.lang.toLowerCase().startsWith('id')) ||
                    voices.find(v => v.lang.startsWith('ms')) ||
                    voices.find(v => v.lang === 'en-US') ||
                    voices[0];
@@ -279,23 +285,41 @@ class VoiceController {
   speak(text, { rate = 1, pitch = 1, volume = 0.9 } = {}) {
     return new Promise(resolve => {
       if (!this.enabled || !this.synth) { resolve(); return; }
-      this.synth.cancel();
+      this.stop();
+      const requestId = ++this._requestId;
       const utt = new SpeechSynthesisUtterance(text);
       if (this.voice) utt.voice = this.voice;
       utt.lang = 'id-ID';
       utt.rate = rate;
       utt.pitch = pitch;
       utt.volume = volume;
-      utt.onend = () => resolve();
-      utt.onerror = () => resolve();
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        if (this._timeoutId) clearTimeout(this._timeoutId);
+        this._timeoutId = null;
+        if (this._finishCurrent === finish) this._finishCurrent = null;
+        resolve();
+      };
+      this._finishCurrent = finish;
+      utt.onend = finish;
+      utt.onerror = finish;
       this.synth.speak(utt);
-      const maxDuration = Math.max(text.length * 100, 5000);
-      setTimeout(() => { this.synth.cancel(); resolve(); }, maxDuration);
+      const maxDuration = Math.max((text.length / Math.max(rate, 0.5)) * 115, 6000);
+      this._timeoutId = setTimeout(() => {
+        if (requestId === this._requestId) this.synth.cancel();
+        finish();
+      }, maxDuration);
     });
   }
 
   stop() {
+    this._requestId += 1;
+    if (this._timeoutId) clearTimeout(this._timeoutId);
+    this._timeoutId = null;
     if (this.synth) this.synth.cancel();
+    if (this._finishCurrent) this._finishCurrent();
   }
 
   toggle() {
@@ -480,6 +504,16 @@ class CharacterController {
         setTimeout(resolve, 400);
       }, duration);
     });
+  }
+
+  showSpeech(text) {
+    const nameEl = this.speechBubble.querySelector('.speaker-name');
+    const textEl = this.speechBubble.querySelector('.bubble-text');
+    if (nameEl) nameEl.textContent = 'Raka';
+    if (textEl) textEl.textContent = text;
+    this.speechBubble.style.left = this.el.style.left || '48%';
+    this.speechBubble.style.bottom = '75%';
+    this.speechBubble.classList.add('visible');
   }
 
   hideSpeech() {
@@ -719,8 +753,10 @@ class SceneManager {
     await this._wait(300);
 
     const introText = 'Hari ini tugas kita sederhana: menjaga data dan sistem perusahaan tetap aman.';
-    this.character.speak(introText, 5000);
-    await this.voice.speak(introText, { rate: 1.05, pitch: 0.9 });
+    this.character.showSpeech(introText);
+    await this.voice.speak(introText, { rate: 0.95, pitch: 0.85 });
+    this.character.hideSpeech();
+    await this._wait(400);
 
     await this._wait(500);
     await this.character.moveTo(48);
@@ -743,14 +779,14 @@ class SceneManager {
     // Show decision
     const chosenOption = await this.decisions.show(scenario);
 
-    // Voice reads explanation
-    this.voice.speak(chosenOption.explanation, { rate: 1 });
-
     // Add score
     this.score.add(chosenOption.score);
 
-    // Play consequence animation
-    await this._playConsequence(scenario, chosenOption);
+    // Keep the consequence visible until its narration is complete.
+    await Promise.all([
+      this.voice.speak(chosenOption.explanation, { rate: 0.95, pitch: 0.88 }),
+      this._playConsequence(scenario, chosenOption),
+    ]);
 
     // Mark completed
     this.timeline.setMarkerCompleted(scenario.id);
@@ -906,8 +942,10 @@ class SceneManager {
     this.character.setState('success');
     await this.character.moveTo(48);
     const endText = 'Keamanan bukan hanya tugas tim IT. Setiap keputusan kita adalah bagian dari pertahanan.';
-    this.character.speak(endText, 5000);
-    await this.voice.speak(endText, { rate: 1, pitch: 0.9 });
+    this.character.showSpeech(endText);
+    await this.voice.speak(endText, { rate: 0.95, pitch: 0.85 });
+    this.character.hideSpeech();
+    await this._wait(400);
 
     await this._wait(500);
 
