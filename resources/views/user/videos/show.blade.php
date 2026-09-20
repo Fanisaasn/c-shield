@@ -15,10 +15,10 @@
 
         <header class="border-b border-slate-200 pb-6 pt-6">
             <h1 class="font-heading text-2xl font-bold text-navy-950 sm:text-3xl">{{ $video->title }}</h1>
-            @if ($video->slug === 'jaga-data-jaga-diri')
+            @if ($video->type === 'interactive' || $video->slug === 'jaga-data-jaga-diri')
                 <p class="mt-2 font-medium text-slate-600">Interactive Security Awareness</p>
             @endif
-            <p class="mt-3 text-sm text-slate-500">Security Awareness &bull; {{ $video->slug === 'jaga-data-jaga-diri' ? 'Interactive Video • Bahasa Indonesia • ' : '' }}{{ $video->published_at?->translatedFormat('d M Y') }}</p>
+            <p class="mt-3 text-sm text-slate-500">Security Awareness &bull; {{ ($video->type === 'interactive' || $video->slug === 'jaga-data-jaga-diri') ? 'Interactive Video • Bahasa Indonesia • ' : '' }}{{ $video->published_at?->translatedFormat('d M Y') }}</p>
         </header>
 
         <section class="border-b border-slate-200 py-7">
@@ -26,7 +26,7 @@
             <p class="mt-3 whitespace-pre-line leading-7 text-slate-700">{{ $video->description }}</p>
         </section>
 
-        @if ($video->slug === 'jaga-data-jaga-diri')
+        @if ($video->type === 'interactive' || $video->slug === 'jaga-data-jaga-diri')
             <section class="border-b border-slate-200 py-7">
                 <h2 class="font-heading text-xl font-bold text-navy-950">Yang akan dipelajari</h2>
                 <ul class="mt-4 grid gap-3 text-sm text-slate-700 sm:grid-cols-2">

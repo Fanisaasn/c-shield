@@ -17,6 +17,17 @@
 </div>
 @endif
 @if($route === 'videos')
+@php($selectedVideoType = old('type', $item->type ?: 'normal'))
+<div>
+    <label class="text-sm font-medium" for="video-type">Jenis video</label>
+    <select id="video-type" name="type" class="mt-1 w-full rounded-md border-slate-300" required>
+        <option value="normal" @selected($selectedVideoType === 'normal')>Video biasa</option>
+        <option value="interactive" @selected($selectedVideoType === 'interactive')>Video interaktif (HTML/CSS/JS)</option>
+    </select>
+    <p class="mt-1 text-xs text-slate-400">Video biasa menggunakan link atau MP4/WebM/MOV. Video interaktif menggunakan paket ZIP.</p>
+    @error('type')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+</div>
+<div id="normal-video-fields" class="space-y-5">
 <div>
     <label class="text-sm font-medium">Link video (Instagram/YouTube/sumber lain) <span class="text-slate-400">(opsional bila unggah file)</span></label>
     <input type="url" name="video_url" value="{{ old('video_url',$item->video_url) }}" placeholder="https://instagram.com/reel/... atau https://youtube.com/watch?v=..." class="mt-1 w-full rounded-md border-slate-300">
@@ -34,6 +45,17 @@
     @enderror
     @if($item->video_path)
         <p class="mt-1 text-xs text-slate-500">File saat ini: <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($item->video_path) }}" target="_blank" rel="noopener" class="text-teal-700 underline">{{ basename($item->video_path) }}</a></p>
+    @endif
+</div>
+</div>
+<div id="interactive-video-fields" class="space-y-2 rounded-lg border border-teal-200 bg-teal-50 p-4">
+    <label class="text-sm font-semibold text-navy-900" for="interactive-zip">Paket video interaktif (ZIP)</label>
+    <input id="interactive-zip" type="file" accept=".zip,application/zip" name="interactive_zip" class="block w-full text-sm">
+    <p class="text-xs leading-5 text-slate-600">ZIP wajib berisi <code>index.html</code> beserta CSS, JavaScript, gambar, audio, atau video yang digunakan. Path relatif di dalam paket akan dipertahankan. Maksimal 39 MB.</p>
+    <p class="text-xs font-medium text-amber-700">Hanya unggah paket dari sumber tepercaya. Script dijalankan dalam iframe terisolasi.</p>
+    @error('interactive_zip')<p class="text-xs text-red-600">{{ $message }}</p>@enderror
+    @if($item->interactive_path)
+        <p class="text-xs text-emerald-700">Paket saat ini sudah terpasang. Kosongkan field jika tidak ingin menggantinya.</p>
     @endif
 </div>
 <div><label class="text-sm font-medium">Deskripsi</label><textarea name="description" class="mt-1 w-full rounded-md border-slate-300">{{ old('description',$item->description) }}</textarea></div>
@@ -73,4 +95,24 @@
 @if($upload)<div><label class="text-sm font-medium">{{ $uploadLabel }}</label><input type="file" accept="image/*" name="{{ $upload }}" class="mt-1 block w-full text-sm">@if($item->{$upload})<p class="mt-1 text-xs text-slate-400">File saat ini tersimpan.</p>@endif</div>@endif
 @if($publishedAt)<div><label class="text-sm font-medium">Tanggal publikasi</label><input type="datetime-local" name="published_at" value="{{ old('published_at', optional($item->published_at)->format('Y-m-d\\TH:i')) }}" class="mt-1 w-full rounded-md border-slate-300"></div>@endif
 <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_published" value="1" @checked(old('is_published',$item->exists ? $item->is_published : true))> Publikasikan</label><div class="flex gap-3"><button class="rounded-md bg-teal-500 px-4 py-2 text-sm font-semibold text-navy-950">Simpan</button><a href="{{ route('admin.'.$route.'.index') }}" class="px-4 py-2 text-sm text-slate-600">Batal</a></div></form>
+@if($route === 'videos')
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const type = document.getElementById('video-type');
+    const normalFields = document.getElementById('normal-video-fields');
+    const interactiveFields = document.getElementById('interactive-video-fields');
+    const syncFields = () => {
+        const interactive = type.value === 'interactive';
+        normalFields.hidden = interactive;
+        interactiveFields.hidden = !interactive;
+        normalFields.querySelectorAll('input').forEach(input => input.disabled = interactive);
+        interactiveFields.querySelectorAll('input').forEach(input => input.disabled = !interactive);
+    };
+    type.addEventListener('change', syncFields);
+    syncFields();
+});
+</script>
+@endpush
+@endif
 @endsection
