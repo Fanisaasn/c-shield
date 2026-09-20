@@ -1,390 +1,77 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Interactive Security Awareness Training — pengalaman pelatihan keamanan siber interaktif dengan animasi kartun.">
-  <title>Security Awareness Training — Interactive Experience</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive security awareness video component">
+    <title>Video Interaktif Keamanan Digital</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-
-<div id="app">
-
-  <!-- ============================================
-       SCENE STAGE — main animation area
-       ============================================ -->
-  <div id="scene-stage">
-
-    <!-- Environment: Wall & Floor -->
-    <div class="env-wall"></div>
-    <div class="env-floor"></div>
-
-    <!-- Ceiling Lights -->
-    <div class="env-ceiling-light"></div>
-    <div class="env-ceiling-light"></div>
-    <div class="env-ceiling-light"></div>
-
-    <!-- Desk -->
-    <div class="env-desk"></div>
-
-    <!-- Monitor -->
-    <div class="env-monitor">
-      <div class="screen-content">
-        <div class="blink-cursor"></div>
-      </div>
-    </div>
-    <div class="env-monitor-stand"></div>
-
-    <!-- Server Rack -->
-    <div class="env-server">
-      <div class="server-unit"></div>
-      <div class="server-unit"></div>
-      <div class="server-unit"></div>
-      <div class="server-unit"></div>
-    </div>
-
-    <!-- CCTV Camera -->
-    <div class="env-cctv">
-      <div class="cctv-mount"></div>
-      <div class="cctv-body">
-        <div class="cctv-lens"></div>
-      </div>
-    </div>
-
-    <!-- Door with access panel -->
-    <div class="env-door">
-      <div class="door-handle"></div>
-    </div>
-    <div class="env-access-panel">
-      <div class="access-led"></div>
-    </div>
-
-    <!-- Smartphone on desk -->
-    <div class="env-phone">
-      <div class="phone-screen"></div>
-    </div>
-
-    <!-- ============================================
-         CHARACTER: RAKA — SVG Cartoon Security Officer
-         ============================================ -->
-    <div id="character-raka" class="state-idle">
-      <svg class="raka-svg" viewBox="0 0 90 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Body / Uniform -->
-        <rect x="25" y="55" width="40" height="55" rx="8" fill="#2a4a7a"/>
-        <!-- Uniform details -->
-        <line x1="45" y1="58" x2="45" y2="108" stroke="#1e3a6a" stroke-width="1.5"/>
-        <!-- Collar -->
-        <polygon points="33,55 45,68 57,55" fill="#1e3a6a"/>
-        <!-- Tie/Badge area -->
-        <rect x="40" y="68" width="10" height="14" rx="2" fill="#f59e0b" opacity="0.9"/>
-        <text x="45" y="78" text-anchor="middle" font-size="6" fill="#1a1a2e" font-weight="700">ID</text>
-
-        <!-- Belt -->
-        <rect x="27" y="100" width="36" height="5" rx="2" fill="#1a1a2e"/>
-        <rect x="42" y="99" width="6" height="7" rx="1" fill="#c0a060"/>
-
-        <!-- Radio on belt -->
-        <rect x="56" y="92" width="7" height="16" rx="2" fill="#333"/>
-        <rect x="57" y="93" width="5" height="3" rx="1" fill="#555"/>
-        <line x1="60" y1="88" x2="62" y2="80" stroke="#555" stroke-width="1"/>
-
-        <!-- Legs -->
-        <rect x="30" y="108" width="14" height="36" rx="4" fill="#1e2d4f"/>
-        <rect x="46" y="108" width="14" height="36" rx="4" fill="#1e2d4f"/>
-
-        <!-- Shoes -->
-        <ellipse cx="37" cy="148" rx="10" ry="5" fill="#1a1a2e"/>
-        <ellipse cx="53" cy="148" rx="10" ry="5" fill="#1a1a2e"/>
-
-        <!-- Arms -->
-        <rect x="14" y="58" width="13" height="38" rx="6" fill="#2a4a7a"/>
-        <rect x="63" y="58" width="13" height="38" rx="6" fill="#2a4a7a"/>
-
-        <!-- Hands -->
-        <circle cx="20" cy="98" r="6" fill="#d4a574"/>
-        <circle cx="70" cy="98" r="6" fill="#d4a574" class="raka-hand-right"/>
-
-        <!-- Neck -->
-        <rect x="38" y="45" width="14" height="12" rx="3" fill="#d4a574"/>
-
-        <!-- Head -->
-        <ellipse cx="45" cy="32" rx="22" ry="24" fill="#d4a574"/>
-
-        <!-- Hair -->
-        <ellipse cx="45" cy="14" rx="23" ry="12" fill="#1a1a2e"/>
-        <ellipse cx="25" cy="22" rx="5" ry="10" fill="#1a1a2e"/>
-        <ellipse cx="65" cy="22" rx="5" ry="10" fill="#1a1a2e"/>
-
-        <!-- Eyes -->
-        <ellipse cx="36" cy="30" rx="4" ry="4.5" fill="white"/>
-        <ellipse cx="54" cy="30" rx="4" ry="4.5" fill="white"/>
-        <circle cx="37" cy="30" r="2.5" fill="#1a1a2e"/>
-        <circle cx="55" cy="30" r="2.5" fill="#1a1a2e"/>
-        <!-- Eye shine -->
-        <circle cx="38" cy="29" r="1" fill="white"/>
-        <circle cx="56" cy="29" r="1" fill="white"/>
-
-        <!-- Eyebrows -->
-        <line class="raka-brow" x1="31" y1="23" x2="41" y2="24" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
-        <line class="raka-brow" x1="49" y1="24" x2="59" y2="23" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
-
-        <!-- Nose -->
-        <ellipse cx="45" cy="36" rx="2.5" ry="2" fill="#c09464"/>
-
-        <!-- Mouth (controlled by JS) -->
-        <path class="raka-mouth" d="M39,42 Q45,48 51,42" stroke="#8b5e3c" stroke-width="2" fill="none" stroke-linecap="round"/>
-
-        <!-- Ear -->
-        <ellipse cx="23" cy="32" rx="4" ry="6" fill="#c09464"/>
-        <ellipse cx="67" cy="32" rx="4" ry="6" fill="#c09464"/>
-
-        <!-- Shoulder patches -->
-        <rect x="15" y="58" width="11" height="8" rx="2" fill="#f59e0b" opacity="0.7"/>
-        <rect x="64" y="58" width="11" height="8" rx="2" fill="#f59e0b" opacity="0.7"/>
-      </svg>
-    </div>
-
-    <!-- ============================================
-         CHARACTER: STRANGER (for tailgating scenario)
-         ============================================ -->
-    <div id="character-stranger">
-      <svg viewBox="0 0 80 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Body -->
-        <rect x="20" y="50" width="40" height="52" rx="8" fill="#6b7280"/>
-        <!-- Collar -->
-        <polygon points="28,50 40,62 52,50" fill="#555"/>
-        <!-- Legs -->
-        <rect x="25" y="100" width="13" height="34" rx="4" fill="#4b5563"/>
-        <rect x="42" y="100" width="13" height="34" rx="4" fill="#4b5563"/>
-        <!-- Shoes -->
-        <ellipse cx="31" cy="138" rx="9" ry="5" fill="#1f2937"/>
-        <ellipse cx="49" cy="138" rx="9" ry="5" fill="#1f2937"/>
-        <!-- Arms -->
-        <rect x="10" y="52" width="12" height="36" rx="6" fill="#6b7280"/>
-        <rect x="58" y="52" width="12" height="36" rx="6" fill="#6b7280"/>
-        <!-- Hands -->
-        <circle cx="16" cy="90" r="5" fill="#d4a574"/>
-        <circle cx="64" cy="90" r="5" fill="#d4a574"/>
-        <!-- Neck -->
-        <rect x="34" y="42" width="12" height="10" rx="3" fill="#d4a574"/>
-        <!-- Head -->
-        <ellipse cx="40" cy="28" rx="20" ry="22" fill="#d4a574"/>
-        <!-- Hair -->
-        <ellipse cx="40" cy="10" rx="21" ry="10" fill="#374151"/>
-        <ellipse cx="22" cy="18" rx="4" ry="8" fill="#374151"/>
-        <ellipse cx="58" cy="18" rx="4" ry="8" fill="#374151"/>
-        <!-- Eyes -->
-        <circle cx="32" cy="26" r="3" fill="white"/>
-        <circle cx="48" cy="26" r="3" fill="white"/>
-        <circle cx="33" cy="26" r="2" fill="#1a1a2e"/>
-        <circle cx="49" cy="26" r="2" fill="#1a1a2e"/>
-        <!-- Mouth -->
-        <path d="M34,36 Q40,40 46,36" stroke="#8b5e3c" stroke-width="1.5" fill="none"/>
-      </svg>
-      <!-- Stranger speech bubble -->
-      <div id="stranger-bubble" class="stranger-bubble">
-        Mas, boleh ikut masuk? Kartu akses saya ketinggalan.
-      </div>
-    </div>
-
-    <!-- ============================================
-         SPEECH BUBBLE for Raka
-         ============================================ -->
-    <div id="raka-speech" class="speech-bubble">
-      <div class="speaker-name">Raka</div>
-      <div class="bubble-text"></div>
-    </div>
-
-    <!-- ============================================
-         NOTIFICATION BELL
-         ============================================ -->
-    <div id="notification-bell" class="notification-bell">🔔</div>
-
-    <!-- ============================================
-         EMAIL POPUP
-         ============================================ -->
-    <div id="email-popup" class="email-popup">
-      <div class="email-header">
-        <span class="icon">⚠️</span>
-        <span>URGENT — Action Required</span>
-      </div>
-      <div class="email-body">
-        <div class="email-from">From: security@company-support.xyz</div>
-        <p><strong>Password Anda akan kedaluwarsa dalam 10 menit.</strong></p>
-        <p style="margin-top:8px; font-size:0.78rem; color:#666;">
-          Segera verifikasi akun Anda untuk menghindari kehilangan akses.
-        </p>
-        <a class="email-btn" href="#" onclick="return false;">Verify Account Now →</a>
-      </div>
-    </div>
-
-    <!-- ============================================
-         USB CLOSE-UP
-         ============================================ -->
-    <div id="usb-closeup" class="usb-closeup">
-      <svg width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- USB body -->
-        <rect x="10" y="20" width="70" height="40" rx="6" fill="#e5e7eb" stroke="#9ca3af" stroke-width="2"/>
-        <!-- USB connector -->
-        <rect x="80" y="26" width="30" height="28" rx="3" fill="#d1d5db" stroke="#9ca3af" stroke-width="2"/>
-        <rect x="84" y="32" width="22" height="16" rx="2" fill="#f9fafb"/>
-        <!-- Metal contacts -->
-        <rect x="88" y="35" width="3" height="4" fill="#6b7280"/>
-        <rect x="93" y="35" width="3" height="4" fill="#6b7280"/>
-        <rect x="98" y="35" width="3" height="4" fill="#6b7280"/>
-        <rect x="88" y="42" width="3" height="4" fill="#6b7280"/>
-        <rect x="93" y="42" width="3" height="4" fill="#6b7280"/>
-        <rect x="98" y="42" width="3" height="4" fill="#6b7280"/>
-        <!-- LED -->
-        <circle cx="25" cy="40" r="4" fill="#ef4444" opacity="0.8">
-          <animate attributeName="opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite"/>
-        </circle>
-        <!-- Label -->
-        <text x="45" y="44" text-anchor="middle" font-size="8" fill="#6b7280" font-weight="600">???</text>
-        <!-- Question mark -->
-        <text x="60" y="10" text-anchor="middle" font-size="16" fill="#f59e0b" font-weight="800">❓</text>
-      </svg>
-    </div>
-
-    <!-- ============================================
-         PASSWORD SCREEN
-         ============================================ -->
-    <div id="password-screen" class="password-screen">
-      <h3>🔐 Buat Password Baru</h3>
-      <div class="password-input-fake">••••••••</div>
-      <p style="margin-top:8px; font-size:0.72rem; color:#888;">
-        Pilih password yang aman untuk akun Anda.
-      </p>
-    </div>
-
-    <!-- ============================================
-         TITLE OVERLAY
-         ============================================ -->
-    <div id="title-overlay">
-      <h1>Security Awareness</h1>
-      <p class="subtitle">Keamanan dimulai dari keputusan kecil.</p>
-    </div>
-
-    <!-- ============================================
-         SCORE DISPLAY
-         ============================================ -->
-    <div id="score-display">
-      <span class="score-icon">🛡️</span>
-      <span>Score:</span>
-      <span class="score-value" id="score-value">0</span>
-    </div>
-
-    <!-- ============================================
-         PROGRESS INDICATOR
-         ============================================ -->
-    <div id="progress-indicator">
-      Scene <span id="progress-text">1 / 6</span>
-    </div>
-
-    <!-- Voice toggle -->
-    <button id="btn-voice-toggle" style="
-      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-      background: rgba(15,23,41,0.8); backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.06); border-radius: 10px;
-      padding: 6px 14px; font-size: 1rem; cursor: pointer; z-index: 35;
-      color: var(--text-primary); font-family: inherit;
-    " aria-label="Toggle voice">🔊</button>
-
-    <!-- ============================================
-         CONSEQUENCE OVERLAY
-         ============================================ -->
-    <div id="consequence-overlay" class="consequence-overlay"></div>
-
-    <!-- ============================================
-         DECISION OVERLAY
-         ============================================ -->
-    <div id="decision-overlay">
-      <h2 class="decision-question"></h2>
-      <div class="decision-options"></div>
-    </div>
-
-    <!-- ============================================
-         EXPLANATION PANEL
-         ============================================ -->
-    <div id="explanation-panel">
-      <div class="explanation-card"></div>
-    </div>
-
-    <!-- ============================================
-         ENDING OVERLAY
-         ============================================ -->
-    <div id="ending-overlay">
-      <div class="ending-content" style="display:flex; flex-direction:column; align-items:center; text-align:center; padding:20px;">
-        <p class="ending-title">TRAINING COMPLETE</p>
-        <p class="ending-subtitle">Security Awareness Training Complete</p>
-
-        <p class="ending-score">0</p>
-        <span class="ending-rank rank-guardian">🛡️ Security Guardian</span>
-
-        <div class="ending-icons">
-          <div class="ending-icon-item">
-            <div class="icon-circle">📧</div>
-            <span>Email Security</span>
-          </div>
-          <div class="ending-icon-item">
-            <div class="icon-circle">💾</div>
-            <span>Device Security</span>
-          </div>
-          <div class="ending-icon-item">
-            <div class="icon-circle">🚪</div>
-            <span>Physical Security</span>
-          </div>
-          <div class="ending-icon-item">
-            <div class="icon-circle">🔑</div>
-            <span>Password Security</span>
-          </div>
-        </div>
-
-        <p class="ending-message">
-          "Hal terpenting bukan mendapatkan skor sempurna, tetapi memahami mengapa suatu tindakan
-          dapat meningkatkan atau menurunkan keamanan."
-        </p>
-
-        <div class="ending-actions">
-          <button class="btn btn-primary" id="btn-restart">🔄 Ulangi Training</button>
-          <button class="btn btn-secondary" id="btn-summary">📋 Lihat Ringkasan</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============================================
-         SCENE TRANSITION
-         ============================================ -->
-    <div id="scene-transition" class="scene-transition"></div>
-
-    <!-- ============================================
-         START SCREEN
-         ============================================ -->
-    <div id="start-screen">
-      <h1>Security Awareness</h1>
-      <p class="start-subtitle">Interactive Training Experience</p>
-      <button class="btn btn-primary" id="btn-start">
-        ▶ Mulai Training
-      </button>
-    </div>
-
-  </div><!-- end scene-stage -->
-
-  <!-- ============================================
-       TIMELINE BAR
-       ============================================ -->
-  <div id="timeline-bar">
-    <span class="timeline-time" id="timeline-current">00:00</span>
-    <div class="timeline-track">
-      <div class="timeline-progress"></div>
-      <!-- Markers injected by JS -->
-    </div>
-    <span class="timeline-time">02:20</span>
-  </div>
-
-</div><!-- end app -->
-
-<script src="script.js"></script>
+    <main class="player-shell">
+        <section class="video-player" id="videoPlayer" aria-label="Simulasi interaktif keamanan digital">
+            <div class="scene-stage" id="sceneStage" >
+                <div class="scene-background"></div>
+                <div class="scene-content" id="sceneContent"></div>
+                <div class="scene-caption" id="sceneCaption"></div>
+                <div class="assessment-overlay" id="assessmentOverlay" hidden>
+                    <div class="assessment-panel">
+                        <div class="assessment-topline">
+                            <span class="assessment-label"><span class="pulse-dot"></span> Video dijeda</span>
+                            <span class="question-count" id="questionCount">Pertanyaan 1 dari 5</span>
+                        </div>
+                        <h2 id="questionText"></h2>
+                        <p class="question-context" id="questionContext"></p>
+                        <div class="answer-list" id="answerList" role="group" aria-label="Pilih Aman atau Berisiko"></div>
+                        <div class="feedback" id="feedback" role="status" hidden>
+                            <span class="feedback-icon" id="feedbackIcon"></span>
+                            <div><strong id="feedbackTitle"></strong>
+                                <p id="feedbackText"></p>
+                            </div>
+                        </div>
+                        <button class="primary-button continue-button" id="continueButton" type="button"
+                            disabled>Lanjutkan Video <span aria-hidden="true">&#8594;</span></button>
+                    </div>
+                </div>
+                <div class="results-panel" id="resultsPanel" hidden>
+                    <div class="results-icon" aria-hidden="true">&#10003;</div>
+                    <p class="result-kicker">LATIHAN SELESAI</p>
+                    <h2>Kenali risiko.<br><em>Lindungi dirimu.</em></h2>
+                    <div class="score-line"><strong id="scoreValue">0 / 5</strong><span id="percentageValue">0%</span>
+                    </div>
+                    <div class="result-stats">
+                        <div><span class="stat-value correct" id="correctValue">0</span><span>Benar</span></div>
+                        <div><span class="stat-value incorrect" id="incorrectValue">0</span><span>Kurang tepat</span></div>
+                    </div>
+                    <p class="result-summary" id="resultSummary"></p>
+                    <button class="primary-button restart-button" id="restartButton" type="button">&#8635; Ulangi latihan</button>
+                </div>
+            </div>
+            <div class="player-controls" id="playerControls">
+                <div class="timeline-row">
+                    <span class="time-label" id="currentTime">00:00</span>
+                    <input class="progress-range" id="progressRange" type="range" min="0" max="100" value="0" step="0.1"
+                        disabled aria-label="Progres animasi">
+                    <span class="time-label" id="duration">01:00</span>
+                </div>
+                <div class="control-row">
+                    <button class="control-button play-button" id="playButton" type="button" aria-label="Putar animasi"
+                        title="Putar">&#9654;</button>
+                    <button class="control-button" id="muteButton" type="button" aria-label="Matikan narasi" aria-pressed="false" title="Matikan narasi">&#128266;</button>
+                    <label class="voice-label" for="voiceSelect">Narator</label>
+                    <select id="voiceSelect" class="voice-select" aria-label="Pilih suara narator"><option>Memuat suara...</option></select>
+                    <span class="demo-label" id="voiceStatus" role="status"></span>
+                    <span class="control-spacer"></span>
+                    <button class="control-button" id="fullscreenButton" type="button" aria-label="Layar penuh"
+                        title="Layar penuh">&#9974;</button>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="narration.js"></script>
+    <script src="script.js"></script>
 </body>
+
 </html>
