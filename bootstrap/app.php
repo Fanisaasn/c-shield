@@ -11,6 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Railway berada di belakang reverse proxy.
+        // Ini membuat Laravel membaca HTTPS dari X-Forwarded-Proto dengan benar.
+        $middleware->trustProxies(at: '*');
+
         $middleware->redirectGuestsTo(fn () => route('admin.login'));
         $middleware->redirectUsersTo(fn () => route('admin.dashboard'));
     })
