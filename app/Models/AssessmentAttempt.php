@@ -59,6 +59,9 @@ class AssessmentAttempt extends Model
 
     public function determineLevel(float $score): string
     {
+        // Samakan dengan skor bulat yang ditampilkan di halaman hasil.
+        $score = round($score);
+
         foreach (self::LEVELS as $maxScore => $label) {
             if ($score <= $maxScore) {
                 return $label;
