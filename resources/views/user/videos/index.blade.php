@@ -19,18 +19,18 @@
                 Belum ada video yang dipublikasikan.
             </p>
         @else
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+            <div class="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
                 @foreach ($videos as $video)
-                    <article class="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                        @include('partials.video-player', ['video' => $video, 'iconClass' => 'h-10 w-10', 'compact' => true])
-                        <div class="flex flex-1 flex-col p-4 sm:p-5">
-                            <p class="text-xs font-medium uppercase tracking-wide text-teal-600">
+                    <article class="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                        @include('partials.video-player', ['video' => $video, 'iconClass' => 'h-10 w-10', 'compact' => true, 'mobileCompact' => true])
+                        <div class="flex min-w-0 flex-1 flex-col p-3 sm:p-5">
+                            <p class="text-[10px] font-medium uppercase tracking-wide text-teal-600 sm:text-xs">
                                 {{ $video->published_at?->translatedFormat('d M Y') }}
                             </p>
-                            <a href="{{ route('videos.show', $video) }}" class="mt-2 font-heading text-base font-bold text-navy-900 group-hover:text-blue-600 sm:text-lg">
+                            <a href="{{ route('videos.show', $video) }}" class="mt-1.5 font-heading text-sm font-bold text-navy-900 [overflow-wrap:anywhere] group-hover:text-blue-600 sm:mt-2 sm:text-lg">
                                 {{ $video->title }}
                             </a>
-                            <p class="mt-2 line-clamp-2 flex-1 text-sm text-slate-500">{{ Str::plainText($video->description) }}</p>
+                            <p class="mt-1.5 line-clamp-2 flex-1 text-xs text-slate-500 [overflow-wrap:anywhere] sm:mt-2 sm:text-sm">{{ Str::plainText($video->description) }}</p>
                         </div>
                     </article>
                 @endforeach
