@@ -1,66 +1,158 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<h1 align="center">🛡️ C-SHIELD</h1>
+<p align="center"><strong>Cimahi Cyber Security Hub & Awareness Field</strong></p>
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+<img src="https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php&logoColor=white" alt="PHP">
+<img src="https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white" alt="Laravel">
+<img src="https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white" alt="MySQL">
+<img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
+<img src="https://img.shields.io/badge/Chart.js-4-FF6384?logo=chartdotjs&logoColor=white" alt="Chart.js">
 </p>
 
-## About Laravel
+## Tentang C-SHIELD
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**C-SHIELD** adalah platform edukasi dan peningkatan kesadaran keamanan siber (*cyber security awareness*) untuk masyarakat Kota Cimahi. Aplikasi ini dikembangkan sebagai proyek **Kerja Praktik** di **Dinas Komunikasi dan Informatika (Diskominfo) Kota Cimahi**.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Melalui C-SHIELD, masyarakat dapat:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Membaca **Artikel** seputar keamanan siber.
+- Menonton **Video** edukasi.
+- Melihat **Flyer** kampanye keamanan digital.
+- Mengikuti informasi **Webinar** dan mendaftar melalui tautan pendaftaran eksternal.
+- Mengukur tingkat pemahaman keamanan siber melalui **Self Assessment** (Pre-Assessment & Post-Assessment) beserta perbandingan hasilnya.
 
-## Learning Laravel
+## Aktor Sistem
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Aktor | Akses | Keterangan |
+|---|---|---|
+| **User (Masyarakat)** | Halaman publik | Tidak perlu login dan tidak memiliki akun. |
+| **Administrator** | `/admin/*` | Login melalui `/admin/login`; semua rute admin dilindungi guard `auth:admin`. |
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Fitur
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Halaman Publik
 
-## Laravel Sponsors
+| Fitur | Rute | Deskripsi |
+|---|---|---|
+| Beranda | `/` | Ringkasan konten dan diagram hasil Self Assessment. |
+| Artikel | `/artikel` | Daftar dan detail artikel keamanan siber. |
+| Video | `/video` | Daftar dan detail video edukasi. |
+| Flyer | `/flyer` | Galeri flyer kampanye keamanan digital. |
+| Webinar | `/webinar` | Info webinar dengan tombol **Register Now** ke tautan pendaftaran eksternal. |
+| Self Assessment | `/self-assessment` | Kuis Pre/Post-Assessment dan perbandingan hasil. |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Alur Self Assessment
 
-### Premium Partners
+1. Pilih **Pre-Assessment** di halaman awal (Post-Assessment terkunci sampai Pre-Assessment selesai).
+2. Isi **identitas responden** (nama/inisial, 4 digit terakhir nomor HP, jenis kelamin, usia, pendidikan terakhir, domisili, status/pekerjaan).
+3. Kerjakan **Pre-Assessment** → lihat hasil awal.
+4. Halaman **pengingat belajar** yang mengarahkan ke Video, Artikel, dan Flyer.
+5. Kerjakan **Post-Assessment** → lihat hasil akhir.
+6. Lihat **perbandingan skor Pre vs Post**.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+Skor berada pada rentang **0–100** dengan lima kategori:
 
-## Contributing
+| Skor | Kategori |
+|---|---|
+| 0–20 | Sangat Rendah |
+| 21–40 | Rendah |
+| 41–60 | Cukup |
+| 61–80 | Baik |
+| 81–100 | Sangat Baik |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Panel Administrator
 
-## Code of Conduct
+- Dashboard ringkasan data.
+- Kelola Artikel, Video, Flyer, dan Webinar (CRUD).
+- Kelola soal Self Assessment.
+- Kelola pertanyaan survei.
+- Laporan hasil assessment responden.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Teknologi
 
-## Security Vulnerabilities
+- **Backend:** PHP 8.2+, Laravel 12
+- **Database:** MySQL
+- **Frontend:** Blade, Tailwind CSS 4, Vite
+- **Visualisasi:** Chart.js
+- **Editor konten:** Trix
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Instalasi
 
-## License
+### Prasyarat
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- PHP ≥ 8.2 dan Composer
+- Node.js ≥ 18 dan npm
+- MySQL (misalnya melalui XAMPP/Laragon)
+
+### Langkah
+
+```bash
+# 1. Clone repository
+git clone https://github.com/Fanisaasn/c-shield.git
+cd c-shield
+
+# 2. Install dependency
+composer install
+npm install
+
+# 3. Salin file environment dan generate key
+cp .env.example .env
+php artisan key:generate
+```
+
+Buat database bernama `cshield_db` di MySQL, lalu sesuaikan konfigurasi di `.env` bila perlu:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=cshield_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+```bash
+# 4. Migrasi dan isi data awal
+php artisan migrate --seed
+
+# 5. Hubungkan folder storage (untuk gambar/video yang diunggah)
+php artisan storage:link
+
+# 6. Jalankan aplikasi (dua terminal)
+npm run dev
+php artisan serve
+```
+
+Buka aplikasi di **http://127.0.0.1:8000**.
+
+### Akun Administrator Default
+
+| Email | Password |
+|---|---|
+| `admin@cshield.test` | `password` |
+
+> ⚠️ Segera ganti password default sebelum aplikasi digunakan di lingkungan produksi.
+
+## Struktur Direktori Utama
+
+```
+app/
+├── Http/Controllers/        # Controller halaman publik
+│   └── Admin/               # Controller panel administrator
+└── Models/                  # Model Eloquent (Article, Video, Flyer, Webinar, Assessment*, Survey*)
+database/
+├── migrations/              # Skema tabel
+└── seeders/                 # Data awal (admin, konten, soal assessment)
+resources/views/
+├── user/                    # Tampilan halaman publik
+└── admin/                   # Tampilan panel administrator
+routes/web.php               # Definisi rute
+```
+
+## Tim Pengembang
+
+Proyek Kerja Praktik — Diskominfo Kota Cimahi.
+
+## Lisensi
+
+Proyek ini dikembangkan untuk keperluan Kerja Praktik di Diskominfo Kota Cimahi. Framework Laravel dilisensikan di bawah [MIT license](https://opensource.org/licenses/MIT).
