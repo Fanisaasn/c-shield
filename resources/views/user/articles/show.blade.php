@@ -25,9 +25,7 @@
             <img src="{{ asset('storage/' . $article->cover_image) }}" alt="{{ $article->title }}" class="mb-8 w-full rounded-xl object-cover">
         @endif
 
-        <div class="public-article-content max-w-none whitespace-pre-line text-base leading-relaxed text-slate-700">
-            {{ $article->content }}
-        </div>
+        @include('partials.rich-text', ['html' => $article->content, 'class' => 'public-article-content text-base leading-relaxed text-slate-700'])
 
         <div class="mt-8 flex flex-wrap gap-3">
             @if ($article->source_url)
