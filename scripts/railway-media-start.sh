@@ -8,6 +8,5 @@ if [ "$#" -eq 0 ]; then
 fi
 
 # Run in the application container, after Railway mounts the public-media volume.
-php artisan content:restore-media --no-interaction
-php artisan storage:link --no-interaction
+php artisan content:restore-media --prepare --no-interaction
 exec "$@"
