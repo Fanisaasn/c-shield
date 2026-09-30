@@ -1,7 +1,7 @@
 @extends('user.layouts.app')
 
 @section('title', $flyer->title)
-@section('meta_description', $flyer->description)
+@section('meta_description', Str::plainText($flyer->description))
 
 @section('content')
     <section class="bg-navy-900 py-12">
@@ -55,10 +55,8 @@
 
             <div class="p-5">
                 @if ($flyer->description)
-                    <p class="whitespace-pre-line text-sm leading-relaxed text-slate-700">
-                        <span class="font-heading font-bold text-navy-900">{{ $flyer->title }}</span>
-                        &nbsp;{{ $flyer->description }}
-                    </p>
+                    <p class="font-heading text-sm font-bold text-navy-900">{{ $flyer->title }}</p>
+                    @include('partials.rich-text', ['html' => $flyer->description, 'class' => 'mt-2 text-sm leading-relaxed text-slate-700'])
                 @endif
 
                 <div class="mt-4 flex flex-wrap gap-3">
