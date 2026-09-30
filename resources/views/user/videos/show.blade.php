@@ -1,7 +1,7 @@
 @extends('user.layouts.app')
 
 @section('title', $video->title)
-@section('meta_description', $video->description)
+@section('meta_description', Str::plainText($video->description))
 
 @section('content')
     <article class="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
@@ -23,7 +23,7 @@
 
         <section class="border-b border-slate-200 py-7">
             <h2 class="font-heading text-xl font-bold text-navy-950">Tentang video</h2>
-            <p class="mt-3 whitespace-pre-line leading-7 text-slate-700">{{ $video->description }}</p>
+            @include('partials.rich-text', ['html' => $video->description, 'class' => 'mt-3 leading-7 text-slate-700'])
         </section>
 
         @if ($video->type === 'interactive' || $video->slug === 'jaga-data-jaga-diri')
