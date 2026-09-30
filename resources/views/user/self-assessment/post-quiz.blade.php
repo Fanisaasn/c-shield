@@ -27,7 +27,8 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('self-assessment.post.store') }}">
+        <form method="POST" action="{{ route('self-assessment.post.store') }}"
+              onsubmit="this.querySelector('button[type=submit]').disabled = true; this.querySelector('button[type=submit]').textContent = 'Memproses...';">
             @csrf
 
             <div class="space-y-4">

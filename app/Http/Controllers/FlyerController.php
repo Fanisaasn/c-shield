@@ -15,6 +15,7 @@ class FlyerController extends Controller
         $flyers = Flyer::query()
             ->where('is_published', true)
             ->with(['images' => fn ($query) => $query->orderBy('sort_order')->limit(1)])
+            ->withCount('images')
             ->latest('published_at')
             ->paginate(9)
             ->withQueryString();
