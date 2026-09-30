@@ -113,6 +113,27 @@ class RestoreContentMediaTest extends TestCase
         $this->assertSame([], $disk->allFiles());
     }
 
+    public function test_mount_detection_requires_exact_kernel_mount_point_and_decodes_spaces(): void
+    {
+        File::shouldReceive('isReadable')->with('/proc/self/mountinfo')->andReturn(true);
+        File::shouldReceive('lines')->with('/proc/self/mountinfo')->andReturn(collect([
+            '100 99 8:1 / /app/storage/app/public rw,relatime - ext4 /dev/volume rw',
+            '101 99 8:2 / /data/public\\040files rw,relatime - ext4 /dev/other rw',
+        ]));
+        $command = new class extends RestoreContentMedia
+        {
+            public function mounted(string $path): bool
+            {
+                return $this->isMountedVolume($path);
+            }
+        };
+
+        $this->assertTrue($command->mounted('/app/storage/app/public'));
+        $this->assertTrue($command->mounted('/data/public files'));
+        $this->assertFalse($command->mounted('/app/storage/app/public-old'));
+        $this->assertFalse($command->mounted('/app/storage'));
+    }
+
     private function registerPreparationCommand(): RestoreContentMedia
     {
         $command = new class extends RestoreContentMedia
