@@ -49,6 +49,23 @@
                            class="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-navy-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                 </div>
 
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3">
+                        <img id="captcha-image" src="{{ route('admin.captcha.image') }}" alt="Gambar kode CAPTCHA" width="184" height="58"
+                             class="h-[58px] w-[184px] rounded-md border border-slate-300 bg-slate-50">
+                        <button id="refresh-captcha" type="button" aria-label="Muat ulang CAPTCHA" title="Muat ulang CAPTCHA"
+                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-slate-300 text-navy-900 transition hover:border-blue-600 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-5 w-5">
+                                <path d="M20 7v5h-5M4 17v-5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M5.5 9a7 7 0 0 1 11.7-2L20 12M4 12l2.8 5a7 7 0 0 0 11.7-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <label for="captcha" class="block text-sm font-medium text-navy-900">Masukkan kode CAPTCHA</label>
+                    <input id="captcha" type="text" name="captcha" required maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                           class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm uppercase text-navy-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
                 <label class="flex items-center gap-2 text-sm text-slate-600">
                     <input type="checkbox" name="remember" class="rounded border-slate-300 text-blue-600 focus:ring-blue-600">
                     Ingat saya
@@ -66,5 +83,11 @@
         </p>
     </div>
 
+    <script>
+        document.getElementById('refresh-captcha').addEventListener('click', function () {
+            document.getElementById('captcha').value = '';
+            document.getElementById('captcha-image').src = @json(route('admin.captcha.image')) + '?refresh=' + Date.now();
+        });
+    </script>
 </body>
 </html>
