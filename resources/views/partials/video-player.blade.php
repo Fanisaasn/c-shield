@@ -5,6 +5,7 @@
         : asset('interactive-video/jaga-data-jaga-diri/index.html');
     $interactiveHue = abs(crc32($video->slug ?: $video->title)) % 360;
     $showInteractivePlayer ??= false;
+    $compact ??= false;
     $youtubeId = null;
     $isInstagram = false;
 
@@ -37,17 +38,29 @@
             <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-black/35 ring-1 ring-white/25 backdrop-blur-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-6 w-6"><path d="M8 5v14l11-7-11-7Z" fill="currentColor"/></svg>
             </span>
-            <span class="mt-3 block line-clamp-2 font-heading text-sm font-bold leading-snug text-white">{{ $video->title }}</span>
-            <span class="mt-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-teal-300">Video interaktif</span>
-        </div>
+            <span class="mt-3 block line-clamp-2 font-heading text-sm font-bold leading-snug text-white">{{ $video->title }}</span>        </div>
     </a>
 @elseif ($youtubeId)
     <div class="aspect-video overflow-hidden rounded-xl bg-navy-900">
         <iframe class="h-full w-full" src="https://www.youtube.com/embed/{{ $youtubeId }}" title="{{ $video->title }}" frameborder="0" loading="lazy"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
     </div>
+@elseif ($isInstagram && $compact)
+    {{-- Di daftar video, embed Instagram (portrait) terlalu tinggi; tampilkan kartu pratinjau 16:9 yang menuju halaman detail. --}}
+    <a href="{{ route('videos.show', $video) }}" class="group/ig relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-navy-950 text-white"
+       @unless($video->thumbnail) style="background:linear-gradient(135deg,#1E5AA8,#0B2545 72%)" @endunless>
+        @if ($video->thumbnail)
+            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($video->thumbnail) }}" alt="Thumbnail {{ $video->title }}" class="absolute inset-0 h-full w-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-navy-950/85 via-navy-950/10 to-transparent"></div>
+        @endif
+        <div class="relative px-5 text-center">
+            <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-black/35 ring-1 ring-white/25 backdrop-blur-sm transition group-hover/ig:bg-black/55">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-6 w-6"><path d="M8 5v14l11-7-11-7Z" fill="currentColor"/></svg>
+            </span>
+            <span class="mt-3 block line-clamp-2 font-heading text-sm font-bold leading-snug text-white">{{ $video->title }}</span>        </div>
+    </a>
 @elseif ($isInstagram)
-    <div class="overflow-hidden rounded-xl">
+    <div class="mx-auto w-full max-w-sm overflow-hidden rounded-xl">
         <blockquote class="instagram-media" data-instgrm-permalink="{{ $video->video_url }}" data-instgrm-version="14" style="margin:0 auto;width:100%;background:#fff;"></blockquote>
     </div>
     @pushOnce('scripts')
