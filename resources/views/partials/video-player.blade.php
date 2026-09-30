@@ -1,5 +1,5 @@
 @php
-    $isInteractive = $video->type === 'interactive' || $video->slug === 'jaga-data-jaga-diri';
+    $isInteractive = $video->isInteractive();
     $interactiveUrl = $video->interactive_path
         ? \Illuminate\Support\Facades\Storage::disk('public')->url($video->interactive_path)
         : asset('interactive-video/jaga-data-jaga-diri/index.html');
@@ -24,8 +24,8 @@
         <iframe class="h-full w-full border-0" src="{{ $interactiveUrl }}" title="Video interaktif: {{ $video->title }}" allow="autoplay; fullscreen" sandbox="allow-scripts allow-forms allow-modals allow-downloads" loading="eager" allowfullscreen></iframe>
     </div>
 @elseif ($isInteractive)
-    <div class="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-navy-950 text-white"
-         @unless($video->thumbnail) style="background:linear-gradient(135deg,hsl({{ $interactiveHue }} 42% 20%),#050d1a 72%)" @endunless>
+    <a href="{{ route('videos.show', $video) }}" class="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-navy-950 text-white"
+       @unless($video->thumbnail) style="background:linear-gradient(135deg,hsl({{ $interactiveHue }} 42% 20%),#050d1a 72%)" @endunless>
         @if($video->thumbnail)
             <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($video->thumbnail) }}" alt="Thumbnail {{ $video->title }}" class="absolute inset-0 h-full w-full object-cover">
             <div class="absolute inset-0 bg-gradient-to-t from-navy-950/85 via-navy-950/10 to-transparent"></div>
@@ -40,19 +40,19 @@
             <span class="mt-3 block line-clamp-2 font-heading text-sm font-bold leading-snug text-white">{{ $video->title }}</span>
             <span class="mt-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-teal-300">Video interaktif</span>
         </div>
-    </div>
+    </a>
 @elseif ($youtubeId)
     <div class="aspect-video overflow-hidden rounded-xl bg-navy-900">
-        <iframe class="h-full w-full" src="https://www.youtube.com/embed/{{ $youtubeId }}" title="{{ $video->title }}" frameborder="0"
+        <iframe class="h-full w-full" src="https://www.youtube.com/embed/{{ $youtubeId }}" title="{{ $video->title }}" frameborder="0" loading="lazy"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
     </div>
 @elseif ($isInstagram)
     <div class="overflow-hidden rounded-xl">
         <blockquote class="instagram-media" data-instgrm-permalink="{{ $video->video_url }}" data-instgrm-version="14" style="margin:0 auto;width:100%;background:#fff;"></blockquote>
     </div>
-    @push('scripts')
+    @pushOnce('scripts')
         <script async src="https://www.instagram.com/embed.js"></script>
-    @endpush
+    @endPushOnce
 @elseif ($video->video_path)
     <div class="flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-navy-900">
         <video controls preload="metadata" class="h-full w-full" @if($video->thumbnail) poster="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($video->thumbnail) }}" @endif>
