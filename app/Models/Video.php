@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Video extends Model
 {
+    // Slug video demo yang memakai paket interaktif bawaan di public/interactive-video.
+    public const BUNDLED_INTERACTIVE_SLUG = 'jaga-data-jaga-diri';
+
     protected $fillable = [
         'title',
         'slug',
@@ -25,5 +28,15 @@ class Video extends Model
             'is_published' => 'boolean',
             'published_at' => 'datetime',
         ];
+    }
+
+    public function isInteractive(): bool
+    {
+        return $this->type === 'interactive' || $this->slug === self::BUNDLED_INTERACTIVE_SLUG;
+    }
+
+    public function usesBundledInteractivePackage(): bool
+    {
+        return $this->isInteractive() && ! $this->interactive_path;
     }
 }
