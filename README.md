@@ -153,6 +153,11 @@ routes/web.php               # Definisi rute
 
 Proyek Kerja Praktik — Diskominfo Kota Cimahi.
 
+| Nama | NIM |
+|---|---|
+| Fanisa Salma Nabila | 2350081056 |
+| Jihan Mutiara Bilqis | 2350081057 |
+
 ## Lisensi
 
 Proyek ini dikembangkan untuk keperluan Kerja Praktik di Diskominfo Kota Cimahi. Framework Laravel dilisensikan di bawah [MIT license](https://opensource.org/licenses/MIT).
