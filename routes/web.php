@@ -53,7 +53,12 @@ Route::prefix('self-assessment')->name('self-assessment.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
         Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
-        Route::post('/login', [AdminAuthController::class, 'login'])->name('login.attempt');
+        Route::get('/login/captcha', [AdminAuthController::class, 'captchaImage'])
+            ->middleware('throttle:30,1')
+            ->name('captcha.image');
+        Route::post('/login', [AdminAuthController::class, 'login'])
+            ->middleware('throttle:5,1')
+            ->name('login.attempt');
     });
 
     Route::middleware('auth:admin')->group(function () {
