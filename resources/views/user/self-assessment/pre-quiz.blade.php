@@ -14,8 +14,8 @@
                 Pre-Assessment
             </h1>
             <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-300">
-                Jawab seluruh pertanyaan berikut sesuai pemahaman Anda saat ini. Tidak ada jawaban benar/salah
-                yang perlu dikhawatirkan &mdash; hasil ini menjadi titik awal sebelum Anda mempelajari materi.
+                Jawab seluruh pertanyaan berikut sesuai pemahaman Anda saat ini. Tidak perlu khawatir jika ada
+                jawaban yang salah &mdash; hasil ini menjadi titik awal sebelum Anda mempelajari materi.
             </p>
         </div>
     </section>
@@ -27,7 +27,8 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('self-assessment.pre.store') }}">
+        <form method="POST" action="{{ route('self-assessment.pre.store') }}"
+              onsubmit="this.querySelector('button[type=submit]').disabled = true; this.querySelector('button[type=submit]').textContent = 'Memproses...';">
             @csrf
 
             <div class="space-y-4">

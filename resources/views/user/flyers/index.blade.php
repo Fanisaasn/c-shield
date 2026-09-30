@@ -25,13 +25,13 @@
                         <div class="relative flex aspect-[3/4] items-center justify-center bg-slate-100">
                             @if ($flyer->images->isNotEmpty())
                                 <img src="{{ asset('storage/' . $flyer->images->first()->image) }}" alt="{{ $flyer->title }}" class="h-full w-full object-cover">
-                                @if ($flyer->images->count() > 1)
+                                @if ($flyer->images_count > 1)
                                     <span class="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs font-medium text-white">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-3.5 w-3.5">
                                             <rect x="3" y="3" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/>
                                             <path d="M8 21h10a2 2 0 0 0 2-2V8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                                         </svg>
-                                        {{ $flyer->images->count() }}
+                                        {{ $flyer->images_count }}
                                     </span>
                                 @endif
                             @else
