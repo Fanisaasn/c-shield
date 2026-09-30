@@ -152,11 +152,11 @@ class RestoreContentMedia extends Command
     protected function isMountedVolume(string $volume): bool
     {
         // Railway mounts volumes at runtime. An environment variable alone is not proof.
-        if (! is_readable('/proc/self/mountinfo')) {
+        if (! File::isReadable('/proc/self/mountinfo')) {
             return false;
         }
 
-        foreach (file('/proc/self/mountinfo', FILE_IGNORE_NEW_LINES) as $line) {
+        foreach (File::lines('/proc/self/mountinfo') as $line) {
             $fields = explode(' ', $line);
             $mountPoint = preg_replace_callback('/\\\\([0-7]{3})/', fn ($match) => chr(octdec($match[1])), $fields[4] ?? '');
             if ($mountPoint === $volume) {
