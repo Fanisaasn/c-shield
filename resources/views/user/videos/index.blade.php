@@ -30,7 +30,7 @@
                             <a href="{{ route('videos.show', $video) }}" class="mt-2 font-heading text-base font-bold text-navy-900 group-hover:text-blue-600 sm:text-lg">
                                 {{ $video->title }}
                             </a>
-                            <p class="mt-2 line-clamp-2 flex-1 text-sm text-slate-500">{{ $video->description }}</p>
+                            <p class="mt-2 line-clamp-2 flex-1 text-sm text-slate-500">{{ Str::plainText($video->description) }}</p>
                         </div>
                     </article>
                 @endforeach
