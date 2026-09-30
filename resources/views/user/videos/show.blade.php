@@ -15,10 +15,10 @@
 
         <header class="border-b border-slate-200 pb-6 pt-6">
             <h1 class="font-heading text-2xl font-bold text-navy-950 sm:text-3xl">{{ $video->title }}</h1>
-            @if ($video->type === 'interactive' || $video->slug === 'jaga-data-jaga-diri')
+            @if ($video->isInteractive())
                 <p class="mt-2 font-medium text-slate-600">Interactive Security Awareness</p>
             @endif
-            <p class="mt-3 text-sm text-slate-500">Security Awareness &bull; {{ ($video->type === 'interactive' || $video->slug === 'jaga-data-jaga-diri') ? 'Interactive Video • Bahasa Indonesia • ' : '' }}{{ $video->published_at?->translatedFormat('d M Y') }}</p>
+            <p class="mt-3 text-sm text-slate-500">Security Awareness &bull; {{ $video->isInteractive() ? 'Interactive Video • Bahasa Indonesia • ' : '' }}{{ $video->published_at?->translatedFormat('d M Y') }}</p>
         </header>
 
         <section class="border-b border-slate-200 py-7">
@@ -26,11 +26,11 @@
             @include('partials.rich-text', ['html' => $video->description, 'class' => 'mt-3 leading-7 text-slate-700'])
         </section>
 
-        @if ($video->type === 'interactive' || $video->slug === 'jaga-data-jaga-diri')
+        @if ($video->usesBundledInteractivePackage())
             <section class="border-b border-slate-200 py-7">
                 <h2 class="font-heading text-xl font-bold text-navy-950">Yang akan dipelajari</h2>
                 <ul class="mt-4 grid gap-3 text-sm text-slate-700 sm:grid-cols-2">
-                    @foreach (['Mengenali email phishing dan tautan mencurigakan', 'Menangani perangkat USB yang tidak dikenal', 'Mencegah akses fisik tanpa verifikasi', 'Membuat password unik dan melindungi akun'] as $objective)
+                    @foreach (['Mengenali email phishing dan tautan mencurigakan', 'Membuat kata sandi yang panjang dan unik', 'Tidak membagikan kode OTP kepada siapa pun', 'Tidak memasang perangkat USB yang tidak dikenal', 'Memilih koneksi yang aman dibanding Wi-Fi publik'] as $objective)
                         <li class="flex gap-3"><span class="text-teal-600">&#10003;</span><span>{{ $objective }}</span></li>
                     @endforeach
                 </ul>
