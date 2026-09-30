@@ -1,5 +1,9 @@
 @php
-    $isInteractive = $video->slug === 'jaga-data-jaga-diri';
+    $isInteractive = $video->type === 'interactive' || $video->slug === 'jaga-data-jaga-diri';
+    $interactiveUrl = $video->interactive_path
+        ? \Illuminate\Support\Facades\Storage::disk('public')->url($video->interactive_path)
+        : asset('interactive-video/jaga-data-jaga-diri/index.html');
+    $interactiveHue = abs(crc32($video->slug ?: $video->title)) % 360;
     $showInteractivePlayer ??= false;
     $youtubeId = null;
     $isInstagram = false;
@@ -17,15 +21,24 @@
 
 @if ($isInteractive && $showInteractivePlayer)
     <div class="aspect-video overflow-hidden rounded-xl bg-navy-950 shadow-sm ring-1 ring-slate-900/10">
-        <iframe class="h-full w-full border-0" src="{{ asset('interactive-video/jaga-data-jaga-diri/index.html') }}" title="Video interaktif: {{ $video->title }}" allow="autoplay" loading="eager"></iframe>
+        <iframe class="h-full w-full border-0" src="{{ $interactiveUrl }}" title="Video interaktif: {{ $video->title }}" allow="autoplay; fullscreen" sandbox="allow-scripts allow-forms allow-modals allow-downloads" loading="eager" allowfullscreen></iframe>
     </div>
 @elseif ($isInteractive)
-    <div class="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-navy-950 text-white">
-        <div class="text-center">
-            <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
+    <div class="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-navy-950 text-white"
+         @unless($video->thumbnail) style="background:linear-gradient(135deg,hsl({{ $interactiveHue }} 42% 20%),#050d1a 72%)" @endunless>
+        @if($video->thumbnail)
+            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($video->thumbnail) }}" alt="Thumbnail {{ $video->title }}" class="absolute inset-0 h-full w-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-navy-950/85 via-navy-950/10 to-transparent"></div>
+        @else
+            <div class="absolute -right-12 -top-14 h-44 w-44 rounded-full bg-white/10 blur-2xl"></div>
+            <div class="absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-teal-400/10 blur-2xl"></div>
+        @endif
+        <div class="relative px-5 text-center">
+            <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-black/35 ring-1 ring-white/25 backdrop-blur-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-6 w-6"><path d="M8 5v14l11-7-11-7Z" fill="currentColor"/></svg>
             </span>
-            <span class="mt-3 block text-xs font-semibold uppercase tracking-[0.2em] text-teal-300">Interactive Security Awareness</span>
+            <span class="mt-3 block line-clamp-2 font-heading text-sm font-bold leading-snug text-white">{{ $video->title }}</span>
+            <span class="mt-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-teal-300">Video interaktif</span>
         </div>
     </div>
 @elseif ($youtubeId)

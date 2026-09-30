@@ -82,6 +82,7 @@ class VideoSeeder extends Seeder
             [
                 'title' => 'Jaga Data, Jaga Diri',
                 'description' => 'Video interaktif ini membahas perilaku aman dalam menggunakan perangkat, akun, dan informasi digital. Pengguna akan menghadapi situasi keamanan dan menentukan apakah perilaku tersebut aman atau berisiko.',
+                'type' => 'interactive',
                 'video_url' => 'interactive://jaga-data-jaga-diri',
                 'is_published' => true,
                 'published_at' => now(),
