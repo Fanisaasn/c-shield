@@ -45,8 +45,20 @@
 
                 <div>
                     <label for="password" class="block text-sm font-medium text-navy-900">Kata Sandi</label>
-                    <input id="password" type="password" name="password" required
-                           class="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-navy-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                    <div class="relative mt-1.5">
+                        <input id="password" type="password" name="password" required autocomplete="current-password"
+                               class="block w-full rounded-md border border-slate-300 py-2 pl-3 pr-12 text-sm text-navy-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        <button id="toggle-password" type="button" aria-controls="password" aria-label="Tampilkan kata sandi" aria-pressed="false"
+                                class="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-md text-slate-500 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <svg data-eye-open xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="hidden h-5 w-5" aria-hidden="true">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+                            </svg>
+                            <svg data-eye-closed xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-5 w-5" aria-hidden="true">
+                                <path d="m3 3 18 18M10.6 5.1A12 12 0 0 1 12 5c6.5 0 10 7 10 7a19 19 0 0 1-3.1 4M6.2 6.2A22 22 0 0 0 2 12s3.5 7 10 7a12 12 0 0 0 5.8-1.8M9.9 9.9a3 3 0 0 0 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="space-y-2">
@@ -84,6 +96,16 @@
     </div>
 
     <script>
+        document.getElementById('toggle-password').addEventListener('click', function () {
+            const input = document.getElementById('password');
+            const visible = input.type === 'password';
+            input.type = visible ? 'text' : 'password';
+            this.setAttribute('aria-pressed', String(visible));
+            this.setAttribute('aria-label', visible ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
+            this.querySelector('[data-eye-open]').classList.toggle('hidden', !visible);
+            this.querySelector('[data-eye-closed]').classList.toggle('hidden', visible);
+        });
+
         document.getElementById('refresh-captcha').addEventListener('click', function () {
             document.getElementById('captcha').value = '';
             document.getElementById('captcha-image').src = @json(route('admin.captcha.image')) + '?refresh=' + Date.now();
