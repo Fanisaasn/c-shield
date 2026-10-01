@@ -14,9 +14,15 @@
     </section>
 
     <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        @include('partials.content-search', ['searchRoute' => 'webinars.index', 'searchLabel' => 'webinar'])
+
         @if ($webinars->isEmpty())
             <p class="rounded-xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500">
-                Belum ada webinar yang dijadwalkan.
+                @if ($search !== '')
+                    Tidak ada hasil untuk &ldquo;{{ $search }}&rdquo;. Coba kata kunci lain.
+                @else
+                    Belum ada webinar yang dijadwalkan.
+                @endif
             </p>
         @else
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

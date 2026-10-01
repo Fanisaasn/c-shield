@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+
 use App\Models\Flyer;
 use App\Models\SurveyQuestion;
 
@@ -10,17 +12,21 @@ class FlyerController extends Controller
     /**
      * Display a paginated list of published flyers.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $validated = $request->validate(['q' => ['nullable', 'string', 'max:200']]);
+        $search = trim($validated['q'] ?? '');
+
         $flyers = Flyer::query()
             ->where('is_published', true)
+            ->when($search !== '', fn ($query) => $query->whereLike('title', '%'.$search.'%'))
             ->with(['images' => fn ($query) => $query->orderBy('sort_order')->limit(1)])
             ->withCount('images')
             ->latest('published_at')
             ->paginate(9)
             ->withQueryString();
 
-        return view('user.flyers.index', compact('flyers'));
+        return view('user.flyers.index', compact('flyers', 'search'));
     }
 
     /**

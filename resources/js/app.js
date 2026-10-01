@@ -4,6 +4,16 @@ import { initPublicMotion } from './motion';
 
 window.Chart = Chart;
 
+document.querySelectorAll('[data-content-search]').forEach(form => {
+    const input = form.querySelector('input[type="search"]');
+    input?.addEventListener('input', () => {
+        // The search field's native clear button also emits an input event.
+        if (input.value === '' && input.defaultValue.trim() !== '') {
+            window.location.assign(form.action);
+        }
+    });
+});
+
 if (document.body?.hasAttribute('data-public-motion')) {
     initPublicMotion(Chart);
 }
