@@ -13,6 +13,9 @@ class HomeController extends Controller
 
     private const GENDER_ORDER = ['Laki-laki', 'Perempuan'];
 
+    /** How many recent respondents the Pre vs Post comparison chart shows. */
+    private const COMPARISON_LIMIT = 50;
+
     private const AGE_BRACKETS = [
         '< 18' => [null, 17],
         '18–25' => [18, 25],
@@ -61,9 +64,45 @@ class HomeController extends Controller
             'scoreByEducation' => $this->averageScoreByEducation($completedAttempts),
             'scoreByAge' => $this->averageScoreByAge($completedAttempts),
             'scoreByDomicile' => $this->averageScoreByDomicile($completedAttempts),
+            'prePostComparison' => $this->recentPrePostComparison(self::COMPARISON_LIMIT),
         ];
 
         return view('user.home', compact('latestArticles', 'upcomingWebinars', 'assessmentStats'));
+    }
+
+    /**
+     * Pre vs Post scores of the most recent respondents who finished both,
+     * oldest first, plus their average scores.
+     */
+    private function recentPrePostComparison(int $limit): array
+    {
+        $posts = AssessmentAttempt::query()
+            ->where('type', 'post')
+            ->whereNotNull('completed_at')
+            ->latest('completed_at')
+            ->take($limit)
+            ->get(['assessment_user_id', 'score']);
+
+        $preScores = AssessmentAttempt::query()
+            ->where('type', 'pre')
+            ->whereNotNull('completed_at')
+            ->whereIn('assessment_user_id', $posts->pluck('assessment_user_id'))
+            ->pluck('score', 'assessment_user_id');
+
+        $pairs = $posts
+            ->filter(fn (AssessmentAttempt $post) => $preScores->has($post->assessment_user_id))
+            ->reverse()
+            ->values()
+            ->map(fn (AssessmentAttempt $post) => [
+                'pre' => (int) round((float) $preScores[$post->assessment_user_id]),
+                'post' => (int) round((float) $post->score),
+            ]);
+
+        return [
+            'pairs' => $pairs,
+            'averagePre' => $pairs->isEmpty() ? 0 : round($pairs->avg('pre'), 1),
+            'averagePost' => $pairs->isEmpty() ? 0 : round($pairs->avg('post'), 1),
+        ];
     }
 
     /**
