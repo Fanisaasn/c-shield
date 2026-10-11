@@ -64,18 +64,17 @@
                         @include('partials.source-link', ['sourceUrl' => $flyer->source_url])
                     @endif
 
-                    <button type="button" onclick="document.getElementById('survey-modal').style.display='flex'" class="inline-flex items-center gap-2 rounded-md border border-teal-500 px-4 py-2 text-sm font-semibold text-teal-700 transition hover:bg-teal-50">
+                    <a href="{{ config('services.skm.url') }}" class="inline-flex items-center gap-2 rounded-md border border-teal-500 px-4 py-2 text-sm font-semibold text-teal-700 transition hover:bg-teal-50">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-4 w-4">
                             <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.2 0-2.3-.25-3.3-.7L3 20l1.2-4.4A8.5 8.5 0 1 1 21 11.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
                         </svg>
                         Beri Masukan
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
     </article>
 
-    @include('partials.survey-modal')
 
     @push('scripts')
         <style>#flyer-track::-webkit-scrollbar { display: none; }</style>

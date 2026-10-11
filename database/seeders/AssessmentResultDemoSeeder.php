@@ -72,17 +72,19 @@ class AssessmentResultDemoSeeder extends Seeder
 
             foreach ($questions as $question) {
                 $answerCorrectly = (mt_rand() / mt_getrandmax()) < $correctRate;
-                $option = $answerCorrectly
-                    ? $question->options->firstWhere('is_correct', true)
-                    : $question->options->firstWhere('is_correct', false);
-                $option ??= $question->options->first();
+                $correctIds = $question->options->where('is_correct', true)->pluck('id');
+                $wrongOption = $question->options->firstWhere('is_correct', false);
+                $chosenIds = $answerCorrectly || $wrongOption === null
+                    ? $correctIds
+                    : collect([$wrongOption->id]);
 
-                AssessmentAnswer::create([
+                $answer = AssessmentAnswer::create([
                     'assessment_attempt_id' => $attempt->id,
                     'assessment_question_id' => $question->id,
-                    'assessment_option_id' => $option->id,
-                    'is_correct' => $option->is_correct,
+                    'is_correct' => $chosenIds->sort()->values()->all() === $correctIds->sort()->values()->all(),
                 ]);
+
+                $answer->options()->attach($chosenIds->all());
             }
 
             $attempt->finalizeScore();
