@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'skm' => [
+        'url' => env('SKM_SURVEY_URL', 'https://skm.go.id/isi-survey/01267806-a585-4a88-9a01-d27929164b70/f563f710-123e-4bba-895a-f3c18fafecc1'),
+    ],
+
 ];

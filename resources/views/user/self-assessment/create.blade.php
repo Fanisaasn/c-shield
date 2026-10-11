@@ -91,10 +91,18 @@
                 </div>
 
                 <div>
-                    <label for="domicile" class="block text-sm font-medium text-navy-900">Domisili (Kecamatan/Kelurahan)</label>
-                    <input type="text" name="domicile" id="domicile" value="{{ old('domicile') }}" required
-                           class="mt-1.5 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
-                    @error('domicile')
+                    <label for="domicile" class="block text-sm font-medium text-navy-900">Domisili (Kecamatan)</label>
+                    <select name="domicile" id="domicile" required
+                            class="mt-1.5 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        <option value="" disabled {{ old('domicile') ? '' : 'selected' }}>Pilih kecamatan</option>
+                        @foreach (\App\Models\AssessmentUser::DOMICILES as $region => $districts)
+                            <optgroup label="{{ $region }}">
+                                @foreach ($districts as $district)
+                                    <option value="{{ $district }}" {{ old('domicile') === $district ? 'selected' : '' }}>{{ $district }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    </select>                    @error('domicile')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror
                 </div>

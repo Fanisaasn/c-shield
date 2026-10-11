@@ -44,8 +44,14 @@
                     <a href="{{ route('self-assessment.index') }}" class="rounded-md bg-teal-500 px-5 py-3 text-sm font-semibold text-navy-950 transition hover:bg-teal-400">
                         Mulai Self Assessment
                     </a>
-                    <a href="{{ route('articles.index') }}" class="rounded-md border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+                    <a href="#materi-edukasi" class="rounded-md border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
                         Jelajahi Materi Edukasi
+                    </a>
+                    <a href="#statistik-hasil" class="inline-flex items-center gap-2 rounded-md border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+                            <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Lihat Statistik 
                     </a>
                 </div>
             </div>
@@ -53,7 +59,7 @@
     </section>
 
     {{-- Feature grid --}}
-    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+    <section id="materi-edukasi" class="mx-auto max-w-7xl scroll-mt-16 px-4 py-16 sm:px-6 lg:px-8">
         <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
             @foreach ([
                 ['route' => 'articles.index', 'title' => 'Artikel', 'desc' => 'Bacaan edukatif seputar praktik keamanan siber.'],
@@ -146,14 +152,15 @@
                 </div>
             </div>
 
-            <div class="mt-10">
+            <div id="statistik-hasil" class="mt-10 scroll-mt-24">
                 <h3 class="text-center font-heading text-lg font-bold text-white">Statistik Hasil Assessment Masyarakat</h3>
                 <p class="mx-auto mt-1 max-w-xl text-center text-sm text-slate-400">
                     Rekap hasil self-assessment seluruh peserta pada tahun {{ $assessmentStats['currentYear'] }}.
                 </p>
             </div>
 
-            <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2">
+            @php($comparison = $assessmentStats['prePostComparison'])
+            <div class="mt-6 grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
                 <div class="rounded-xl bg-white p-4 sm:p-5">
                     <p class="text-sm font-semibold text-navy-900">Persentase Hasil Assessment</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
@@ -168,6 +175,36 @@
                 </div>
 
                 <div class="rounded-xl bg-white p-4 sm:p-5">
+                    <p class="text-sm font-semibold text-navy-900">Perbandingan Skor Pre &amp; Post Assessment</p>
+                    <p class="text-xs text-slate-400">{{ $comparison['pairs']->count() }} peserta terakhir yang menyelesaikan keduanya</p>
+
+                    @if ($comparison['pairs']->isEmpty())
+                        <p class="mt-6 py-6 text-center text-sm text-slate-400">Statistik akan tampil setelah ada peserta yang menyelesaikan Pre dan Post-Assessment.</p>
+                    @else
+                        @php($improvement = round($comparison['averagePost'] - $comparison['averagePre'], 1))
+                        <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+                            <div class="rounded-lg bg-slate-50 px-2 py-2">
+                                <p class="text-[11px] text-slate-500">Rata-rata Pre</p>
+                                <p class="font-heading text-lg font-bold text-blue-600">{{ $comparison['averagePre'] }}</p>
+                            </div>
+                            <div class="rounded-lg bg-slate-50 px-2 py-2">
+                                <p class="text-[11px] text-slate-500">Rata-rata Post</p>
+                                <p class="font-heading text-lg font-bold text-teal-600">{{ $comparison['averagePost'] }}</p>
+                            </div>
+                            <div class="rounded-lg bg-slate-50 px-2 py-2">
+                                <p class="text-[11px] text-slate-500">Perubahan</p>
+                                <p class="font-heading text-lg font-bold {{ $improvement >= 0 ? 'text-emerald-600' : 'text-red-600' }}">{{ $improvement > 0 ? '+' : '' }}{{ $improvement }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 h-44">
+                            <canvas id="prePostChart" role="img" aria-label="Diagram perbandingan skor Pre-Assessment dan Post-Assessment {{ $comparison['pairs']->count() }} peserta terakhir"></canvas>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+                <div class="rounded-xl bg-white p-4 sm:p-5">
                     <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Jenis Kelamin</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
 
@@ -179,9 +216,7 @@
                         </div>
                     @endif
                 </div>
-            </div>
 
-            <div class="mt-4 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
                 <div class="rounded-xl bg-white p-4 sm:p-5">
                     <p class="text-sm font-semibold text-navy-900">Assessment Berdasarkan Pendidikan</p>
                     <p class="text-xs text-slate-400">Tahun {{ $assessmentStats['currentYear'] }}</p>
@@ -295,6 +330,48 @@
                             y: { ticks: { color: '#0b2545', font: { size: 11 } }, grid: { display: false } },
                         },
                         plugins: { legend: { display: false } },
+                    },
+                });
+            }
+
+            const prePostEl = document.getElementById('prePostChart');
+            if (prePostEl) {
+                const pairs = @json($assessmentStats['prePostComparison']['pairs']);
+
+                new Chart(prePostEl, {
+                    type: 'line',
+                    data: {
+                        labels: pairs.map(function (_, index) { return 'Peserta ' + (index + 1); }),
+                        datasets: [
+                            {
+                                label: 'Pre-Assessment',
+                                data: pairs.map(function (pair) { return pair.pre; }),
+                                borderColor: '#1e5aa8',
+                                backgroundColor: '#1e5aa8',
+                                pointRadius: pairs.length > 20 ? 0 : 3,
+                                tension: 0.3,
+                            },
+                            {
+                                label: 'Post-Assessment',
+                                data: pairs.map(function (pair) { return pair.post; }),
+                                borderColor: '#2ab7ca',
+                                backgroundColor: '#2ab7ca',
+                                pointRadius: pairs.length > 20 ? 0 : 3,
+                                tension: 0.3,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            x: { ticks: { display: false }, grid: { display: false } },
+                            y: { beginAtZero: true, max: 100, ticks: { color: '#94a3b8', stepSize: 25 }, grid: { color: '#e2e8f0' } },
+                        },
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#0b2545', usePointStyle: true, boxWidth: 8, font: { size: 11 } } },
+                        },
                     },
                 });
             }

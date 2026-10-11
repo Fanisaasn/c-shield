@@ -79,7 +79,37 @@ class DashboardController extends Controller
             'scoreByEducation' => $this->averageScoreByEducation($completedAttempts),
             'scoreByAge' => $this->averageScoreByAge($completedAttempts),
             'scoreByDomicile' => $this->averageScoreByDomicile($completedAttempts),
+            'prePostParticipation' => $this->prePostParticipation($currentYear),
         ]);
+    }
+
+    /**
+     * Of the respondents who completed a Pre-Assessment in the given year:
+     * how many also completed the Post-Assessment versus only the Pre, and
+     * the average Pre/Post scores of those who completed both.
+     */
+    private function prePostParticipation(int $year): array
+    {
+        $preScores = AssessmentAttempt::query()
+            ->where('type', 'pre')
+            ->whereNotNull('completed_at')
+            ->whereYear('completed_at', $year)
+            ->pluck('score', 'assessment_user_id');
+
+        $postScores = AssessmentAttempt::query()
+            ->where('type', 'post')
+            ->whereNotNull('completed_at')
+            ->whereIn('assessment_user_id', $preScores->keys())
+            ->pluck('score', 'assessment_user_id');
+
+        $bothPreScores = $preScores->only($postScores->keys());
+
+        return [
+            'both' => $postScores->count(),
+            'onlyPre' => $preScores->count() - $postScores->count(),
+            'averagePre' => $bothPreScores->isEmpty() ? 0 : round((float) $bothPreScores->avg(), 1),
+            'averagePost' => $postScores->isEmpty() ? 0 : round((float) $postScores->avg(), 1),
+        ];
     }
 
     /**
