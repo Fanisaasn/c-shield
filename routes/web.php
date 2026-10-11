@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\VideoController as AdminVideoController;
 use App\Http\Controllers\Admin\FlyerController as AdminFlyerController;
 use App\Http\Controllers\Admin\WebinarController as AdminWebinarController;
 use App\Http\Controllers\Admin\AssessmentController as AdminAssessmentController;
+use App\Http\Controllers\Admin\LearningMaterialController as AdminLearningMaterialController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\SurveyQuestionController as AdminSurveyQuestionController;
 use App\Http\Controllers\ArticleController;
@@ -72,6 +73,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('assessments/questions', [AdminAssessmentController::class, 'storeQuestion'])->name('assessments.questions.store');
         Route::put('assessments/questions/{question}', [AdminAssessmentController::class, 'updateQuestion'])->name('assessments.questions.update');
         Route::delete('assessments/questions/{question}', [AdminAssessmentController::class, 'destroyQuestion'])->name('assessments.questions.destroy');
+        Route::get('materi-belajar', [AdminLearningMaterialController::class, 'index'])->name('learning-material.index');
+        Route::put('materi-belajar', [AdminLearningMaterialController::class, 'update'])->name('learning-material.update');
         Route::get('survey-questions', [AdminSurveyQuestionController::class, 'index'])->name('survey-questions.index');
         Route::post('survey-questions', [AdminSurveyQuestionController::class, 'store'])->name('survey-questions.store');
         Route::put('survey-questions/{question}', [AdminSurveyQuestionController::class, 'update'])->name('survey-questions.update');

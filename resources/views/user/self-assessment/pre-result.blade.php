@@ -75,7 +75,7 @@
         </div>
 
         <div class="mt-6 rounded-md border border-teal-200 bg-teal-50 px-5 py-4 text-sm text-teal-700">
-            Langkah selanjutnya: pelajari dahulu materi Video, Artikel, dan Flyer yang tersedia, lalu kerjakan
+            Langkah selanjutnya: pelajari dahulu materi Social Engineering, lalu kerjakan
             Post-Assessment untuk melihat perkembangan skor kesadaran keamanan siber Anda.
         </div>
 

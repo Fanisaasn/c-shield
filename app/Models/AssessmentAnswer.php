@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AssessmentAnswer extends Model
 {
     protected $fillable = [
         'assessment_attempt_id',
         'assessment_question_id',
-        'assessment_option_id',
         'is_correct',
     ];
 
@@ -31,8 +31,11 @@ class AssessmentAnswer extends Model
         return $this->belongsTo(AssessmentQuestion::class, 'assessment_question_id');
     }
 
-    public function option(): BelongsTo
+    /**
+     * The options the respondent picked for this question (one or more).
+     */
+    public function options(): BelongsToMany
     {
-        return $this->belongsTo(AssessmentOption::class, 'assessment_option_id');
+        return $this->belongsToMany(AssessmentOption::class, 'assessment_answer_options');
     }
 }

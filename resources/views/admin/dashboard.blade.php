@@ -43,6 +43,57 @@
         <p class="mt-1 text-sm text-slate-500">Rekap hasil self-assessment seluruh peserta pada tahun {{ $currentYear }}.</p>
     </div>
 
+    @php
+        $participation = $prePostParticipation;
+        $participationTotal = $participation['both'] + $participation['onlyPre'];
+    @endphp
+    <div class="mt-4 grid gap-4 lg:grid-cols-2">
+        <div class="rounded-xl border border-slate-200 bg-white p-5">
+            <p class="text-sm font-semibold text-navy-900">Partisipasi Pre &amp; Post Assessment</p>
+            <p class="text-xs text-slate-400">Peserta yang menyelesaikan Pre-Assessment tahun {{ $currentYear }}</p>
+
+            @if ($participationTotal === 0)
+                <p class="mt-6 py-6 text-center text-sm text-slate-400">Belum ada data.</p>
+            @else
+                <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+                    <div class="rounded-lg bg-slate-50 px-2 py-2">
+                        <p class="text-[11px] text-slate-500">Total Pre</p>
+                        <p class="font-heading text-lg font-bold text-navy-900">{{ $participationTotal }}</p>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 px-2 py-2">
+                        <p class="text-[11px] text-slate-500">Pre + Post</p>
+                        <p class="font-heading text-lg font-bold text-teal-600">{{ $participation['both'] }}</p>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 px-2 py-2">
+                        <p class="text-[11px] text-slate-500">Hanya Pre</p>
+                        <p class="font-heading text-lg font-bold text-amber-600">{{ $participation['onlyPre'] }}</p>
+                    </div>
+                </div>
+                <div class="mt-3 h-48">
+                    <canvas id="participationChart" role="img" aria-label="Diagram jumlah peserta yang menyelesaikan Pre dan Post-Assessment dibanding hanya Pre-Assessment"></canvas>
+                </div>
+            @endif
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-white p-5">
+            <p class="text-sm font-semibold text-navy-900">Rata-rata Skor Pre vs Post</p>
+            <p class="text-xs text-slate-400">Peserta yang menyelesaikan keduanya, tahun {{ $currentYear }}</p>
+
+            @if ($participation['both'] === 0)
+                <p class="mt-6 py-6 text-center text-sm text-slate-400">Belum ada peserta yang menyelesaikan Post-Assessment.</p>
+            @else
+                @php($improvement = round($participation['averagePost'] - $participation['averagePre'], 1))
+                <p class="mt-3 text-sm text-slate-600">
+                    Perubahan rata-rata:
+                    <span class="font-semibold {{ $improvement >= 0 ? 'text-emerald-600' : 'text-red-600' }}">{{ $improvement > 0 ? '+' : '' }}{{ $improvement }} poin</span>
+                </p>
+                <div class="mt-3 h-56">
+                    <canvas id="prePostAverageChart" role="img" aria-label="Diagram rata-rata skor Pre-Assessment {{ $participation['averagePre'] }} dan Post-Assessment {{ $participation['averagePost'] }}"></canvas>
+                </div>
+            @endif
+        </div>
+    </div>
+
     <div class="mt-4 grid gap-4 lg:grid-cols-2">
         <div class="rounded-xl border border-slate-200 bg-white p-5">
             <p class="text-sm font-semibold text-navy-900">Persentase Hasil Assessment</p>
@@ -180,6 +231,66 @@
                         scales: {
                             x: { beginAtZero: true, max: 100, ticks: { color: '#94a3b8' }, grid: { color: '#e2e8f0' } },
                             y: { ticks: { color: '#0b2545', font: { size: 11 } }, grid: { display: false } },
+                        },
+                        plugins: { legend: { display: false } },
+                    },
+                });
+            }
+
+            const participation = @json($prePostParticipation);
+
+            const participationEl = document.getElementById('participationChart');
+            if (participationEl) {
+                const participationTotal = participation.both + participation.onlyPre;
+
+                new Chart(participationEl, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pre + Post Assessment', 'Hanya Pre-Assessment'],
+                        datasets: [{
+                            data: [participation.both, participation.onlyPre],
+                            backgroundColor: ['#2ab7ca', '#f59e0b'],
+                            borderWidth: 0,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#0b2545', usePointStyle: true, boxWidth: 8, font: { size: 11 } } },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (ctx) {
+                                        const percent = participationTotal ? Math.round((ctx.parsed / participationTotal) * 100) : 0;
+                                        return ctx.label + ': ' + ctx.parsed + ' peserta (' + percent + '%)';
+                                    },
+                                },
+                            },
+                        },
+                    },
+                });
+            }
+
+            const prePostAverageEl = document.getElementById('prePostAverageChart');
+            if (prePostAverageEl) {
+                new Chart(prePostAverageEl, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Pre-Assessment', 'Post-Assessment'],
+                        datasets: [{
+                            label: 'Rata-rata Skor',
+                            data: [participation.averagePre, participation.averagePost],
+                            backgroundColor: ['#1e5aa8', '#2ab7ca'],
+                            borderRadius: 4,
+                            maxBarThickness: 64,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, max: 100, ticks: { color: '#94a3b8' }, grid: { color: '#e2e8f0' } },
+                            x: { ticks: { color: '#0b2545' }, grid: { display: false } },
                         },
                         plugins: { legend: { display: false } },
                     },

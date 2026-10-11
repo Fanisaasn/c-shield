@@ -4,31 +4,32 @@ namespace App\Http\Controllers;
 
 use App\Models\AssessmentAnswer;
 use App\Models\AssessmentAttempt;
-use App\Models\AssessmentOption;
 use App\Models\AssessmentQuestion;
 use App\Models\AssessmentUser;
+use App\Models\LearningMaterial;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class SelfAssessmentController extends Controller
 {
     /**
      * Show the Self-Assessment landing page: a dropdown to start the
-     * Pre-Assessment, or (once the session's Pre-Assessment is completed)
-     * the Post-Assessment.
+     * Pre-Assessment, or (once the session's Pre-Assessment is completed
+     * and its Post-Assessment is not yet finished) the Post-Assessment.
      */
     public function index(Request $request)
     {
-        $preCompleted = $this->currentPreAttempt($request)?->completed_at !== null;
+        $postUnlocked = $this->postUnlocked($request);
 
-        return view('user.self-assessment.index', compact('preCompleted'));
+        return view('user.self-assessment.index', compact('postUnlocked'));
     }
 
     /**
      * Dispatch on the chosen mode: Pre-Assessment always starts a fresh
-     * identity form; Post-Assessment is only reachable once the session's
-     * Pre-Assessment attempt is completed.
+     * identity form; Post-Assessment is only reachable while the session's
+     * current round has a completed Pre- and an unfinished Post-Assessment.
      */
     public function start(Request $request): RedirectResponse
     {
@@ -40,9 +41,8 @@ class SelfAssessmentController extends Controller
             return redirect()->route('self-assessment.create');
         }
 
-        if ($this->currentPreAttempt($request)?->completed_at === null) {
-            return redirect()->route('self-assessment.index')
-                ->with('error', 'Kerjakan Pre-Assessment terlebih dahulu.');
+        if (! $this->postUnlocked($request)) {
+            return $this->postLockedRedirect();
         }
 
         return redirect()->route('self-assessment.materi');
@@ -72,7 +72,7 @@ class SelfAssessmentController extends Controller
             'gender' => 'required|in:Laki-laki,Perempuan',
             'age' => 'required|integer|min:5|max:120',
             'education' => 'required|string|max:255',
-            'domicile' => 'required|string|max:255',
+            'domicile' => ['required', Rule::in(AssessmentUser::domicileOptions())],
             'occupation_status' => 'required|string|max:255',
         ]);
 
@@ -86,7 +86,7 @@ class SelfAssessmentController extends Controller
 
         $request->session()->put('assessment_user_id', $user->id);
         $request->session()->put('assessment_pre_attempt_id', $attempt->id);
-        $request->session()->forget('assessment_post_attempt_id');
+        $request->session()->forget(['assessment_post_attempt_id', 'assessment_materi_viewed']);
 
         return redirect()->route('self-assessment.pre.quiz');
     }
@@ -159,40 +159,55 @@ class SelfAssessmentController extends Controller
     }
 
     /**
-     * Show the study-reminder step between the Pre-Assessment result and
-     * the Post-Assessment: a nudge to study the site's existing Video,
-     * Artikel, and Flyer content (nothing here is tracked).
+     * Show the mandatory study step between the Pre-Assessment result and
+     * the Post-Assessment: the single admin-managed Social Engineering
+     * material. Opening it is recorded so the Post-Assessment can unlock.
      */
     public function materi(Request $request)
     {
-        $attempt = $this->currentPreAttempt($request);
-
-        if ($attempt === null || $attempt->completed_at === null) {
-            return redirect()->route('self-assessment.index')
-                ->with('error', 'Kerjakan Pre-Assessment terlebih dahulu.');
+        if (! $this->postUnlocked($request)) {
+            return $this->postLockedRedirect();
         }
 
         if ($request->session()->get('assessment_post_attempt_id')) {
             return redirect()->route('self-assessment.post.quiz');
         }
 
-        return view('user.self-assessment.materi');
+        $material = LearningMaterial::current();
+
+        if ($material?->isReady()) {
+            $request->session()->put('assessment_materi_viewed', true);
+        }
+
+        return view('user.self-assessment.materi', [
+            'material' => $material?->isReady() ? $material : null,
+        ]);
     }
 
     /**
      * Open the Post-Assessment attempt and move the user into the
-     * Post-Assessment quiz.
+     * Post-Assessment quiz, once the study material has been opened and
+     * the user has confirmed studying it.
      */
     public function materiLanjut(Request $request): RedirectResponse
     {
-        $attempt = $this->currentPreAttempt($request);
-
-        if ($attempt === null || $attempt->completed_at === null) {
-            return redirect()->route('self-assessment.index')
-                ->with('error', 'Kerjakan Pre-Assessment terlebih dahulu.');
+        if (! $this->postUnlocked($request)) {
+            return $this->postLockedRedirect();
         }
 
         if ($request->session()->get('assessment_post_attempt_id') === null) {
+            $material = LearningMaterial::current();
+
+            if (! $material?->isReady() || ! $request->session()->has('assessment_materi_viewed')) {
+                return redirect()->route('self-assessment.materi')
+                    ->with('error', 'Pelajari materi terlebih dahulu sebelum mengerjakan Post-Assessment.');
+            }
+
+            if (! $request->boolean('confirm_studied')) {
+                return redirect()->route('self-assessment.materi')
+                    ->with('error', 'Centang konfirmasi bahwa Anda sudah mempelajari materi.');
+            }
+
             $postAttempt = AssessmentAttempt::create([
                 'assessment_user_id' => $request->session()->get('assessment_user_id'),
                 'type' => 'post',
@@ -308,6 +323,7 @@ class SelfAssessmentController extends Controller
             'assessment_user_id',
             'assessment_pre_attempt_id',
             'assessment_post_attempt_id',
+            'assessment_materi_viewed',
         ]);
 
         return redirect()->route('self-assessment.create');
@@ -332,40 +348,46 @@ class SelfAssessmentController extends Controller
      */
     private function storeAnswers(Request $request, AssessmentAttempt $attempt): ?RedirectResponse
     {
-        $questionIds = AssessmentQuestion::query()->pluck('id');
+        $questions = $this->questions()->keyBy('id');
 
+        // A single-answer question submits one option id (radio); a
+        // multi-answer question submits an array of option ids (checkboxes).
         $validated = $request->validate([
-            'answers' => 'required|array|size:' . $questionIds->count(),
-            'answers.*' => 'required|integer|exists:assessment_options,id',
+            'answers' => 'required|array|size:' . $questions->count(),
+            'answers.*' => 'required',
+        ], [
+            'answers.size' => 'Jawab semua pertanyaan terlebih dahulu.',
+            'answers.*.required' => 'Jawab semua pertanyaan terlebih dahulu.',
         ]);
 
-        if ($questionIds->diff(array_keys($validated['answers']))->isNotEmpty()) {
-            return back()->withInput()->with('error', 'Jawaban tidak valid. Silakan coba lagi.');
-        }
+        $selections = [];
 
-        $options = AssessmentOption::query()
-            ->whereIn('id', array_values($validated['answers']))
-            ->get()
-            ->keyBy('id');
+        foreach ($questions as $questionId => $question) {
+            $chosen = collect((array) ($validated['answers'][$questionId] ?? []))
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->sort()
+                ->values();
 
-        foreach ($validated['answers'] as $questionId => $optionId) {
-            $option = $options->get($optionId);
-
-            if ($option === null || (int) $option->assessment_question_id !== (int) $questionId) {
+            if ($chosen->isEmpty() || $chosen->diff($question->options->pluck('id'))->isNotEmpty()) {
                 return back()->withInput()->with('error', 'Jawaban tidak valid. Silakan coba lagi.');
             }
+
+            $selections[$questionId] = $chosen;
         }
 
-        DB::transaction(function () use ($validated, $options, $attempt) {
-            foreach ($validated['answers'] as $questionId => $optionId) {
-                $option = $options->get($optionId);
+        DB::transaction(function () use ($questions, $selections, $attempt) {
+            foreach ($selections as $questionId => $chosen) {
+                $correctIds = $questions[$questionId]->options->where('is_correct', true)->pluck('id')->sort()->values();
 
-                AssessmentAnswer::create([
+                // All-or-nothing: every correct option picked and nothing else.
+                $answer = AssessmentAnswer::create([
                     'assessment_attempt_id' => $attempt->id,
                     'assessment_question_id' => $questionId,
-                    'assessment_option_id' => $optionId,
-                    'is_correct' => $option->is_correct,
+                    'is_correct' => $chosen->all() === $correctIds->all(),
                 ]);
+
+                $answer->options()->attach($chosen->all());
             }
 
             $attempt->finalizeScore();
@@ -380,18 +402,39 @@ class SelfAssessmentController extends Controller
     private function answerReview(AssessmentAttempt $attempt)
     {
         return $attempt->answers()
-            ->with(['question' => fn ($query) => $query->orderBy('order'), 'option'])
+            ->with([
+                'question.options' => fn ($query) => $query->orderBy('order'),
+                'options' => fn ($query) => $query->orderBy('order'),
+            ])
             ->get()
             ->sortBy('question.order')
             ->map(fn (AssessmentAnswer $answer) => [
                 'question' => $answer->question->question,
-                'chosen' => $answer->option->option_text,
+                'chosen' => $answer->options->pluck('option_text')->implode(', '),
                 'is_correct' => $answer->is_correct,
                 'correct_option' => $answer->is_correct
                     ? null
-                    : $answer->question->options()->where('is_correct', true)->value('option_text'),
+                    : $answer->question->options->where('is_correct', true)->pluck('option_text')->implode(', '),
             ])
             ->values();
+    }
+
+    /**
+     * Whether the Post-Assessment may be (re)entered: the session's
+     * Pre-Assessment is completed and its Post-Assessment is not finished.
+     * Once a Post-Assessment is finished the round is over, and a new
+     * Pre-Assessment must be taken before the Post-Assessment opens again.
+     */
+    private function postUnlocked(Request $request): bool
+    {
+        return $this->currentPreAttempt($request)?->completed_at !== null
+            && $this->currentPostAttempt($request)?->completed_at === null;
+    }
+
+    private function postLockedRedirect(): RedirectResponse
+    {
+        return redirect()->route('self-assessment.index')
+            ->with('error', 'Kerjakan Pre-Assessment terlebih dahulu.');
     }
 
     /**
