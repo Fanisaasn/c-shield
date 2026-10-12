@@ -14,6 +14,7 @@ class PublicContentSearchTest extends TestCase
         ]]);
         $this->withoutVite();
         DB::statement('CREATE TABLE flyer_images (id INTEGER PRIMARY KEY, flyer_id INTEGER, image TEXT, sort_order INTEGER)');
+        DB::statement('CREATE TABLE webinar_registrations (id INTEGER PRIMARY KEY, webinar_id INTEGER, name TEXT, email TEXT, phone TEXT, institution TEXT, occupation TEXT, motivation TEXT, created_at TEXT, updated_at TEXT)');
 
         foreach (['videos' => '/video', 'flyers' => '/flyer', 'webinars' => '/webinar', 'articles' => '/artikel'] as $table => $url) {
             DB::statement("CREATE TABLE {$table} (id INTEGER PRIMARY KEY, title TEXT, description TEXT,
