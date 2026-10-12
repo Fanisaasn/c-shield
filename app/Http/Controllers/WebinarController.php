@@ -21,6 +21,7 @@ class WebinarController extends Controller
 
         $webinars = Webinar::query()
             ->where('is_published', true)
+            ->withCount('registrations')
             ->when($search !== '', fn ($query) => $query->whereLike('title', '%'.$search.'%'))
             ->orderByRaw('webinar_date < ? ASC', [$now])
             ->orderByRaw('CASE WHEN webinar_date >= ? THEN webinar_date END ASC', [$now])

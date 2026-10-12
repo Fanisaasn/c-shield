@@ -17,6 +17,7 @@ use App\Http\Controllers\SelfAssessmentController;
 use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\WebinarController;
+use App\Http\Controllers\WebinarRegistrationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -33,6 +34,7 @@ Route::get('/flyer/{flyer}', [FlyerController::class, 'show'])->name('flyers.sho
 Route::post('/survei', [SurveyController::class, 'store'])->name('survey.store');
 
 Route::get('/webinar', [WebinarController::class, 'index'])->name('webinars.index');
+Route::post('/webinar/{webinar}/register', [WebinarRegistrationController::class, 'store'])->name('webinars.register');
 
 Route::prefix('self-assessment')->name('self-assessment.')->group(function () {
     Route::get('/', [SelfAssessmentController::class, 'index'])->name('index');
@@ -80,5 +82,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('survey-questions/{question}', [AdminSurveyQuestionController::class, 'update'])->name('survey-questions.update');
         Route::delete('survey-questions/{question}', [AdminSurveyQuestionController::class, 'destroy'])->name('survey-questions.destroy');
         Route::get('reports', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/export-assessment', [AdminReportController::class, 'exportAssessment'])->name('reports.export-assessment');
+        Route::get('reports/export-webinar', [AdminReportController::class, 'exportWebinarRegistrations'])->name('reports.export-webinar');
     });
 });

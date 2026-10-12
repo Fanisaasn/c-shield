@@ -18,7 +18,10 @@ class AuthController extends Controller
     {
         $captcha->ensure($request);
 
-        return view('admin.auth.login');
+        return response()
+            ->view('admin.auth.login')
+            ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+            ->header('Pragma', 'no-cache');
     }
 
     public function captchaImage(Request $request, AdminLoginCaptcha $captcha): Response
