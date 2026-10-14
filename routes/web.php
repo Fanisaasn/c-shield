@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\LearningMaterialController as AdminLearningMateri
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\SurveyQuestionController as AdminSurveyQuestionController;
 use App\Http\Controllers\Admin\WebinarRegistrationController as AdminWebinarRegistrationController;
+use App\Http\Controllers\Admin\EditDashboardController as AdminEditDashboardController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\FlyerController;
 use App\Http\Controllers\HomeController;
@@ -91,5 +92,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('webinar-registrations/{registration}/send-single', [AdminWebinarRegistrationController::class, 'sendSingle'])->name('webinar-registrations.send-single');
         Route::post('webinar-registrations/{registration}/toggle-status', [AdminWebinarRegistrationController::class, 'toggleStatus'])->name('webinar-registrations.toggle-status');
         Route::get('webinar-registrations/{webinar}/export', [AdminWebinarRegistrationController::class, 'export'])->name('webinar-registrations.export');
+
+        // Edit Dashboard (Logo & Slide Hero)
+        Route::get('edit-dashboard', [AdminEditDashboardController::class, 'index'])->name('edit-dashboard.index');
+        Route::post('edit-dashboard/logo', [AdminEditDashboardController::class, 'updateLogo'])->name('edit-dashboard.logo');
+        Route::post('edit-dashboard/settings', [AdminEditDashboardController::class, 'updateLogo'])->name('edit-dashboard.settings');
+        Route::post('edit-dashboard/reset-logo', [AdminEditDashboardController::class, 'resetLogo'])->name('edit-dashboard.reset-logo');
+        Route::post('edit-dashboard/slides', [AdminEditDashboardController::class, 'storeSlide'])->name('edit-dashboard.slides.store');
+        Route::put('edit-dashboard/slides/{slide}', [AdminEditDashboardController::class, 'updateSlide'])->name('edit-dashboard.slides.update');
+        Route::delete('edit-dashboard/slides/{slide}', [AdminEditDashboardController::class, 'destroySlide'])->name('edit-dashboard.slides.destroy');
+        Route::patch('edit-dashboard/slides/{slide}/toggle', [AdminEditDashboardController::class, 'toggleSlide'])->name('edit-dashboard.slides.toggle');
+        Route::post('edit-dashboard/slides/reorder', [AdminEditDashboardController::class, 'reorderSlides'])->name('edit-dashboard.slides.reorder');
     });
 });
