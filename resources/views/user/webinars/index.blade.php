@@ -224,6 +224,17 @@
                         </div>
                     </div>
 
+                    {{-- Referensi / Sumber Info --}}
+                    <div>
+                        <label for="reg-referral" class="block text-sm font-medium text-navy-900">Siapa yang Mereferensikan / Sumber Info <span class="text-xs text-slate-400 font-normal">(Opsional)</span></label>
+                        <input type="text" id="reg-referral" name="referral_source" maxlength="255" value="{{ old('referral_source') }}"
+                               class="mt-1 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm transition focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                               placeholder="Contoh: Teman, Rekan Kerja, Instagram Diskominfo, WhatsApp Group, dll.">
+                        @error('referral_source')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     {{-- Motivasi --}}
                     <div>
                         <label for="reg-motivation" class="block text-sm font-medium text-navy-900">Motivasi Mengikuti Webinar</label>

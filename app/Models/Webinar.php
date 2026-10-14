@@ -14,6 +14,7 @@ class Webinar extends Model
         'webinar_date',
         'platform',
         'registration_url',
+        'meeting_link',
         'poster_image',
         'is_published',
     ];

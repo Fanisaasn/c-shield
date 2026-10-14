@@ -25,6 +25,7 @@ class WebinarRegistrationController extends Controller
             'institution' => ['nullable', 'string', 'max:255'],
             'occupation' => ['nullable', 'string', 'max:255'],
             'motivation' => ['nullable', 'string', 'max:1000'],
+            'referral_source' => ['nullable', 'string', 'max:255'],
         ]);
 
         // Check if already registered

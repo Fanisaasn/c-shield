@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\AssessmentController as AdminAssessmentController
 use App\Http\Controllers\Admin\LearningMaterialController as AdminLearningMaterialController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\SurveyQuestionController as AdminSurveyQuestionController;
+use App\Http\Controllers\Admin\WebinarRegistrationController as AdminWebinarRegistrationController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\FlyerController;
 use App\Http\Controllers\HomeController;
@@ -84,5 +85,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reports', [AdminReportController::class, 'index'])->name('reports.index');
         Route::get('reports/export-assessment', [AdminReportController::class, 'exportAssessment'])->name('reports.export-assessment');
         Route::get('reports/export-webinar', [AdminReportController::class, 'exportWebinarRegistrations'])->name('reports.export-webinar');
+
+        Route::get('webinar-registrations', [AdminWebinarRegistrationController::class, 'index'])->name('webinar-registrations.index');
+        Route::post('webinar-registrations/{webinar}/send-whatsapp', [AdminWebinarRegistrationController::class, 'sendWhatsApp'])->name('webinar-registrations.send-whatsapp');
+        Route::post('webinar-registrations/{registration}/send-single', [AdminWebinarRegistrationController::class, 'sendSingle'])->name('webinar-registrations.send-single');
+        Route::post('webinar-registrations/{registration}/toggle-status', [AdminWebinarRegistrationController::class, 'toggleStatus'])->name('webinar-registrations.toggle-status');
+        Route::get('webinar-registrations/{webinar}/export', [AdminWebinarRegistrationController::class, 'export'])->name('webinar-registrations.export');
     });
 });
