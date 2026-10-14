@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\SurveyQuestion;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
 
 class SurveyQuestionSeeder extends Seeder
 {
@@ -25,6 +26,14 @@ class SurveyQuestionSeeder extends Seeder
             'Sarana dan prasarana yang tersedia mendukung kenyamanan pengguna layanan',
             'Secara keseluruhan saya puas dengan pelayanan yang diberikan',
         ];
+
+        // Pertanyaan yang diubah lewat admin, hasil `php artisan content:export-seeders`.
+        $jsonPath = database_path('seeders/data/survey_questions.json');
+
+        if (File::exists($jsonPath)) {
+            $exported = json_decode(File::get($jsonPath), true);
+            $questions = $exported ? array_column($exported, 'question') : $questions;
+        }
 
         foreach ($questions as $order => $question) {
             SurveyQuestion::query()->updateOrCreate(
