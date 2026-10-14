@@ -118,5 +118,15 @@
         "thumbnail": null,
         "is_published": true,
         "published_at": "2026-07-31 09:26:00"
+    },
+    {
+        "title": "Jaga Data, Jaga Diri",
+        "slug": "jaga-data-jaga-diri",
+        "description": "Video interaktif ini membahas perilaku aman dalam menggunakan perangkat, akun, dan informasi digital. Pengguna akan menghadapi situasi keamanan dan menentukan apakah perilaku tersebut aman atau berisiko.",
+        "video_url": "interactive://jaga-data-jaga-diri",
+        "video_path": null,
+        "thumbnail": null,
+        "is_published": true,
+        "published_at": "2026-09-20 09:36:30"
     }
 ]

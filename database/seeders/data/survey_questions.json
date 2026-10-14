@@ -1,0 +1,38 @@
+[
+    {
+        "question": "Informasi pelayanan tersedia melalui media elektronik maupun nonelektronik",
+        "sort_order": 0
+    },
+    {
+        "question": "Persyaratan yang diminta sesuai dengan yang diinformasikan",
+        "sort_order": 1
+    },
+    {
+        "question": "Prosedur pelayanan mudah dipahami dan diikuti",
+        "sort_order": 2
+    },
+    {
+        "question": "Waktu pelayanan sesuai dengan yang telah dijanjikan",
+        "sort_order": 3
+    },
+    {
+        "question": "Petugas/pengelola memiliki kompetensi yang memadai dalam memberikan pelayanan",
+        "sort_order": 4
+    },
+    {
+        "question": "Petugas/pengelola bersikap sopan dan ramah dalam memberikan pelayanan",
+        "sort_order": 5
+    },
+    {
+        "question": "Pengaduan atau masukan pengguna layanan ditangani dengan baik",
+        "sort_order": 6
+    },
+    {
+        "question": "Sarana dan prasarana yang tersedia mendukung kenyamanan pengguna layanan",
+        "sort_order": 7
+    },
+    {
+        "question": "Secara keseluruhan saya puas dengan pelayanan yang diberikan",
+        "sort_order": 8
+    }
+]
