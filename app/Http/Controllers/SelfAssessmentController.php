@@ -86,7 +86,7 @@ class SelfAssessmentController extends Controller
 
         $request->session()->put('assessment_user_id', $user->id);
         $request->session()->put('assessment_pre_attempt_id', $attempt->id);
-        $request->session()->forget(['assessment_post_attempt_id', 'assessment_materi_viewed']);
+        $request->session()->forget(['assessment_post_attempt_id', 'assessment_materi_done', 'assessment_materi_opened']);
 
         return redirect()->route('self-assessment.pre.quiz');
     }
@@ -160,8 +160,9 @@ class SelfAssessmentController extends Controller
 
     /**
      * Show the mandatory study step between the Pre-Assessment result and
-     * the Post-Assessment: the single admin-managed Social Engineering
-     * material. Opening it is recorded so the Post-Assessment can unlock.
+     * the Post-Assessment: the admin-managed materials, one at a time and
+     * in order. Only finished materials and the current one can be opened;
+     * the ones after it stay locked until the current one is finished.
      */
     public function materi(Request $request)
     {
@@ -173,21 +174,88 @@ class SelfAssessmentController extends Controller
             return redirect()->route('self-assessment.post.quiz');
         }
 
-        $material = LearningMaterial::current();
+        $materials = LearningMaterial::readySequence();
+        $doneIds = $this->doneMaterialIds($request, $materials);
+        $currentIndex = $materials->search(fn (LearningMaterial $material) => ! in_array($material->id, $doneIds, true));
 
-        if ($material?->isReady()) {
-            $request->session()->put('assessment_materi_viewed', true);
+        // ?langkah=N reopens an earlier (finished) material; later ones are locked.
+        $shownIndex = $currentIndex === false ? null : $currentIndex;
+
+        if ($request->filled('langkah')) {
+            $requested = (int) $request->query('langkah') - 1;
+            $lastOpenable = $currentIndex === false ? $materials->count() - 1 : $currentIndex;
+
+            if ($requested < 0 || $requested > $lastOpenable) {
+                return redirect()->route('self-assessment.materi')
+                    ->with('error', 'Selesaikan materi secara berurutan. Materi berikutnya masih terkunci.');
+            }
+
+            $shownIndex = $requested;
+        }
+
+        $shown = $shownIndex === null ? null : $materials[$shownIndex];
+        $secondsSinceOpened = null;
+
+        if ($shown !== null && $shownIndex === $currentIndex) {
+            $opened = $request->session()->get('assessment_materi_opened', []);
+            $opened[$shown->id] ??= now()->getTimestamp();
+            $request->session()->put('assessment_materi_opened', $opened);
+            $secondsSinceOpened = now()->getTimestamp() - $opened[$shown->id];
         }
 
         return view('user.self-assessment.materi', [
-            'material' => $material?->isReady() ? $material : null,
+            'materials' => $materials,
+            'doneIds' => $doneIds,
+            'currentIndex' => $currentIndex === false ? null : $currentIndex,
+            'shown' => $shown,
+            'shownIndex' => $shownIndex,
+            'secondsSinceOpened' => $secondsSinceOpened,
         ]);
     }
 
     /**
+     * Mark the current material as finished once the respondent has gone
+     * through it (read every PDF page, watched the video to the end, or
+     * completed the interactive video), unlocking the next one.
+     */
+    public function materiSelesai(Request $request, LearningMaterial $material): RedirectResponse
+    {
+        if (! $this->postUnlocked($request)) {
+            return $this->postLockedRedirect();
+        }
+
+        $materials = LearningMaterial::readySequence();
+        $doneIds = $this->doneMaterialIds($request, $materials);
+        $current = $materials->first(fn (LearningMaterial $item) => ! in_array($item->id, $doneIds, true));
+
+        if ($current === null || ! $current->is($material)) {
+            return redirect()->route('self-assessment.materi')
+                ->with('error', 'Selesaikan materi secara berurutan.');
+        }
+
+        $openedAt = $request->session()->get('assessment_materi_opened', [])[$material->id] ?? null;
+
+        if ($openedAt === null) {
+            return redirect()->route('self-assessment.materi')
+                ->with('error', 'Pelajari materi ini terlebih dahulu.');
+        }
+
+        // A video cannot have been watched in full in less time than it lasts (small allowance for rounding).
+        if (in_array($material->file_type, ['video', 'youtube', 'instagram'], true) && $material->duration_seconds
+            && now()->getTimestamp() - $openedAt < $material->duration_seconds - 5) {
+            return redirect()->route('self-assessment.materi')
+                ->with('error', 'Tonton video sampai selesai sebelum melanjutkan.');
+        }
+
+        $request->session()->put('assessment_materi_done', [...$doneIds, $material->id]);
+
+        return redirect()->route('self-assessment.materi');
+    }
+
+    /**
      * Open the Post-Assessment attempt and move the user into the
-     * Post-Assessment quiz, once the study material has been opened and
-     * the user has confirmed studying it.
+     * Post-Assessment quiz, once every study material has been finished
+     * and the user has confirmed studying them.
      */
     public function materiLanjut(Request $request): RedirectResponse
     {
@@ -196,11 +264,11 @@ class SelfAssessmentController extends Controller
         }
 
         if ($request->session()->get('assessment_post_attempt_id') === null) {
-            $material = LearningMaterial::current();
+            $materials = LearningMaterial::readySequence();
 
-            if (! $material?->isReady() || ! $request->session()->has('assessment_materi_viewed')) {
+            if ($materials->isEmpty() || count($this->doneMaterialIds($request, $materials)) < $materials->count()) {
                 return redirect()->route('self-assessment.materi')
-                    ->with('error', 'Pelajari materi terlebih dahulu sebelum mengerjakan Post-Assessment.');
+                    ->with('error', 'Selesaikan semua materi terlebih dahulu sebelum mengerjakan Post-Assessment.');
             }
 
             if (! $request->boolean('confirm_studied')) {
@@ -323,7 +391,8 @@ class SelfAssessmentController extends Controller
             'assessment_user_id',
             'assessment_pre_attempt_id',
             'assessment_post_attempt_id',
-            'assessment_materi_viewed',
+            'assessment_materi_done',
+            'assessment_materi_opened',
         ]);
 
         return redirect()->route('self-assessment.create');
@@ -429,6 +498,20 @@ class SelfAssessmentController extends Controller
     {
         return $this->currentPreAttempt($request)?->completed_at !== null
             && $this->currentPostAttempt($request)?->completed_at === null;
+    }
+
+    /**
+     * Ids of the given materials the respondent has finished this round.
+     * Materials deleted or added by the admin since are naturally ignored
+     * or still pending.
+     *
+     * @return list<int>
+     */
+    private function doneMaterialIds(Request $request, $materials): array
+    {
+        $done = $request->session()->get('assessment_materi_done', []);
+
+        return $materials->pluck('id')->filter(fn ($id) => in_array($id, $done, true))->values()->all();
     }
 
     private function postLockedRedirect(): RedirectResponse
