@@ -14,9 +14,15 @@
     </section>
 
     <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        @include('partials.content-search', ['searchRoute' => 'articles.index', 'searchLabel' => 'artikel'])
+
         @if ($articles->isEmpty())
             <p class="rounded-xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500">
-                Belum ada artikel yang dipublikasikan.
+                @if ($search !== '')
+                    Tidak ada hasil untuk &ldquo;{{ $search }}&rdquo;. Coba kata kunci lain.
+                @else
+                    Belum ada artikel yang dipublikasikan.
+                @endif
             </p>
         @else
             <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">

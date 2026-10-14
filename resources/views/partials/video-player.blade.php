@@ -34,11 +34,11 @@
             <div class="absolute -right-12 -top-14 h-44 w-44 rounded-full bg-white/10 blur-2xl"></div>
             <div class="absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-teal-400/10 blur-2xl"></div>
         @endif
-        <div class="relative px-5 text-center">
-            <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-black/35 ring-1 ring-white/25 backdrop-blur-sm">
+        <div class="relative text-center {{ ($mobileCompact ?? false) ? 'px-2 sm:px-5' : 'px-5' }}">
+            <span class="mx-auto flex {{ ($mobileCompact ?? false) ? 'h-8 w-8 sm:h-12 sm:w-12' : 'h-12 w-12' }} items-center justify-center rounded-full bg-black/35 ring-1 ring-white/25 backdrop-blur-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-6 w-6"><path d="M8 5v14l11-7-11-7Z" fill="currentColor"/></svg>
             </span>
-            <span class="mt-3 block line-clamp-2 font-heading text-sm font-bold leading-snug text-white">{{ $video->title }}</span>        </div>
+            <span class="block line-clamp-2 font-heading font-bold leading-snug text-white {{ ($mobileCompact ?? false) ? 'mt-1 text-[10px] [overflow-wrap:anywhere] sm:mt-3 sm:text-sm' : 'mt-3 text-sm' }}">{{ $video->title }}</span>        </div>
     </a>
 @elseif ($youtubeId)
     <div class="aspect-video overflow-hidden rounded-xl bg-navy-900">
@@ -53,11 +53,11 @@
             <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($video->thumbnail) }}" alt="Thumbnail {{ $video->title }}" class="absolute inset-0 h-full w-full object-cover">
             <div class="absolute inset-0 bg-gradient-to-t from-navy-950/85 via-navy-950/10 to-transparent"></div>
         @endif
-        <div class="relative px-5 text-center">
-            <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-black/35 ring-1 ring-white/25 backdrop-blur-sm transition group-hover/ig:bg-black/55">
+        <div class="relative text-center {{ ($mobileCompact ?? false) ? 'px-2 sm:px-5' : 'px-5' }}">
+            <span class="mx-auto flex {{ ($mobileCompact ?? false) ? 'h-8 w-8 sm:h-12 sm:w-12' : 'h-12 w-12' }} items-center justify-center rounded-full bg-black/35 ring-1 ring-white/25 backdrop-blur-sm transition group-hover/ig:bg-black/55">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-6 w-6"><path d="M8 5v14l11-7-11-7Z" fill="currentColor"/></svg>
             </span>
-            <span class="mt-3 block line-clamp-2 font-heading text-sm font-bold leading-snug text-white">{{ $video->title }}</span>        </div>
+            <span class="block line-clamp-2 font-heading font-bold leading-snug text-white {{ ($mobileCompact ?? false) ? 'mt-1 text-[10px] [overflow-wrap:anywhere] sm:mt-3 sm:text-sm' : 'mt-3 text-sm' }}">{{ $video->title }}</span>        </div>
     </a>
 @elseif ($isInstagram)
     <div class="mx-auto w-full max-w-sm overflow-hidden rounded-xl">

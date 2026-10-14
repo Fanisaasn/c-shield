@@ -39,4 +39,10 @@ return [
         'url' => env('SKM_SURVEY_URL', 'https://skm.go.id/isi-survey/01267806-a585-4a88-9a01-d27929164b70/f563f710-123e-4bba-895a-f3c18fafecc1'),
     ],
 
+    'whatsapp' => [
+        'token' => env('WHATSAPP_TOKEN'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'api_version' => env('WHATSAPP_API_VERSION', 'v19.0'),
+    ],
+
 ];
