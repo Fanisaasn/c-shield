@@ -3,7 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Models\Article;
+use App\Models\AssessmentQuestion;
 use App\Models\Flyer;
+use App\Models\LearningMaterial;
+use App\Models\SurveyQuestion;
 use App\Models\Video;
 use App\Models\Webinar;
 use Illuminate\Console\Command;
@@ -15,7 +18,7 @@ class ExportContentSeeders extends Command
 {
     protected $signature = 'content:export-seeders';
 
-    protected $description = 'Ekspor data flyer, video, artikel, dan webinar dari database saat ini (beserta file gambar/videonya) ke database/seeders, supaya bisa dibagikan lewat git dan dimasukkan ulang lewat php artisan db:seed';
+    protected $description = 'Ekspor data flyer, video, artikel, webinar, materi belajar, soal assessment, dan pertanyaan survei dari database saat ini (beserta file gambar/videonya) ke database/seeders, supaya bisa dibagikan lewat git dan dimasukkan ulang lewat php artisan db:seed';
 
     protected string $dataPath;
 
@@ -33,6 +36,9 @@ class ExportContentSeeders extends Command
         $this->exportVideos();
         $this->exportArticles();
         $this->exportWebinars();
+        $this->exportLearningMaterial();
+        $this->exportAssessmentQuestions();
+        $this->exportSurveyQuestions();
 
         $this->newLine();
         $this->info('Selesai. Sekarang jalankan: git add database/seeders && git commit && git push');
@@ -117,6 +123,52 @@ class ExportContentSeeders extends Command
         $this->info('Webinar: '.count($webinars).' data diekspor.');
     }
 
+    protected function exportLearningMaterial(): void
+    {
+        $material = LearningMaterial::current();
+
+        $data = $material ? [
+            'title' => $material->title,
+            'description' => $material->description,
+            'file_path' => $this->copyToAssets($material->file_path),
+            'file_type' => $material->file_type,
+            'original_name' => $material->original_name,
+        ] : null;
+
+        $this->writeJson('learning_material.json', $data);
+        $this->info('Materi belajar: '.($data ? 1 : 0).' data diekspor.');
+    }
+
+    protected function exportAssessmentQuestions(): void
+    {
+        $questions = AssessmentQuestion::with(['options' => fn ($query) => $query->orderBy('order')])
+            ->orderBy('order')
+            ->get()
+            ->map(fn (AssessmentQuestion $question) => [
+                'question' => $question->question,
+                'order' => $question->order,
+                'options' => $question->options->map(fn ($option) => [
+                    'text' => $option->option_text,
+                    'correct' => $option->is_correct,
+                    'order' => $option->order,
+                ])->all(),
+            ])->all();
+
+        $this->writeJson('assessment_questions.json', $questions);
+        $this->info('Soal assessment: '.count($questions).' data diekspor.');
+    }
+
+    protected function exportSurveyQuestions(): void
+    {
+        $questions = SurveyQuestion::orderBy('sort_order')->get()->map(fn (SurveyQuestion $question) => [
+            'question' => $question->question,
+            'sort_order' => $question->sort_order,
+        ])->all();
+
+        $this->writeJson('survey_questions.json', $questions);
+        $this->info('Pertanyaan survei: '.count($questions).' data diekspor.');
+    }
+
     /**
      * Copy an uploaded file from the public disk into the git-tracked
      * database/seeders/assets folder, mirroring its relative path, so the
@@ -191,7 +243,7 @@ class ExportContentSeeders extends Command
         return $saved;
     }
 
-    protected function writeJson(string $filename, array $data): void
+    protected function writeJson(string $filename, ?array $data): void
     {
         File::put(
             $this->dataPath.DIRECTORY_SEPARATOR.$filename,

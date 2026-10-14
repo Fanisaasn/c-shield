@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\AssessmentQuestion;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
 
 class AssessmentSeeder extends Seeder
 {
@@ -133,6 +134,13 @@ class AssessmentSeeder extends Seeder
                 ],
             ],
         ];
+
+        // Soal yang diubah lewat admin, hasil `php artisan content:export-seeders`.
+        $jsonPath = database_path('seeders/data/assessment_questions.json');
+
+        if (File::exists($jsonPath)) {
+            $questions = json_decode(File::get($jsonPath), true) ?? $questions;
+        }
 
         foreach ($questions as $questionOrder => $questionData) {
             $question = AssessmentQuestion::query()->updateOrCreate(
