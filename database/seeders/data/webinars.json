@@ -1,22 +1,12 @@
 [
     {
-        "title": "Membangun Budaya Keamanan Siber di Lingkungan Kerja",
-        "description": "Webinar edukasi bagi ASN dan masyarakat Kota Cimahi mengenai pentingnya budaya keamanan siber sehari-hari.",
-        "speaker": "Tim Keamanan Informasi Diskominfo Kota Cimahi",
-        "webinar_date": "2026-09-14 09:00:00",
-        "platform": "Zoom Meeting",
-        "registration_url": "https://example.com/register/webinar-budaya-keamanan-siber",
-        "poster_image": null,
-        "is_published": true
-    },
-    {
-        "title": "Mengenali dan Menghindari Penipuan Digital",
-        "description": "Sesi berbagi pengalaman dan studi kasus penipuan digital yang sering terjadi di masyarakat.",
-        "speaker": "Narasumber Diskominfo Kota Cimahi",
-        "webinar_date": "2026-09-30 13:30:00",
-        "platform": "Google Meet",
-        "registration_url": "https://example.com/register/webinar-penipuan-digital",
-        "poster_image": null,
+        "title": "🕷️ WEBINAR SERIES 07 | THE NEW BATTLEFIELD 🕷️ The Darkside of Digital Life",
+        "description": "Naik sepeda menuju kota,\r\nBerhenti sebentar bertemu spiderman\r\nDunia maya penuh cerita\r\nDi balik kemudahan ada ancaman\r\n\r\n🕷️ WEBINAR SERIES 07 | THE NEW BATTLEFIELD 🕷️\r\nThe Darkside of Digital Life\r\n\r\nDunia digital memberikan kemudahan, tetapi di baliknya terdapat ancaman siber yang terus berkembang. Mulai dari pencurian data, penipuan online, hingga berbagai modus serangan yang dapat menyasar siapa saja.\r\n\r\nMelalui webinar ini, kita akan mengungkap berbagai ancaman siber yang sering terjadi, memahami bagaimana serangan dilakukan, serta mempelajari langkah-langkah sederhana untuk melindungi diri di era digital.\r\n\r\n🎙️ Narasumber:\r\n👤 Rifki Nugraha – Founder of Surosowan Cyber\r\n👤 Bramantyo Ardi – Founder of Surosowan Cyber\r\n\r\n🎤 Moderator:\r\nNisa Fauziyyah Handari, A.md.Kom – Sandiman Terampil\r\n\r\n🎙️ Opening Remarks:\r\nDrs. Ahmad Saefulloh, M.M. – Kepala Dinas Kominfo Kota Cimahi\r\n\r\n📅 Rabu, 19 Agustus 2026\r\n💻 Via Zoom Meeting\r\n\r\n🎁 Special Gift untuk peserta.\r\n\r\nJangan lewatkan kesempatan untuk menambah wawasan dan meningkatkan kesadaran keamanan digital. Karena di era digital, musuh terbesar sering kali tidak terlihat.\r\n\r\n#JUMATKAMISAE #CyberSecurity #SecurityAwareness #LiterasiDigital #KeamananSiber #DiskominfoCimahi #CimahiCSIRT",
+        "speaker": "👤 Rifki Nugraha – Founder of Surosowan Cyber 👤 Bramantyo Ardi – Founder of Surosowan Cyber",
+        "webinar_date": "2026-10-01 09:00:00",
+        "platform": "Zoom",
+        "registration_url": "https://s.id/regJUMATKAMI07",
+        "poster_image": "webinars/CpmmbipttVog9EcDp0SwaPijE3sZ5j7I2zTtzIfr.jpg",
         "is_published": true
     }
 ]

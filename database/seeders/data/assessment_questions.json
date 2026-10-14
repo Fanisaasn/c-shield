@@ -1,0 +1,340 @@
+[
+    {
+        "question": "Manakah contoh kata sandi yang paling aman untuk digunakan?",
+        "order": 1,
+        "options": [
+            {
+                "text": "123456",
+                "correct": false,
+                "order": 0
+            },
+            {
+                "text": "P@ssw0rd!2026",
+                "correct": true,
+                "order": 1
+            },
+            {
+                "text": "namasaya",
+                "correct": false,
+                "order": 2
+            },
+            {
+                "text": "A98Ku#@dah",
+                "correct": true,
+                "order": 3
+            }
+        ]
+    },
+    {
+        "question": "Apa langkah yang sebaiknya dilakukan agar akun tetap aman?",
+        "order": 2,
+        "options": [
+            {
+                "text": "Menggunakan kata sandi yang sama di semua akun",
+                "correct": false,
+                "order": 1
+            },
+            {
+                "text": "Mengaktifkan autentikasi dua faktor (2FA)",
+                "correct": true,
+                "order": 2
+            },
+            {
+                "text": "Menuliskan kata sandi di kertas dan menempelkannya di monitor",
+                "correct": false,
+                "order": 3
+            },
+            {
+                "text": "Membagikan kata sandi kepada rekan kerja",
+                "correct": false,
+                "order": 4
+            }
+        ]
+    },
+    {
+        "question": "Kapan sebaiknya sebuah kata sandi penting segera diganti?",
+        "order": 3,
+        "options": [
+            {
+                "text": "Tidak perlu pernah diganti",
+                "correct": false,
+                "order": 1
+            },
+            {
+                "text": "Secara berkala dan segera setelah ada indikasi kebocoran",
+                "correct": true,
+                "order": 2
+            },
+            {
+                "text": "Hanya jika lupa",
+                "correct": false,
+                "order": 3
+            },
+            {
+                "text": "Setahun sekali tanpa alasan tertentu",
+                "correct": false,
+                "order": 4
+            }
+        ]
+    },
+    {
+        "question": "Apa yang dimaksud dengan phishing?",
+        "order": 4,
+        "options": [
+            {
+                "text": "Aktivitas menjaga jaringan dari virus",
+                "correct": false,
+                "order": 1
+            },
+            {
+                "text": "Upaya penipuan untuk mencuri data pribadi melalui email/pesan palsu",
+                "correct": true,
+                "order": 2
+            },
+            {
+                "text": "Proses backup data ke cloud",
+                "correct": false,
+                "order": 3
+            },
+            {
+                "text": "Aplikasi antivirus resmi",
+                "correct": false,
+                "order": 4
+            }
+        ]
+    },
+    {
+        "question": "Tindakan yang tepat saat menerima pesan mencurigakan yang meminta data pribadi adalah...",
+        "order": 5,
+        "options": [
+            {
+                "text": "Langsung membalas dengan data yang diminta",
+                "correct": false,
+                "order": 1
+            },
+            {
+                "text": "Mengklik semua tautan untuk memastikan",
+                "correct": false,
+                "order": 2
+            },
+            {
+                "text": "Tidak mengklik tautan dan melaporkan/menghapus pesan tersebut",
+                "correct": true,
+                "order": 3
+            },
+            {
+                "text": "Meneruskan ke rekan kerja lain tanpa verifikasi",
+                "correct": false,
+                "order": 4
+            }
+        ]
+    },
+    {
+        "question": "Ciri umum pesan phishing adalah...",
+        "order": 6,
+        "options": [
+            {
+                "text": "Menggunakan bahasa formal dari instansi resmi",
+                "correct": false,
+                "order": 1
+            },
+            {
+                "text": "Mendesak korban bertindak cepat dengan ancaman atau iming-iming",
+                "correct": true,
+                "order": 2
+            },
+            {
+                "text": "Tidak memiliki tautan apa pun",
+                "correct": false,
+                "order": 3
+            },
+            {
+                "text": "Dikirim dari alamat email resmi yang telah terverifikasi",
+                "correct": false,
+                "order": 4
+            }
+        ]
+    },
+    {
+        "question": "Mengapa penting untuk selalu memperbarui (update) sistem operasi dan aplikasi?",
+        "order": 7,
+        "options": [
+            {
+                "text": "Untuk menambah ruang penyimpanan",
+                "correct": false,
+                "order": 1
+            },
+            {
+                "text": "Untuk menutup celah keamanan yang telah ditemukan",
+                "correct": true,
+                "order": 2
+            },
+            {
+                "text": "Agar tampilan aplikasi lebih menarik",
+                "correct": false,
+                "order": 3
+            },
+            {
+                "text": "Tidak memberikan manfaat apa pun",
+                "correct": false,
+                "order": 4
+            }
+        ]
+    },
+    {
+        "question": "Apa risiko menggunakan Wi-Fi publik tanpa proteksi tambahan?",
+        "order": 8,
+        "options": [
+            {
+                "text": "Tidak ada risiko sama sekali",
+                "correct": false,
+                "order": 1
+            },
+            {
+                "text": "Data dapat disadap oleh pihak yang tidak bertanggung jawab",
+                "correct": true,
+                "order": 2
+            },
+            {
+                "text": "Baterai perangkat menjadi lebih awet",
+                "correct": false,
+                "order": 3
+            },
+            {
+                "text": "Koneksi otomatis menjadi lebih cepat",
+                "correct": false,
+                "order": 4
+            }
+        ]
+    },
+    {
+        "question": "Apa fungsi utama antivirus pada sebuah perangkat?",
+        "order": 9,
+        "options": [
+            {
+                "text": "Mempercepat kinerja perangkat",
+                "correct": false,
+                "order": 1
+            },
+            {
+                "text": "Mendeteksi dan mencegah perangkat lunak berbahaya (malware)",
+                "correct": true,
+                "order": 2
+            },
+            {
+                "text": "Menghapus seluruh data secara otomatis",
+                "correct": false,
+                "order": 3
+            },
+            {
+                "text": "Mengganti kata sandi secara berkala",
+                "correct": false,
+                "order": 4
+            }
+        ]
+    },
+    {
+        "question": "Data pribadi yang sebaiknya tidak dibagikan sembarangan di media sosial adalah...",
+        "order": 10,
+        "options": [
+            {
+                "text": "Nomor KTP, alamat rumah, dan data keuangan",
+                "correct": true,
+                "order": 1
+            },
+            {
+                "text": "Nama akun media sosial",
+                "correct": false,
+                "order": 2
+            },
+            {
+                "text": "Judul foto profil",
+                "correct": false,
+                "order": 3
+            },
+            {
+                "text": "Nama aplikasi yang sedang digunakan",
+                "correct": false,
+                "order": 4
+            }
+        ]
+    },
+    {
+        "question": "Sebelum menginstal sebuah aplikasi, sebaiknya pengguna...",
+        "order": 11,
+        "options": [
+            {
+                "text": "Langsung menyetujui semua izin akses tanpa membaca",
+                "correct": false,
+                "order": 1
+            },
+            {
+                "text": "Memeriksa sumber aplikasi dan izin akses yang diminta",
+                "correct": true,
+                "order": 2
+            },
+            {
+                "text": "Menginstal dari sumber tidak resmi agar gratis",
+                "correct": false,
+                "order": 3
+            },
+            {
+                "text": "Mengabaikan kebijakan privasi aplikasi",
+                "correct": false,
+                "order": 4
+            }
+        ]
+    },
+    {
+        "question": "Apa yang sebaiknya dilakukan jika menemukan informasi yang belum jelas kebenarannya (hoaks)?",
+        "order": 12,
+        "options": [
+            {
+                "text": "Langsung membagikan ke banyak grup",
+                "correct": false,
+                "order": 1
+            },
+            {
+                "text": "Memverifikasi kebenaran informasi sebelum membagikannya",
+                "correct": true,
+                "order": 2
+            },
+            {
+                "text": "Menambahkan judul yang lebih provokatif",
+                "correct": false,
+                "order": 3
+            },
+            {
+                "text": "Mengabaikan tanpa memeriksa lebih lanjut",
+                "correct": false,
+                "order": 4
+            }
+        ]
+    },
+    {
+        "question": "Mengapa penting melaporkan insiden keamanan siber yang dialami?",
+        "order": 13,
+        "options": [
+            {
+                "text": "Agar dapat ditindaklanjuti dan mencegah dampak yang lebih luas",
+                "correct": true,
+                "order": 1
+            },
+            {
+                "text": "Karena wajib menurut hukum tanpa manfaat lain",
+                "correct": false,
+                "order": 2
+            },
+            {
+                "text": "Agar mendapatkan hadiah",
+                "correct": false,
+                "order": 3
+            },
+            {
+                "text": "Tidak ada gunanya melaporkan",
+                "correct": false,
+                "order": 4
+            }
+        ]
+    }
+]
