@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\AssessmentController as AdminAssessmentController
 use App\Http\Controllers\Admin\LearningMaterialController as AdminLearningMaterialController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\SurveyQuestionController as AdminSurveyQuestionController;
+use App\Http\Controllers\Admin\WebinarRegistrationController as AdminWebinarRegistrationController;
+use App\Http\Controllers\Admin\EditDashboardController as AdminEditDashboardController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\FlyerController;
 use App\Http\Controllers\HomeController;
@@ -17,6 +19,7 @@ use App\Http\Controllers\SelfAssessmentController;
 use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\WebinarController;
+use App\Http\Controllers\WebinarRegistrationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -33,6 +36,7 @@ Route::get('/flyer/{flyer}', [FlyerController::class, 'show'])->name('flyers.sho
 Route::post('/survei', [SurveyController::class, 'store'])->name('survey.store');
 
 Route::get('/webinar', [WebinarController::class, 'index'])->name('webinars.index');
+Route::post('/webinar/{webinar}/register', [WebinarRegistrationController::class, 'store'])->name('webinars.register');
 
 Route::prefix('self-assessment')->name('self-assessment.')->group(function () {
     Route::get('/', [SelfAssessmentController::class, 'index'])->name('index');
@@ -54,7 +58,12 @@ Route::prefix('self-assessment')->name('self-assessment.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
         Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
-        Route::post('/login', [AdminAuthController::class, 'login'])->name('login.attempt');
+        Route::get('/login/captcha', [AdminAuthController::class, 'captchaImage'])
+            ->middleware('throttle:30,1')
+            ->name('captcha.image');
+        Route::post('/login', [AdminAuthController::class, 'login'])
+            ->middleware('throttle:5,1')
+            ->name('login.attempt');
     });
 
     Route::middleware('auth:admin')->group(function () {
@@ -75,5 +84,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('survey-questions/{question}', [AdminSurveyQuestionController::class, 'update'])->name('survey-questions.update');
         Route::delete('survey-questions/{question}', [AdminSurveyQuestionController::class, 'destroy'])->name('survey-questions.destroy');
         Route::get('reports', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/export-assessment', [AdminReportController::class, 'exportAssessment'])->name('reports.export-assessment');
+        Route::get('reports/export-webinar', [AdminReportController::class, 'exportWebinarRegistrations'])->name('reports.export-webinar');
+
+        Route::get('webinar-registrations', [AdminWebinarRegistrationController::class, 'index'])->name('webinar-registrations.index');
+        Route::post('webinar-registrations/{webinar}/send-whatsapp', [AdminWebinarRegistrationController::class, 'sendWhatsApp'])->name('webinar-registrations.send-whatsapp');
+        Route::post('webinar-registrations/{registration}/send-single', [AdminWebinarRegistrationController::class, 'sendSingle'])->name('webinar-registrations.send-single');
+        Route::post('webinar-registrations/{registration}/toggle-status', [AdminWebinarRegistrationController::class, 'toggleStatus'])->name('webinar-registrations.toggle-status');
+        Route::get('webinar-registrations/{webinar}/export', [AdminWebinarRegistrationController::class, 'export'])->name('webinar-registrations.export');
+
+        // Edit Dashboard (Logo & Slide Hero)
+        Route::get('edit-dashboard', [AdminEditDashboardController::class, 'index'])->name('edit-dashboard.index');
+        Route::post('edit-dashboard/logo', [AdminEditDashboardController::class, 'updateLogo'])->name('edit-dashboard.logo');
+        Route::post('edit-dashboard/settings', [AdminEditDashboardController::class, 'updateLogo'])->name('edit-dashboard.settings');
+        Route::post('edit-dashboard/reset-logo', [AdminEditDashboardController::class, 'resetLogo'])->name('edit-dashboard.reset-logo');
+        Route::post('edit-dashboard/slides', [AdminEditDashboardController::class, 'storeSlide'])->name('edit-dashboard.slides.store');
+        Route::put('edit-dashboard/slides/{slide}', [AdminEditDashboardController::class, 'updateSlide'])->name('edit-dashboard.slides.update');
+        Route::delete('edit-dashboard/slides/{slide}', [AdminEditDashboardController::class, 'destroySlide'])->name('edit-dashboard.slides.destroy');
+        Route::patch('edit-dashboard/slides/{slide}/toggle', [AdminEditDashboardController::class, 'toggleSlide'])->name('edit-dashboard.slides.toggle');
+        Route::post('edit-dashboard/slides/reorder', [AdminEditDashboardController::class, 'reorderSlides'])->name('edit-dashboard.slides.reorder');
     });
 });

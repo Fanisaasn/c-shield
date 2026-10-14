@@ -67,7 +67,39 @@ class HomeController extends Controller
             'prePostComparison' => $this->recentPrePostComparison(self::COMPARISON_LIMIT),
         ];
 
-        return view('user.home', compact('latestArticles', 'upcomingWebinars', 'assessmentStats'));
+        $slides = collect();
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('dashboard_slides')) {
+                $slides = \App\Models\DashboardSlide::query()->active()->ordered()->get();
+            }
+        } catch (\Throwable $e) {
+            // Silently fallback if table not yet migrated
+        }
+
+        if ($slides->isEmpty()) {
+            $slides = collect([
+                (object) [
+                    'id' => 1,
+                    'title' => 'Cimahi Cyber Security Hub',
+                    'description' => 'Pusat informasi dan edukasi keamanan siber terpadu Kota Cimahi.',
+                    'image_url' => 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=2200&q=82',
+                ],
+                (object) [
+                    'id' => 2,
+                    'title' => 'Infrastruktur Keamanan Digital',
+                    'description' => 'Meningkatkan ketahanan sistem dan data aparatur serta masyarakat.',
+                    'image_url' => 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=2200&q=82',
+                ],
+                (object) [
+                    'id' => 3,
+                    'title' => 'Edukasi & Kesadaran Siber',
+                    'description' => 'Tingkatkan kesadaran keamanan digital melalui materi interaktif dan self-assessment.',
+                    'image_url' => 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=2200&q=82',
+                ],
+            ]);
+        }
+
+        return view('user.home', compact('latestArticles', 'upcomingWebinars', 'assessmentStats', 'slides'));
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Webinar extends Model
 {
@@ -13,6 +14,7 @@ class Webinar extends Model
         'webinar_date',
         'platform',
         'registration_url',
+        'meeting_link',
         'poster_image',
         'is_published',
     ];
@@ -23,5 +25,10 @@ class Webinar extends Model
             'webinar_date' => 'datetime',
             'is_published' => 'boolean',
         ];
+    }
+
+    public function registrations(): HasMany
+    {
+        return $this->hasMany(WebinarRegistration::class);
     }
 }

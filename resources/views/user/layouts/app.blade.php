@@ -16,15 +16,19 @@
 </head>
 <body data-public-motion class="flex min-h-screen flex-col bg-slate-50 font-sans text-navy-900 antialiased">
 
-    <header class="sticky top-0 z-50 border-b border-navy-800/10 bg-navy-900">
+    <header class="sticky top-0 z-50 border-b border-navy-800/10 bg-navy-900 transition-colors">
         <nav class="mx-auto flex max-w-7xl flex-wrap items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-            <a href="{{ route('home') }}" class="flex items-center gap-2 font-heading text-lg font-bold text-white">
-                <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500 text-navy-950">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-5 w-5">
-                        <path d="M12 2 4 5v6c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V5l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="currentColor" fill-opacity="0.15"/>
-                        <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </span>
+            <a href="{{ route('home') }}" class="flex items-center gap-2.5 font-heading text-lg font-bold text-white">
+                @if (!empty($appLogoUrl))
+                    <img src="{{ $appLogoUrl }}" alt="Logo" class="h-9 w-auto max-w-[150px] object-contain">
+                @else
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500 text-navy-950">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-5 w-5">
+                            <path d="M12 2 4 5v6c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V5l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="currentColor" fill-opacity="0.15"/>
+                            <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                @endif
                 <span>C-SHIELD</span>
             </a>
 
@@ -66,13 +70,17 @@
         <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
             <div class="grid gap-8 md:grid-cols-3">
                 <div>
-                    <div class="flex items-center gap-2 font-heading text-base font-bold text-white">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500 text-navy-950">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-4 w-4">
-                                <path d="M12 2 4 5v6c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V5l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="currentColor" fill-opacity="0.15"/>
-                                <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </span>
+                    <div class="flex items-center gap-2.5 font-heading text-base font-bold text-white">
+                        @if (!empty($appLogoUrl))
+                            <img src="{{ $appLogoUrl }}" alt="Logo" class="h-8 w-auto max-w-[130px] object-contain">
+                        @else
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500 text-navy-950">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-4 w-4">
+                                    <path d="M12 2 4 5v6c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V5l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="currentColor" fill-opacity="0.15"/>
+                                    <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                        @endif
                         C-SHIELD
                     </div>
                     <p class="mt-3 text-sm leading-relaxed text-slate-400">

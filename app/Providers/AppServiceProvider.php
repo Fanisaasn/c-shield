@@ -31,5 +31,19 @@ class AppServiceProvider extends ServiceProvider
 
             return Str::squish(html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
         });
+
+        // Bagikan URL logo dinamis ke seluruh view Blade
+        \Illuminate\Support\Facades\View::composer('*', function ($view) {
+            $logoUrl = null;
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('dashboard_settings')) {
+                    $logoUrl = \App\Models\DashboardSetting::getLogoUrl();
+                }
+            } catch (\Throwable $e) {
+                // Silently fallback jika database belum terhubung
+            }
+
+            $view->with('appLogoUrl', $logoUrl);
+        });
     }
 }

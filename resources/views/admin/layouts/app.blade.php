@@ -42,13 +42,17 @@
     <div id="admin-sidebar-overlay" onclick="document.getElementById('admin-sidebar').classList.add('-translate-x-full'); this.classList.add('hidden')" class="fixed inset-0 z-30 hidden bg-navy-950/50 md:hidden"></div>
 
     <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-40 flex h-screen w-64 -translate-x-full flex-col bg-navy-900 transition-transform duration-200 md:z-auto md:translate-x-0">
-        <div class="flex items-center gap-2 px-6 py-5">
-            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500 text-navy-950">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-5 w-5">
-                    <path d="M12 2 4 5v6c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V5l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="currentColor" fill-opacity="0.15"/>
-                    <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </span>
+        <div class="flex items-center gap-2.5 px-6 py-5">
+            @if (!empty($appLogoUrl))
+                <img src="{{ $appLogoUrl }}" alt="Logo" class="h-8 w-auto max-w-[130px] object-contain">
+            @else
+                <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500 text-navy-950">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-5 w-5">
+                        <path d="M12 2 4 5v6c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V5l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="currentColor" fill-opacity="0.15"/>
+                        <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+            @endif
             <span class="font-heading text-base font-bold text-white">C-SHIELD Admin</span>
         </div>
 
@@ -60,7 +64,15 @@
                 </svg>
                 Dashboard
             </a>
-            @foreach (['articles' => 'Artikel', 'videos' => 'Video Edukasi', 'flyers' => 'Flyer', 'webinars' => 'Webinar', 'assessments' => 'Self-Assessment', 'learning-material' => 'Materi Belajar', 'survey-questions' => 'Survei Kepuasan', 'reports' => 'Monitoring & Laporan'] as $section => $label)
+            <a href="{{ route('admin.edit-dashboard.index') }}"
+               class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.edit-dashboard.*') ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-4 w-4 shrink-0">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Edit Dashboard
+            </a>
+            @foreach (['articles' => 'Artikel', 'videos' => 'Video Edukasi', 'flyers' => 'Flyer', 'webinars' => 'Webinar', 'webinar-registrations' => 'Pendaftaran Webinar', 'assessments' => 'Self-Assessment', 'learning-material' => 'Materi Belajar', 'survey-questions' => 'Survei Kepuasan', 'reports' => 'Monitoring & Laporan'] as $section => $label)
                 <a href="{{ route('admin.'.$section.'.index') }}" class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.'.$section.'.*') ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white' }}">{{ $label }}</a>
             @endforeach
         </nav>

@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 
 class ExportContentSeeders extends Command
 {
-    protected $signature = 'content:export-seeders';
+    protected $signature = 'content:export-seeders {--only= : Export only flyers, videos, articles, or webinars}';
 
     protected $description = 'Ekspor data flyer, video, artikel, webinar, materi belajar, soal assessment, dan pertanyaan survei dari database saat ini (beserta file gambar/videonya) ke database/seeders, supaya bisa dibagikan lewat git dan dimasukkan ulang lewat php artisan db:seed';
 
@@ -26,19 +26,34 @@ class ExportContentSeeders extends Command
 
     public function handle(): int
     {
+        $exports = [
+            'flyers' => 'exportFlyers',
+            'videos' => 'exportVideos',
+            'articles' => 'exportArticles',
+            'webinars' => 'exportWebinars',
+        ];
+        $only = $this->option('only');
+        if ($only !== null && ! isset($exports[$only])) {
+            $this->error('--only must be flyers, videos, articles, or webinars.');
+
+            return self::FAILURE;
+        }
+
         $this->dataPath = database_path('seeders/data');
         $this->assetsPath = database_path('seeders/assets');
 
         File::ensureDirectoryExists($this->dataPath);
         File::ensureDirectoryExists($this->assetsPath);
 
-        $this->exportFlyers();
-        $this->exportVideos();
-        $this->exportArticles();
-        $this->exportWebinars();
-        $this->exportLearningMaterial();
-        $this->exportAssessmentQuestions();
-        $this->exportSurveyQuestions();
+        try {
+            foreach ($only === null ? $exports : [$exports[$only]] as $method) {
+                $this->$method();
+            }
+        } catch (\RuntimeException $exception) {
+            $this->error($exception->getMessage());
+
+            return self::FAILURE;
+        }
 
         $this->newLine();
         $this->info('Selesai. Sekarang jalankan: git add database/seeders && git commit && git push');
@@ -184,7 +199,7 @@ class ExportContentSeeders extends Command
         }
 
         if (! Storage::disk('public')->exists($relativePath)) {
-            return null;
+            throw new \RuntimeException("Cannot export missing public media: {$relativePath}. Restore the original file before exporting; this content JSON was not replaced.");
         }
 
         $source = Storage::disk('public')->path($relativePath);
@@ -192,7 +207,9 @@ class ExportContentSeeders extends Command
         File::ensureDirectoryExists(dirname($destination));
 
         if (! $this->compressImage($source, $destination)) {
-            File::copy($source, $destination);
+            if (! File::copy($source, $destination)) {
+                throw new \RuntimeException("Cannot copy exported media: {$relativePath}");
+            }
         }
 
         return $relativePath;
