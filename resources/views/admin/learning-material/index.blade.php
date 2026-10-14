@@ -1,50 +1,64 @@
 @extends('admin.layouts.app')
 @section('title', 'Materi Belajar')
 @section('content')
-<form method="POST" enctype="multipart/form-data" action="{{ route('admin.learning-material.update') }}" class="max-w-3xl space-y-5 rounded-xl border border-slate-200 bg-white p-6">
-    @csrf
-    @method('PUT')
+<div class="flex flex-wrap items-start justify-between gap-3">
+    <p class="max-w-2xl text-sm text-slate-500">
+        Materi wajib dipelajari responden secara berurutan setelah Pre-Assessment.
+    </p>
+    <a href="{{ route('admin.learning-material.create') }}" class="rounded-md bg-teal-500 px-4 py-2 text-sm font-semibold text-navy-950">Tambah Materi</a>
+</div>
 
-    <div>
-        <h2 class="font-heading font-bold">Materi Social Engineering</h2>
-        <p class="mt-1 text-xs text-slate-500">
-            Materi ini wajib dipelajari responden setelah Pre-Assessment. Post-Assessment baru dapat dibuka setelah
-            responden membuka materi ini dan mencentang konfirmasi sudah mempelajarinya.
-        </p>
-    </div>
-
-    <div>
-        <label class="text-sm font-medium" for="title">Judul materi</label>
-        <input id="title" name="title" value="{{ old('title', $material->title) }}" class="mt-1 w-full rounded-md border-slate-300" required>
-        @error('title')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-    </div>
-
-    <div>
-        <label class="text-sm font-medium" for="description">Ringkasan / pengantar <span class="text-slate-400">(opsional)</span></label>
-        <textarea id="description" name="description" rows="4" class="mt-1 w-full rounded-md border-slate-300">{{ old('description', $material->description) }}</textarea>
-        @error('description')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-    </div>
-
-    <div>
-        <label class="text-sm font-medium" for="file">
-            File materi
-            @if ($material->file_path)<span class="text-slate-400">(kosongkan bila tidak ingin mengganti)</span>@endif
-        </label>
-        <input id="file" type="file" name="file" accept=".pdf,.ppt,.pptx,.mp4,.webm" class="mt-1 block w-full text-sm" @required(! $material->file_path)>
-        <p class="mt-1 text-xs text-slate-400">
-            Format: PDF, PPT/PPTX, atau video MP4/WebM. Maksimal 100 MB.
-            PDF dan video tampil langsung di halaman. PPT/PPTX hanya tampil langsung bila situs sudah online (memakai
-            penampil Microsoft Office); di localhost responden perlu mengunduhnya, jadi disarankan mengekspor PPT ke PDF.
-        </p>
-        @error('file')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-        @if ($material->file_path)
-            <p class="mt-2 text-xs text-slate-500">
-                File saat ini ({{ strtoupper($material->file_type) }}):
-                <a href="{{ $material->fileUrl() }}" target="_blank" rel="noopener" class="text-teal-700 underline">{{ $material->original_name ?: basename($material->file_path) }}</a>
-            </p>
-        @endif
-    </div>
-
-    <button class="rounded-md bg-teal-500 px-4 py-2 text-sm font-semibold">Simpan materi</button>
-</form>
+<div class="mt-5 overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <table class="min-w-full text-left text-sm">
+        <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+            <tr>
+                <th class="px-4 py-3">Urutan</th>
+                <th class="px-4 py-3">Judul</th>
+                <th class="px-4 py-3">Jenis</th>
+                <th class="px-4 py-3">Diperbarui</th>
+                <th class="px-4 py-3"></th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+            @forelse ($materials as $material)
+                <tr>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-1">
+                            <span class="w-6 font-semibold text-navy-900">{{ $loop->iteration }}</span>
+                            @foreach (['up' => '↑', 'down' => '↓'] as $direction => $arrow)
+                                <form method="POST" action="{{ route('admin.learning-material.move', $material) }}">
+                                    @csrf
+                                    <input type="hidden" name="direction" value="{{ $direction }}">
+                                    <button class="rounded border border-slate-200 px-2 text-slate-500 hover:bg-slate-50 disabled:opacity-30"
+                                            title="{{ $direction === 'up' ? 'Naikkan' : 'Turunkan' }}"
+                                            @disabled($direction === 'up' ? $loop->first : $loop->last)>{{ $arrow }}</button>
+                                </form>
+                            @endforeach
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 font-medium text-navy-900">
+                        {{ $material->title }}
+                        @unless ($material->isReady())
+                            <span class="ml-1 text-xs font-normal text-amber-600">(belum ada file, dilewati)</span>
+                        @endunless
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="rounded-full px-2 py-1 text-xs font-semibold {{ $material->isInteractive() ? 'bg-teal-50 text-teal-700' : 'bg-slate-100 text-slate-600' }}">{{ $material->typeLabel() }}</span>
+                    </td>
+                    <td class="px-4 py-3 text-slate-500">{{ $material->updated_at->format('d M Y') }}</td>
+                    <td class="px-4 py-3 text-right">
+                        <a class="mr-3 text-teal-700" href="{{ route('admin.learning-material.edit', $material) }}">Edit</a>
+                        <form class="inline" method="POST" action="{{ route('admin.learning-material.destroy', $material) }}">
+                            @csrf
+                            @method('DELETE')
+                            <button onclick="return confirm('Hapus materi ini?')" class="text-red-600">Hapus</button>
+                        </form>
+                    </td>
+                </tr>
+            @empty
+                <tr><td colspan="5" class="px-4 py-8 text-center text-slate-400">Belum ada materi. Post-Assessment tidak dapat dibuka sampai ada minimal satu materi.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
 @endsection

@@ -48,6 +48,7 @@ Route::prefix('self-assessment')->name('self-assessment.')->group(function () {
     Route::get('/pre/hasil', [SelfAssessmentController::class, 'preResult'])->name('pre.result');
     Route::get('/materi', [SelfAssessmentController::class, 'materi'])->name('materi');
     Route::post('/materi/lanjut', [SelfAssessmentController::class, 'materiLanjut'])->name('materi.lanjut');
+    Route::post('/materi/{material}/selesai', [SelfAssessmentController::class, 'materiSelesai'])->name('materi.selesai');
     Route::get('/post', [SelfAssessmentController::class, 'postQuiz'])->name('post.quiz');
     Route::post('/post', [SelfAssessmentController::class, 'storePostQuiz'])->name('post.store');
     Route::get('/post/hasil', [SelfAssessmentController::class, 'postResult'])->name('post.result');
@@ -78,7 +79,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('assessments/questions/{question}', [AdminAssessmentController::class, 'updateQuestion'])->name('assessments.questions.update');
         Route::delete('assessments/questions/{question}', [AdminAssessmentController::class, 'destroyQuestion'])->name('assessments.questions.destroy');
         Route::get('materi-belajar', [AdminLearningMaterialController::class, 'index'])->name('learning-material.index');
-        Route::put('materi-belajar', [AdminLearningMaterialController::class, 'update'])->name('learning-material.update');
+        Route::get('materi-belajar/tambah', [AdminLearningMaterialController::class, 'create'])->name('learning-material.create');
+        Route::post('materi-belajar', [AdminLearningMaterialController::class, 'store'])->name('learning-material.store');
+        Route::get('materi-belajar/{material}/edit', [AdminLearningMaterialController::class, 'edit'])->name('learning-material.edit');
+        Route::put('materi-belajar/{material}', [AdminLearningMaterialController::class, 'update'])->name('learning-material.update');
+        Route::delete('materi-belajar/{material}', [AdminLearningMaterialController::class, 'destroy'])->name('learning-material.destroy');
+        Route::post('materi-belajar/{material}/pindah', [AdminLearningMaterialController::class, 'move'])->name('learning-material.move');
         Route::get('survey-questions', [AdminSurveyQuestionController::class, 'index'])->name('survey-questions.index');
         Route::post('survey-questions', [AdminSurveyQuestionController::class, 'store'])->name('survey-questions.store');
         Route::put('survey-questions/{question}', [AdminSurveyQuestionController::class, 'update'])->name('survey-questions.update');

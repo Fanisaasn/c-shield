@@ -3,29 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Video;
+use App\Support\InteractivePackage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
-use PharData;
-use RecursiveIteratorIterator;
 use Throwable;
 
 class VideoController extends ContentController
 {
     private const MAX_VIDEO_SIZE_KB = 102400; // 100 MB
-    private const MAX_INTERACTIVE_SIZE_KB = 39936; // 39 MB compressed (below PHP's 40 MB POST limit)
-    private const MAX_INTERACTIVE_UNCOMPRESSED_BYTES = 209715200; // 200 MB
-    private const MAX_INTERACTIVE_FILES = 2000;
-
-    private const INTERACTIVE_EXTENSIONS = [
-        'html', 'htm', 'css', 'js', 'json', 'txt', 'md', 'xml',
-        'svg', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'ico',
-        'mp3', 'wav', 'ogg', 'm4a', 'aac', 'mp4', 'webm',
-        'woff', 'woff2', 'ttf', 'otf', 'vtt',
-    ];
 
     protected string $model = Video::class;
 
@@ -119,7 +107,7 @@ class VideoController extends ContentController
             'nullable',
             'file',
             'mimes:zip',
-            'max:'.self::MAX_INTERACTIVE_SIZE_KB,
+            'max:'.InteractivePackage::MAX_SIZE_KB,
         ];
 
         $data = $request->validate($rules, [
@@ -146,7 +134,7 @@ class VideoController extends ContentController
             $data['video_path'] = null;
 
             if ($request->hasFile('interactive_zip')) {
-                $data['interactive_path'] = $this->storeInteractivePackage($request);
+                $data['interactive_path'] = InteractivePackage::store($request->file('interactive_zip'), 'interactive-videos', 'interactive_zip');
             }
         } else {
             $data['interactive_path'] = null;
@@ -172,93 +160,8 @@ class VideoController extends ContentController
         }
     }
 
-    private function storeInteractivePackage(Request $request): string
-    {
-        $packageId = (string) Str::uuid();
-        $temporaryName = $packageId.'.zip';
-        $temporaryPath = $request->file('interactive_zip')->storeAs('interactive-video-temp', $temporaryName, 'local');
-
-        if (! $temporaryPath) {
-            throw ValidationException::withMessages(['interactive_zip' => 'ZIP gagal disimpan untuk diproses.']);
-        }
-
-        $absolutePath = Storage::disk('local')->path($temporaryPath);
-        $destination = 'interactive-videos/'.$packageId;
-
-        try {
-            $archive = new PharData($absolutePath);
-            $prefix = 'phar://'.str_replace('\\', '/', $absolutePath).'/';
-            $entries = [];
-            $indexFiles = [];
-            $totalBytes = 0;
-
-            foreach (new RecursiveIteratorIterator($archive) as $uri => $file) {
-                if ($file->isDir()) {
-                    continue;
-                }
-
-                $relativePath = str_replace('\\', '/', substr(str_replace('\\', '/', (string) $uri), strlen($prefix)));
-                $segments = explode('/', $relativePath);
-                $extension = strtolower(pathinfo($relativePath, PATHINFO_EXTENSION));
-
-                if ($relativePath === '' || str_starts_with($relativePath, '/') || str_contains($relativePath, "\0") || in_array('..', $segments, true) || str_contains($relativePath, ':')) {
-                    throw ValidationException::withMessages(['interactive_zip' => 'ZIP berisi path file yang tidak aman.']);
-                }
-
-                if (str_starts_with($relativePath, '__MACOSX/') || basename($relativePath) === '.DS_Store') {
-                    continue;
-                }
-
-                if (! in_array($extension, self::INTERACTIVE_EXTENSIONS, true)) {
-                    throw ValidationException::withMessages(['interactive_zip' => "Jenis file .{$extension} tidak diizinkan di dalam ZIP."]);
-                }
-
-                $totalBytes += $file->getSize();
-                $entries[] = [$relativePath, (string) $uri];
-
-                if (strtolower(basename($relativePath)) === 'index.html') {
-                    $indexFiles[] = $relativePath;
-                }
-
-                if (count($entries) > self::MAX_INTERACTIVE_FILES || $totalBytes > self::MAX_INTERACTIVE_UNCOMPRESSED_BYTES) {
-                    throw ValidationException::withMessages(['interactive_zip' => 'Isi ZIP terlalu besar atau memiliki terlalu banyak file.']);
-                }
-            }
-
-            if ($indexFiles === []) {
-                throw ValidationException::withMessages(['interactive_zip' => 'ZIP harus memiliki file index.html.']);
-            }
-
-            usort($indexFiles, fn (string $a, string $b) => substr_count($a, '/') <=> substr_count($b, '/'));
-
-            foreach ($entries as [$relativePath, $uri]) {
-                $contents = file_get_contents($uri);
-                if ($contents === false || ! Storage::disk('public')->put($destination.'/'.$relativePath, $contents)) {
-                    throw ValidationException::withMessages(['interactive_zip' => 'Salah satu file dalam ZIP gagal diekstrak.']);
-                }
-            }
-
-            return $destination.'/'.$indexFiles[0];
-        } catch (ValidationException $exception) {
-            Storage::disk('public')->deleteDirectory($destination);
-            throw $exception;
-        } catch (Throwable $exception) {
-            Storage::disk('public')->deleteDirectory($destination);
-            throw ValidationException::withMessages(['interactive_zip' => 'ZIP tidak valid atau rusak.']);
-        } finally {
-            Storage::disk('local')->delete($temporaryPath);
-        }
-    }
-
     private function deleteInteractivePackage(?string $path): void
     {
-        if (! $path || ! Str::startsWith($path, 'interactive-videos/')) {
-            return;
-        }
-
-        $parts = explode('/', $path);
-        if (count($parts) >= 2 && Str::isUuid($parts[1])) {
-            Storage::disk('public')->deleteDirectory($parts[0].'/'.$parts[1]);
-        }
+        InteractivePackage::delete($path, 'interactive-videos');
     }
 }
