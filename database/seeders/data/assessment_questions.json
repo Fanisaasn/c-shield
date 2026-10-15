@@ -6,22 +6,22 @@
             {
                 "text": "123456",
                 "correct": false,
-                "order": 0
+                "order": 1
             },
             {
                 "text": "P@ssw0rd!2026",
                 "correct": true,
-                "order": 1
+                "order": 2
             },
             {
                 "text": "namasaya",
                 "correct": false,
-                "order": 2
+                "order": 3
             },
             {
-                "text": "A98Ku#@dah",
-                "correct": true,
-                "order": 3
+                "text": "qwerty",
+                "correct": false,
+                "order": 4
             }
         ]
     },
@@ -48,6 +48,32 @@
                 "text": "Membagikan kata sandi kepada rekan kerja",
                 "correct": false,
                 "order": 4
+            }
+        ]
+    },
+    {
+        "question": "wadfhahsefh",
+        "order": 2,
+        "options": [
+            {
+                "text": "ksdfj",
+                "correct": false,
+                "order": 0
+            },
+            {
+                "text": "kalks",
+                "correct": false,
+                "order": 1
+            },
+            {
+                "text": "lksjfdlk",
+                "correct": false,
+                "order": 2
+            },
+            {
+                "text": "lskdflk",
+                "correct": true,
+                "order": 3
             }
         ]
     },
