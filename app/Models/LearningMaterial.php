@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * One study material (PDF, PPT, video, or interactive video) a respondent
@@ -142,6 +143,14 @@ class LearningMaterial extends Model
 
     public function fileUrl(): ?string
     {
-        return $this->file_path ? Storage::disk('public')->url($this->file_path) : null;
+        if (! $this->file_path) {
+            return null;
+        }
+
+        if (Str::startsWith($this->file_path, ['http://', 'https://'])) {
+            return $this->file_path;
+        }
+
+        return asset('storage/'.$this->file_path);
     }
 }
