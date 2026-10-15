@@ -1,5 +1,55 @@
 [
     {
+        "title": "Dasar-Dasar Keamanan Siber untuk Pemula",
+        "slug": "dasar-dasar-keamanan-siber-untuk-pemula",
+        "description": "Pengenalan konsep dasar keamanan siber dan mengapa hal ini penting bagi setiap pengguna internet.",
+        "video_url": "https://www.youtube.com/watch?v=CONTOH-VIDEO-01",
+        "video_path": "videos/yESF81lYSGp043yFpFQDk1jAcLbYsgXhldN13H2w.mp4",
+        "thumbnail": "videos/ZxDhtiXpIyOUezRljYgKyuF94qiYtytOCcGiVfmU.jpg",
+        "is_published": true,
+        "published_at": "2026-09-17 06:58:34"
+    },
+    {
+        "title": "Cara Mengenali dan Menghindari Serangan Phishing",
+        "slug": "cara-mengenali-dan-menghindari-serangan-phishing",
+        "description": "Simulasi dan contoh nyata pesan phishing beserta cara mengidentifikasinya.",
+        "video_url": "https://www.youtube.com/watch?v=CONTOH-VIDEO-02",
+        "video_path": null,
+        "thumbnail": null,
+        "is_published": true,
+        "published_at": "2026-09-18 06:58:34"
+    },
+    {
+        "title": "Melindungi Data Pribadi di Media Sosial",
+        "slug": "melindungi-data-pribadi-di-media-sosial",
+        "description": "Pengaturan privasi yang perlu diperhatikan saat menggunakan media sosial.",
+        "video_url": "https://www.youtube.com/watch?v=CONTOH-VIDEO-03",
+        "video_path": null,
+        "thumbnail": null,
+        "is_published": true,
+        "published_at": "2026-09-19 06:58:34"
+    },
+    {
+        "title": "Contoh Video: File Diputar Langsung di C-SHIELD",
+        "slug": "contoh-video-file-diputar-langsung-di-c-shield",
+        "description": "Contoh video yang berkasnya diunggah langsung ke C-SHIELD (bukan link Instagram/YouTube), sehingga diputar dari server sendiri. Untuk video yang diambil dari Instagram/YouTube, isi field \"Link video\" saja di form admin agar otomatis tampil sebagai embed yang diputar dari sumbernya.",
+        "video_url": "",
+        "video_path": "videos/demo-uploaded-file.webm",
+        "thumbnail": null,
+        "is_published": true,
+        "published_at": "2026-09-20 06:52:40"
+    },
+    {
+        "title": "Jaga Data, Jaga Diri",
+        "slug": "jaga-data-jaga-diri",
+        "description": "Video interaktif ini membahas perilaku aman dalam menggunakan perangkat, akun, dan informasi digital. Pengguna akan menghadapi situasi keamanan dan menentukan apakah perilaku tersebut aman atau berisiko.",
+        "video_url": "interactive://jaga-data-jaga-diri",
+        "video_path": null,
+        "thumbnail": null,
+        "is_published": true,
+        "published_at": "2026-09-22 01:15:31"
+    },
+    {
         "title": "#JUMATKAMISAE MV17 - HARGA MAHAL DIBALIK DANCE BAYI GENERATE AI YANG LAGI VIRA",
         "slug": "jumatkamisae-mv17-harga-mahal-dibalik-dance-bayi-generate-ai-yang-lagi-vira",
         "description": "#JUMATKAMISAE MV17 - HARGA MAHAL DIBALIK DANCE BAYI GENERATE AI YANG LAGI VIRAL\r\n\r\nWelcomeback with Mimin SandiGuard\r\n\r\nHati - hati Ayah & Bunda! 🚨, Tren video AI bayi yang lagi ramai ternyata punya sisi gelap. Mulai dari pencurian data untuk AI training sampai risiko Deepfake yang mengerikan. Kita yang harus jadi 'benteng' privasi anak-anak kita, dan bijak dalam bersosmed. Simak faktanya di video ini! Detail kasus nya ada di konten carausel berikutnya.\r\n\r\nTulis di kolom komentar:\r\nMimin sih ngeri ya, semakin kesini, video yang di generate AI semakin rapih, Bagaimana menurut kalian? 😉\r\n\r\n#JUMATKAMISAE #KeamananInformasi #ParentingDigital #BahayaAI",
@@ -120,13 +170,13 @@
         "published_at": "2026-07-31 09:26:00"
     },
     {
-        "title": "Jaga Data, Jaga Diri",
-        "slug": "jaga-data-jaga-diri",
-        "description": "Video interaktif ini membahas perilaku aman dalam menggunakan perangkat, akun, dan informasi digital. Pengguna akan menghadapi situasi keamanan dan menentukan apakah perilaku tersebut aman atau berisiko.",
-        "video_url": "interactive://jaga-data-jaga-diri",
+        "title": "jksfkdjf",
+        "slug": "ajlkdsjd",
+        "description": "kdklsj",
+        "video_url": "interactive://ajlkdsjd",
         "video_path": null,
-        "thumbnail": null,
+        "thumbnail": "videos/8NBklzhNy6odO3eOQTnWpyIjyHfpcN6cYKuehIsV.jpg",
         "is_published": true,
-        "published_at": "2026-09-20 09:36:30"
+        "published_at": "2026-09-20 19:02:48"
     }
 ]
