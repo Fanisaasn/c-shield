@@ -9,7 +9,6 @@ use App\Http\Controllers\Admin\WebinarController as AdminWebinarController;
 use App\Http\Controllers\Admin\AssessmentController as AdminAssessmentController;
 use App\Http\Controllers\Admin\LearningMaterialController as AdminLearningMaterialController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
-use App\Http\Controllers\Admin\SurveyQuestionController as AdminSurveyQuestionController;
 use App\Http\Controllers\Admin\WebinarRegistrationController as AdminWebinarRegistrationController;
 use App\Http\Controllers\Admin\EditDashboardController as AdminEditDashboardController;
 use App\Http\Controllers\ArticleController;
@@ -85,10 +84,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('materi-belajar/{material}', [AdminLearningMaterialController::class, 'update'])->name('learning-material.update');
         Route::delete('materi-belajar/{material}', [AdminLearningMaterialController::class, 'destroy'])->name('learning-material.destroy');
         Route::post('materi-belajar/{material}/pindah', [AdminLearningMaterialController::class, 'move'])->name('learning-material.move');
-        Route::get('survey-questions', [AdminSurveyQuestionController::class, 'index'])->name('survey-questions.index');
-        Route::post('survey-questions', [AdminSurveyQuestionController::class, 'store'])->name('survey-questions.store');
-        Route::put('survey-questions/{question}', [AdminSurveyQuestionController::class, 'update'])->name('survey-questions.update');
-        Route::delete('survey-questions/{question}', [AdminSurveyQuestionController::class, 'destroy'])->name('survey-questions.destroy');
         Route::get('reports', [AdminReportController::class, 'index'])->name('reports.index');
         Route::get('reports/export-assessment', [AdminReportController::class, 'exportAssessment'])->name('reports.export-assessment');
         Route::get('reports/export-webinar', [AdminReportController::class, 'exportWebinarRegistrations'])->name('reports.export-webinar');
