@@ -9,6 +9,7 @@ use App\Models\LearningMaterial;
 use App\Models\SurveyQuestion;
 use App\Models\Video;
 use App\Models\Webinar;
+use App\Support\InteractivePackage;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -16,7 +17,7 @@ use Illuminate\Support\Str;
 
 class ExportContentSeeders extends Command
 {
-    protected $signature = 'content:export-seeders {--only= : Export only flyers, videos, articles, or webinars}';
+    protected $signature = 'content:export-seeders {--only= : Export only flyers, videos, articles, webinars, learning-materials, assessments, or survey}';
 
     protected $description = 'Ekspor data flyer, video, artikel, webinar, materi belajar, soal assessment, dan pertanyaan survei dari database saat ini (beserta file gambar/videonya) ke database/seeders, supaya bisa dibagikan lewat git dan dimasukkan ulang lewat php artisan db:seed';
 
@@ -31,10 +32,13 @@ class ExportContentSeeders extends Command
             'videos' => 'exportVideos',
             'articles' => 'exportArticles',
             'webinars' => 'exportWebinars',
+            'learning-materials' => 'exportLearningMaterials',
+            'assessments' => 'exportAssessmentQuestions',
+            'survey' => 'exportSurveyQuestions',
         ];
         $only = $this->option('only');
         if ($only !== null && ! isset($exports[$only])) {
-            $this->error('--only must be flyers, videos, articles, or webinars.');
+            $this->error('--only must be one of: '.implode(', ', array_keys($exports)).'.');
 
             return self::FAILURE;
         }
@@ -138,20 +142,53 @@ class ExportContentSeeders extends Command
         $this->info('Webinar: '.count($webinars).' data diekspor.');
     }
 
-    protected function exportLearningMaterial(): void
+    protected function exportLearningMaterials(): void
     {
-        $material = LearningMaterial::current();
-
-        $data = $material ? [
+        $materials = LearningMaterial::ordered()->map(fn (LearningMaterial $material) => [
             'title' => $material->title,
             'description' => $material->description,
-            'file_path' => $this->copyToAssets($material->file_path),
+            'file_path' => $material->isInteractive()
+                ? $this->copyInteractivePackageToAssets($material->file_path, 'learning-materials/interactive')
+                : $this->copyToAssets($material->file_path),
+            'external_url' => $material->external_url,
             'file_type' => $material->file_type,
+            'duration_seconds' => $material->duration_seconds,
             'original_name' => $material->original_name,
-        ] : null;
+        ])->all();
 
-        $this->writeJson('learning_material.json', $data);
-        $this->info('Materi belajar: '.($data ? 1 : 0).' data diekspor.');
+        $this->writeJson('learning_materials.json', $materials);
+        // Replaced by learning_materials.json, which holds every material.
+        File::delete($this->dataPath.DIRECTORY_SEPARATOR.'learning_material.json');
+        $this->info('Materi belajar: '.count($materials).' data diekspor.');
+    }
+
+    /**
+     * Copy every file of an interactive package (not just its index.html)
+     * into database/seeders/assets as-is, so the package keeps working when
+     * restored on another machine.
+     */
+    protected function copyInteractivePackageToAssets(?string $indexPath, string $directory): ?string
+    {
+        $root = InteractivePackage::packageRoot($indexPath, $directory);
+
+        if ($root === null) {
+            return $this->copyToAssets($indexPath);
+        }
+
+        if (! Storage::disk('public')->exists($indexPath)) {
+            throw new \RuntimeException("Cannot export missing public media: {$indexPath}. Restore the original file before exporting; this content JSON was not replaced.");
+        }
+
+        foreach (Storage::disk('public')->allFiles($root) as $file) {
+            $destination = $this->assetsPath.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $file);
+            File::ensureDirectoryExists(dirname($destination));
+
+            if (! File::copy(Storage::disk('public')->path($file), $destination)) {
+                throw new \RuntimeException("Cannot copy exported media: {$file}");
+            }
+        }
+
+        return $indexPath;
     }
 
     protected function exportAssessmentQuestions(): void
