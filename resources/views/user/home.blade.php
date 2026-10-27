@@ -200,8 +200,37 @@
                                 <p class="font-heading text-lg font-bold {{ $improvement >= 0 ? 'text-emerald-600' : 'text-red-600' }}">{{ $improvement > 0 ? '+' : '' }}{{ $improvement }}</p>
                             </div>
                         </div>
-                        <div class="mt-3 h-44">
-                            <canvas id="prePostChart" role="img" aria-label="Diagram perbandingan skor Pre-Assessment dan Post-Assessment {{ $comparison['pairs']->count() }} peserta terakhir"></canvas>
+                        @php($totalPairs = $comparison['pairs']->count())
+                        @php($changeGroups = [
+                            ['label' => 'Skor naik', 'count' => $comparison['improved'], 'bar' => 'bg-emerald-500', 'text' => 'text-emerald-600'],
+                            ['label' => 'Skor tetap', 'count' => $comparison['unchanged'], 'bar' => 'bg-slate-300', 'text' => 'text-slate-500'],
+                            ['label' => 'Skor turun', 'count' => $comparison['declined'], 'bar' => 'bg-red-400', 'text' => 'text-red-500'],
+                        ])
+
+                        <div class="mt-5">
+                            <p class="text-sm text-slate-600">
+                                <span class="font-heading text-2xl font-bold text-emerald-600">{{ round($comparison['improved'] / $totalPairs * 100) }}%</span>
+                                peserta mengalami <span class="font-semibold text-navy-900">peningkatan skor</span> setelah mempelajari materi
+                                <span class="text-slate-400">({{ $comparison['improved'] }} dari {{ $totalPairs }} peserta)</span>
+                            </p>
+
+                            <div class="mt-3 flex h-4 w-full overflow-hidden rounded-full bg-slate-100" role="img" aria-label="{{ $comparison['improved'] }} peserta skornya naik, {{ $comparison['unchanged'] }} tetap, {{ $comparison['declined'] }} turun">
+                                @foreach ($changeGroups as $group)
+                                    @if ($group['count'] > 0)
+                                        <div class="{{ $group['bar'] }} h-full" style="width: {{ $group['count'] / $totalPairs * 100 }}%" title="{{ $group['label'] }}: {{ $group['count'] }} peserta"></div>
+                                    @endif
+                                @endforeach
+                            </div>
+
+                            <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+                                @foreach ($changeGroups as $group)
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="{{ $group['bar'] }} h-2.5 w-2.5 shrink-0 rounded-full"></span>
+                                        <span class="text-slate-500">{{ $group['label'] }}</span>
+                                        <span class="ml-auto font-semibold {{ $group['text'] }}">{{ $group['count'] }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -334,48 +363,6 @@
                             y: { ticks: { color: '#0b2545', font: { size: 11 } }, grid: { display: false } },
                         },
                         plugins: { legend: { display: false } },
-                    },
-                });
-            }
-
-            const prePostEl = document.getElementById('prePostChart');
-            if (prePostEl) {
-                const pairs = @json($assessmentStats['prePostComparison']['pairs']);
-
-                new Chart(prePostEl, {
-                    type: 'line',
-                    data: {
-                        labels: pairs.map(function (_, index) { return 'Peserta ' + (index + 1); }),
-                        datasets: [
-                            {
-                                label: 'Pre-Assessment',
-                                data: pairs.map(function (pair) { return pair.pre; }),
-                                borderColor: '#1e5aa8',
-                                backgroundColor: '#1e5aa8',
-                                pointRadius: pairs.length > 20 ? 0 : 3,
-                                tension: 0.3,
-                            },
-                            {
-                                label: 'Post-Assessment',
-                                data: pairs.map(function (pair) { return pair.post; }),
-                                borderColor: '#2ab7ca',
-                                backgroundColor: '#2ab7ca',
-                                pointRadius: pairs.length > 20 ? 0 : 3,
-                                tension: 0.3,
-                            },
-                        ],
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        interaction: { mode: 'index', intersect: false },
-                        scales: {
-                            x: { ticks: { display: false }, grid: { display: false } },
-                            y: { beginAtZero: true, max: 100, ticks: { color: '#94a3b8', stepSize: 25 }, grid: { color: '#e2e8f0' } },
-                        },
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: '#0b2545', usePointStyle: true, boxWidth: 8, font: { size: 11 } } },
-                        },
                     },
                 });
             }
