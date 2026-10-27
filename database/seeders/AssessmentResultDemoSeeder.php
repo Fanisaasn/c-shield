@@ -60,36 +60,44 @@ class AssessmentResultDemoSeeder extends Seeder
                 'occupation_status' => self::OCCUPATIONS[array_rand(self::OCCUPATIONS)],
             ]);
 
-            $attempt = AssessmentAttempt::create([
-                'assessment_user_id' => $user->id,
-                'type' => 'pre',
-                'started_at' => now()->subMinutes(random_int(5, 15)),
-            ]);
-
             // Vary how many questions each respondent answers correctly
-            // so results spread across all five awareness levels.
-            $correctRate = [0.1, 0.3, 0.5, 0.7, 0.9][random_int(0, 4)];
+            // so results spread across all five awareness levels, then let
+            // the Post-Assessment improve on it after studying the material.
+            $preCorrectRate = [0.1, 0.3, 0.5, 0.7, 0.9][random_int(0, 4)];
+            $postCorrectRate = min(1.0, $preCorrectRate + [0.0, 0.1, 0.2, 0.3][random_int(0, 3)]);
 
-            foreach ($questions as $question) {
-                $answerCorrectly = (mt_rand() / mt_getrandmax()) < $correctRate;
-                $correctIds = $question->options->where('is_correct', true)->pluck('id');
-                $wrongOption = $question->options->firstWhere('is_correct', false);
-                $chosenIds = $answerCorrectly || $wrongOption === null
-                    ? $correctIds
-                    : collect([$wrongOption->id]);
-
-                $answer = AssessmentAnswer::create([
-                    'assessment_attempt_id' => $attempt->id,
-                    'assessment_question_id' => $question->id,
-                    'is_correct' => $chosenIds->sort()->values()->all() === $correctIds->sort()->values()->all(),
-                ]);
-
-                $answer->options()->attach($chosenIds->all());
-            }
-
-            $attempt->finalizeScore();
+            $this->createCompletedAttempt($user, 'pre', $questions, $preCorrectRate);
+            $this->createCompletedAttempt($user, 'post', $questions, $postCorrectRate);
         }
 
-        $this->command?->info('Berhasil membuat ' . self::RESPONDENT_COUNT . ' contoh hasil assessment.');
+        $this->command?->info('Berhasil membuat ' . self::RESPONDENT_COUNT . ' contoh hasil Pre & Post-Assessment.');
+    }
+
+    private function createCompletedAttempt(AssessmentUser $user, string $type, $questions, float $correctRate): void
+    {
+        $attempt = AssessmentAttempt::create([
+            'assessment_user_id' => $user->id,
+            'type' => $type,
+            'started_at' => now()->subMinutes(random_int(5, 15)),
+        ]);
+
+        foreach ($questions as $question) {
+            $answerCorrectly = (mt_rand() / mt_getrandmax()) < $correctRate;
+            $correctIds = $question->options->where('is_correct', true)->pluck('id');
+            $wrongOption = $question->options->firstWhere('is_correct', false);
+            $chosenIds = $answerCorrectly || $wrongOption === null
+                ? $correctIds
+                : collect([$wrongOption->id]);
+
+            $answer = AssessmentAnswer::create([
+                'assessment_attempt_id' => $attempt->id,
+                'assessment_question_id' => $question->id,
+                'is_correct' => $chosenIds->sort()->values()->all() === $correctIds->sort()->values()->all(),
+            ]);
+
+            $answer->options()->attach($chosenIds->all());
+        }
+
+        $attempt->finalizeScore();
     }
 }
