@@ -134,6 +134,9 @@ class HomeController extends Controller
             'pairs' => $pairs,
             'averagePre' => $pairs->isEmpty() ? 0 : round($pairs->avg('pre'), 1),
             'averagePost' => $pairs->isEmpty() ? 0 : round($pairs->avg('post'), 1),
+            'improved' => $pairs->filter(fn (array $pair) => $pair['post'] > $pair['pre'])->count(),
+            'unchanged' => $pairs->filter(fn (array $pair) => $pair['post'] === $pair['pre'])->count(),
+            'declined' => $pairs->filter(fn (array $pair) => $pair['post'] < $pair['pre'])->count(),
         ];
     }
 
