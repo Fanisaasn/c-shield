@@ -104,6 +104,8 @@
 
         <main class="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
             @if (session('success')) <div class="mb-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ session('success') }}</div> @endif
+            @if (session('warning')) <div class="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">{{ session('warning') }}</div> @endif
+            @if (session('error')) <div class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{{ session('error') }}</div> @endif
             @if ($errors->any()) <div class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">Periksa kembali isian yang ditandai.</div> @endif
             @yield('content')
         </main>

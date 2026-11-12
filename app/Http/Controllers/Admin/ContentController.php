@@ -50,11 +50,13 @@ abstract class ContentController extends Controller
         return redirect()->route("admin.{$this->route}.index")->with('success', 'Data berhasil dihapus.');
     }
 
+    protected array $messages = [];
+
     protected function validated(Request $request, ?Model $item = null): array
     {
         $rules = $this->rules;
         if ($this->slugField) $rules['slug'] = ['nullable', 'string', 'max:255', 'unique:'.$this->route.',slug'.($item ? ','.$item->id : '')];
-        $data = $request->validate($rules);
+        $data = $request->validate($rules, $this->messages);
         $data['is_published'] = $request->boolean('is_published');
         if ($this->slugField) $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
         if (array_key_exists('published_at', $data) && !$data['published_at'] && $data['is_published']) $data['published_at'] = now();
