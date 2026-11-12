@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Video;
 use App\Support\InteractivePackage;
+use App\Support\VideoThumbnail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -148,9 +149,21 @@ class VideoController extends ContentController
         if ($request->hasFile('thumbnail')) {
             $this->deleteUpload($item);
             $data['thumbnail'] = $request->file('thumbnail')->store('videos', 'public');
+        } elseif (! $isInteractive && $this->needsAutoThumbnail($data['video_url'] ?? null, $item)) {
+            $this->deleteUpload($item);
+            $data['thumbnail'] = isset($data['video_url']) ? VideoThumbnail::fetch($data['video_url']) : null;
         }
 
         return $data;
+    }
+
+    /**
+     * A thumbnail uploaded by an admin is never replaced; one fetched from
+     * the link is refreshed only when the link changes.
+     */
+    private function needsAutoThumbnail(?string $url, ?Model $item): bool
+    {
+        return ! $item?->thumbnail || (VideoThumbnail::isAuto($item->thumbnail) && $item->video_url !== $url);
     }
 
     private function deleteVideo(?string $path): void

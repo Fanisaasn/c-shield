@@ -55,7 +55,7 @@ class LearningMaterial extends Model
         };
     }
 
-    private static function parseYoutubeId(string $url): ?string
+    public static function parseYoutubeId(string $url): ?string
     {
         return preg_match('/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i', $url, $matches)
             ? $matches[1]
@@ -65,7 +65,7 @@ class LearningMaterial extends Model
     /**
      * [kind, code] of an Instagram post/reel URL, e.g. ['reel', 'C1a2B3'].
      */
-    private static function parseInstagramPost(string $url): ?array
+    public static function parseInstagramPost(string $url): ?array
     {
         if (! preg_match('#instagram\.com/(?:[A-Za-z0-9_.]+/)?(p|reels?|tv)/([A-Za-z0-9_-]+)#i', $url, $matches)) {
             return null;

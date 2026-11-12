@@ -1,1 +1,1 @@
-@include('admin.content-form', ['title' => 'Video Edukasi', 'route' => 'videos', 'slug' => true, 'upload' => 'thumbnail', 'uploadLabel' => 'Thumbnail', 'publishedAt' => true])
+@include('admin.content-form', ['title' => 'Video Edukasi', 'route' => 'videos', 'slug' => true, 'upload' => 'thumbnail', 'uploadLabel' => 'Thumbnail (opsional, otomatis dari link YouTube/Instagram bila dikosongkan)', 'publishedAt' => true])
