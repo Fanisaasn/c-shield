@@ -25,8 +25,8 @@ class WebinarRegistrationDemoSeeder extends Seeder
                 'occupation' => 'PNS / ASN',
                 'motivation' => 'Ingin memahami perlindungan data dan keamanan informasi di kantor.',
                 'referral_source' => 'Rekan Kerja Diskominfo',
-                'whatsapp_status' => 'sent',
-                'whatsapp_sent_at' => now()->subHours(5),
+                'email_status' => 'sent',
+                'email_sent_at' => now()->subHours(5),
             ],
             [
                 'name' => 'Siti Nurhaliza',
@@ -36,8 +36,8 @@ class WebinarRegistrationDemoSeeder extends Seeder
                 'occupation' => 'Mahasiswa',
                 'motivation' => 'Menambah wawasan seputar cyber security untuk tugas akhir.',
                 'referral_source' => 'Dosen Pembimbing',
-                'whatsapp_status' => 'pending',
-                'whatsapp_sent_at' => null,
+                'email_status' => 'pending',
+                'email_sent_at' => null,
             ],
             [
                 'name' => 'Budi Pratama',
@@ -47,8 +47,8 @@ class WebinarRegistrationDemoSeeder extends Seeder
                 'occupation' => 'Staf Kelurahan',
                 'motivation' => 'Mencegah penipuan phising dan ransomware pada komputer pelayanan.',
                 'referral_source' => 'Instagram @diskominfocimahi',
-                'whatsapp_status' => 'sent',
-                'whatsapp_sent_at' => now()->subHours(2),
+                'email_status' => 'sent',
+                'email_sent_at' => now()->subHours(2),
             ],
             [
                 'name' => 'Dewi Anggraeni',
@@ -58,8 +58,8 @@ class WebinarRegistrationDemoSeeder extends Seeder
                 'occupation' => 'Guru Informatika',
                 'motivation' => 'Ingin mengajarkan literasi keamanan digital kepada murid-murid.',
                 'referral_source' => 'Grup WhatsApp Guru Cimahi',
-                'whatsapp_status' => 'pending',
-                'whatsapp_sent_at' => null,
+                'email_status' => 'pending',
+                'email_sent_at' => null,
             ],
             [
                 'name' => 'Rian Hidayat',
@@ -69,8 +69,8 @@ class WebinarRegistrationDemoSeeder extends Seeder
                 'occupation' => 'Web Developer',
                 'motivation' => 'Mempelajari best practice keamanan web aplikasi.',
                 'referral_source' => null, // Mandiri / Tidak tersedia
-                'whatsapp_status' => 'pending',
-                'whatsapp_sent_at' => null,
+                'email_status' => 'pending',
+                'email_sent_at' => null,
             ],
             [
                 'name' => 'Putri Ayu Wandira',
@@ -80,8 +80,8 @@ class WebinarRegistrationDemoSeeder extends Seeder
                 'occupation' => 'Tenaga Honorer',
                 'motivation' => 'Meningkatkan kesadaran keamanan digital.',
                 'referral_source' => 'Teman Sekantor',
-                'whatsapp_status' => 'sent',
-                'whatsapp_sent_at' => now()->subDay(),
+                'email_status' => 'sent',
+                'email_sent_at' => now()->subDay(),
             ],
         ];
 
@@ -110,8 +110,8 @@ class WebinarRegistrationDemoSeeder extends Seeder
                         'occupation' => $p['occupation'],
                         'motivation' => $p['motivation'],
                         'referral_source' => $p['referral_source'],
-                        'whatsapp_status' => ($wIndex + $pIndex) % 2 === 0 ? 'sent' : 'pending',
-                        'whatsapp_sent_at' => ($wIndex + $pIndex) % 2 === 0 ? now()->subHours($pIndex + 1) : null,
+                        'email_status' => ($wIndex + $pIndex) % 2 === 0 ? 'sent' : 'pending',
+                        'email_sent_at' => ($wIndex + $pIndex) % 2 === 0 ? now()->subHours($pIndex + 1) : null,
                     ]
                 );
             }

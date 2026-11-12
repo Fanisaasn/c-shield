@@ -5,13 +5,29 @@ namespace Tests\Feature;
 use App\Models\Admin;
 use App\Models\Webinar;
 use App\Models\WebinarRegistration;
-use App\Services\WhatsAppCloudService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Http;
+use App\Mail\WebinarLinkMail;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class AdminWebinarRegistrationTest extends TestCase
 {
+    use DatabaseTransactions;
+
+    protected function makeRegistration(?Webinar $webinar = null): WebinarRegistration
+    {
+        $webinar ??= Webinar::first();
+        $this->assertNotNull($webinar, 'Butuh minimal satu webinar di database.');
+
+        return WebinarRegistration::create([
+            'webinar_id' => $webinar->id,
+            'name' => 'Peserta Uji',
+            'email' => 'peserta-uji-' . uniqid() . '@example.com',
+            'phone' => '081234567890',
+            'email_status' => 'pending',
+        ]);
+    }
+
     protected function admin(): Admin
     {
         return Admin::first() ?? Admin::create([
@@ -36,7 +52,7 @@ class AdminWebinarRegistrationTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Data Pendaftaran Webinar');
-        $response->assertSee('Kirim Link Webinar via WhatsApp');
+        $response->assertSee('Kirim Link Webinar via Email');
     }
 
     public function test_pendaftar_are_grouped_by_webinar(): void
@@ -53,13 +69,12 @@ class AdminWebinarRegistrationTest extends TestCase
         $response->assertSee($webinarA->title);
     }
 
-    public function test_admin_can_toggle_whatsapp_status(): void
+    public function test_admin_can_toggle_email_status(): void
     {
         $admin = $this->admin();
-        $registration = WebinarRegistration::first();
-        $this->assertNotNull($registration);
+        $registration = $this->makeRegistration();
 
-        $initialStatus = $registration->whatsapp_status;
+        $initialStatus = $registration->email_status;
 
         $response = $this->actingAs($admin, 'admin')
             ->post(route('admin.webinar-registrations.toggle-status', $registration));
@@ -67,17 +82,21 @@ class AdminWebinarRegistrationTest extends TestCase
         $response->assertRedirect();
 
         $registration->refresh();
-        $this->assertNotEquals($initialStatus, $registration->whatsapp_status);
+        $this->assertNotEquals($initialStatus, $registration->email_status);
     }
 
-    public function test_admin_can_broadcast_whatsapp_link_with_template(): void
+    public function test_admin_can_broadcast_webinar_link_via_email(): void
     {
+        Mail::fake();
+
         $admin = $this->admin();
         $webinar = Webinar::first();
+        $this->makeRegistration($webinar);
 
         $response = $this->actingAs($admin, 'admin')
-            ->post(route('admin.webinar-registrations.send-whatsapp', $webinar), [
+            ->post(route('admin.webinar-registrations.send-email', $webinar), [
                 'meeting_link' => 'https://zoom.us/j/999888777?pwd=secretpassword',
+                'email_subject' => 'Link {judul_webinar}',
                 'message_template' => 'Halo {nama}, ini link webinar {judul_webinar}: {link_webinar}',
                 'target' => 'all',
             ]);
@@ -86,6 +105,30 @@ class AdminWebinarRegistrationTest extends TestCase
 
         $webinar->refresh();
         $this->assertEquals('https://zoom.us/j/999888777?pwd=secretpassword', $webinar->meeting_link);
+
+        $registration = $webinar->registrations()->first();
+        Mail::assertSent(WebinarLinkMail::class, function (WebinarLinkMail $mail) use ($registration, $webinar) {
+            return $mail->hasTo($registration->email)
+                && $mail->subjectLine === 'Link ' . $webinar->title
+                && str_contains($mail->body, $registration->name)
+                && str_contains($mail->body, 'https://zoom.us/j/999888777');
+        });
+        Mail::assertSentCount($webinar->registrations()->count());
+        $this->assertEquals('sent', $registration->refresh()->email_status);
+    }
+
+    public function test_admin_can_send_webinar_link_email_to_single_participant(): void
+    {
+        Mail::fake();
+
+        $registration = $this->makeRegistration();
+
+        $response = $this->actingAs($this->admin(), 'admin')
+            ->post(route('admin.webinar-registrations.send-single', $registration));
+
+        $response->assertRedirect();
+        Mail::assertSent(WebinarLinkMail::class, fn (WebinarLinkMail $mail) => $mail->hasTo($registration->email));
+        $this->assertEquals('sent', $registration->refresh()->email_status);
     }
 
     public function test_admin_can_export_webinar_registrations_csv(): void
@@ -98,16 +141,5 @@ class AdminWebinarRegistrationTest extends TestCase
 
         $response->assertOk();
         $response->assertHeader('content-type', 'text/csv; charset=UTF-8');
-    }
-
-    public function test_whatsapp_service_formats_indonesian_phone_numbers(): void
-    {
-        $service = new WhatsAppCloudService();
-
-        $this->assertEquals('6281234567890', $service->formatPhoneNumber('0812-3456-7890'));
-        $this->assertEquals('6281234567890', $service->formatPhoneNumber('+62 812 3456 7890'));
-        $this->assertEquals('6281234567890', $service->formatPhoneNumber('6281234567890'));
-        $this->assertNull($service->formatPhoneNumber(null));
-        $this->assertNull($service->formatPhoneNumber(''));
     }
 }

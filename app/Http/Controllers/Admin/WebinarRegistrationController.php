@@ -3,29 +3,38 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\WebinarLinkMail;
 use App\Models\Webinar;
 use App\Models\WebinarRegistration;
-use App\Services\WhatsAppCloudService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class WebinarRegistrationController extends Controller
 {
     /**
+     * Mailer yang tidak benar-benar mengirim email (hanya menulis ke log / memori).
+     */
+    private const NON_DELIVERING_MAILERS = ['log', 'array'];
+
+    /**
      * Display the webinar registrations management page grouped by webinar.
      */
-    public function index(Request $request, WhatsAppCloudService $waService): View
+    public function index(Request $request): View
     {
         // 1. Kelompokkan pendaftar berdasarkan judul webinar
         $webinars = Webinar::query()
             ->withCount([
                 'registrations',
-                'registrations as pending_count' => fn ($q) => $q->where('whatsapp_status', 'pending'),
-                'registrations as sent_count' => fn ($q) => $q->where('whatsapp_status', 'sent'),
-                'registrations as failed_count' => fn ($q) => $q->where('whatsapp_status', 'failed'),
+                'registrations as pending_count' => fn ($q) => $q->where('email_status', 'pending'),
+                'registrations as sent_count' => fn ($q) => $q->where('email_status', 'sent'),
+                'registrations as failed_count' => fn ($q) => $q->where('email_status', 'failed'),
             ])
             ->orderByDesc('webinar_date')
             ->get();
@@ -61,49 +70,41 @@ class WebinarRegistrationController extends Controller
                 });
             }
 
-            // Filter status WhatsApp
+            // Filter status email
             if ($request->filled('status') && in_array($request->query('status'), ['pending', 'sent', 'failed'])) {
-                $query->where('whatsapp_status', $request->query('status'));
+                $query->where('email_status', $request->query('status'));
             }
 
             $registrations = $query->orderByDesc('id')->get();
         }
 
-        // Default template pesan WhatsApp
-        $defaultTemplate = "Halo {nama}, terima kasih telah mendaftar webinar *{judul_webinar}*.\n\n"
-            . "Berikut informasi akses pelaksanaan webinar:\n"
-            . "🗓 Tanggal: {tanggal}\n"
-            . "⏰ Waktu: {waktu}\n"
-            . "🎤 Narasumber: {pembicara}\n"
-            . "💻 Platform: {platform}\n\n"
-            . "🔗 Link Webinar:\n{link_webinar}\n\n"
-            . "Mohon bergabung tepat waktu ya. Sampai jumpa di ruang webinar!\n\n"
-            . "_C-SHIELD Diskominfo Kota Cimahi_";
-
-        $isCloudApiConfigured = $waService->isConfigured();
-
         return view('admin.webinar-registrations.index', [
             'webinars' => $webinars,
             'selectedWebinar' => $selectedWebinar,
             'registrations' => $registrations,
-            'defaultTemplate' => $defaultTemplate,
-            'isCloudApiConfigured' => $isCloudApiConfigured,
+            'defaultSubject' => $this->defaultSubject(),
+            'defaultTemplate' => $this->defaultTemplate(),
+            'isMailConfigured' => $this->isMailConfigured(),
+            'mailerName' => config('mail.default'),
+            'mailFromAddress' => config('mail.from.address'),
         ]);
     }
 
     /**
-     * Send webinar link via WhatsApp to registrations of the selected webinar.
+     * Send webinar link via email to registrations of the selected webinar.
      */
-    public function sendWhatsApp(Request $request, Webinar $webinar, WhatsAppCloudService $waService): RedirectResponse|JsonResponse
+    public function sendEmail(Request $request, Webinar $webinar): RedirectResponse|JsonResponse
     {
         $request->validate([
             'meeting_link' => ['required', 'string', 'max:255'],
+            'email_subject' => ['required', 'string', 'max:255'],
             'message_template' => ['required', 'string'],
             'target' => ['required', 'in:all,pending_only,selected'],
             'selected_ids' => ['nullable', 'array'],
             'selected_ids.*' => ['integer'],
         ], [
             'meeting_link.required' => 'Link webinar wajib diisi.',
+            'email_subject.required' => 'Subjek email wajib diisi.',
             'message_template.required' => 'Template pesan wajib diisi.',
         ]);
 
@@ -116,7 +117,7 @@ class WebinarRegistrationController extends Controller
         $query = $webinar->registrations();
 
         if ($request->input('target') === 'pending_only') {
-            $query->where('whatsapp_status', 'pending');
+            $query->where('email_status', 'pending');
         } elseif ($request->input('target') === 'selected') {
             $selectedIds = $request->input('selected_ids', []);
             if (empty($selectedIds)) {
@@ -133,178 +134,64 @@ class WebinarRegistrationController extends Controller
 
         $sentCount = 0;
         $failedCount = 0;
-        $simulatedCount = 0;
 
+        $subject = $request->input('email_subject');
         $template = $request->input('message_template');
         $meetingLink = $request->input('meeting_link');
-        $isConfigured = $waService->isConfigured();
 
         foreach ($recipients as $recipient) {
-            if (! $recipient->phone) {
-                $recipient->update([
-                    'whatsapp_status' => 'failed',
-                    'whatsapp_error' => 'Nomor WhatsApp tidak tersedia.',
-                ]);
-                $failedCount++;
-                continue;
-            }
-
-            // Ganti tag / variabel pada template pesan
-            $personalizedMessage = str_replace(
-                [
-                    '{nama}',
-                    '{judul_webinar}',
-                    '{tanggal}',
-                    '{waktu}',
-                    '{platform}',
-                    '{link_webinar}',
-                    '{pembicara}',
-                ],
-                [
-                    $recipient->name,
-                    $webinar->title,
-                    $webinar->webinar_date ? $webinar->webinar_date->translatedFormat('d F Y') : '-',
-                    $webinar->webinar_date ? $webinar->webinar_date->translatedFormat('H:i') . ' WIB' : '-',
-                    $webinar->platform ?? 'Online Meeting',
-                    $meetingLink,
-                    $webinar->speaker ?? '-',
-                ],
-                $template
-            );
-
-            if ($isConfigured) {
-                // Kirim via WhatsApp Business Cloud API Meta
-                $result = $waService->sendMessage($recipient->phone, $personalizedMessage);
-
-                if ($result['success']) {
-                    $recipient->update([
-                        'whatsapp_status' => 'sent',
-                        'whatsapp_sent_at' => now(),
-                        'whatsapp_error' => null,
-                    ]);
-                    $sentCount++;
-                } else {
-                    $recipient->update([
-                        'whatsapp_status' => 'failed',
-                        'whatsapp_error' => $result['error'] ?? 'Pengiriman gagal',
-                    ]);
-                    $failedCount++;
-                }
-            } else {
-                // Mode simulasi jika WHATSAPP_TOKEN & WHATSAPP_PHONE_NUMBER_ID belum diisi
-                $recipient->update([
-                    'whatsapp_status' => 'sent',
-                    'whatsapp_sent_at' => now(),
-                    'whatsapp_error' => null,
-                ]);
-                $simulatedCount++;
-            }
+            $result = $this->deliver($recipient, $webinar, $subject, $template, $meetingLink);
+            $result['success'] ? $sentCount++ : $failedCount++;
         }
 
-        if ($isConfigured) {
-            $msg = "Pengiriman WhatsApp selesai: {$sentCount} berhasil";
-            if ($failedCount > 0) {
-                $msg .= ", {$failedCount} gagal.";
-            } else {
-                $msg .= ".";
-            }
-        } else {
-            $msg = "Proses broadcast selesai ({$simulatedCount} pesan diproses). Catatan: WhatsApp Cloud API berjalan dalam mode simulasi karena WHATSAPP_TOKEN belum diisi di .env. Anda juga dapat menggunakan tombol WhatsApp Web untuk kirim langsung.";
+        $msg = "Pengiriman email selesai: {$sentCount} berhasil" . ($failedCount > 0 ? ", {$failedCount} gagal." : '.');
+
+        if (! $this->isMailConfigured()) {
+            $msg .= ' Catatan: MAIL_MAILER masih "' . config('mail.default') . '", jadi email hanya dicatat di log dan TIDAK benar-benar terkirim. Atur SMTP di .env untuk pengiriman sungguhan.';
         }
 
         if ($request->expectsJson()) {
             return response()->json([
                 'status' => 'success',
                 'message' => $msg,
-                'sent_count' => $sentCount + $simulatedCount,
+                'sent_count' => $sentCount,
                 'failed_count' => $failedCount,
             ]);
         }
 
         return redirect()->route('admin.webinar-registrations.index', ['webinar_id' => $webinar->id])
-            ->with('success', $msg);
+            ->with($failedCount > 0 ? 'warning' : 'success', $msg);
     }
 
     /**
-     * Send WhatsApp link to a single participant.
+     * Send the webinar link email to a single participant.
      */
-    public function sendSingle(Request $request, WebinarRegistration $registration, WhatsAppCloudService $waService): JsonResponse|RedirectResponse
+    public function sendSingle(Request $request, WebinarRegistration $registration): JsonResponse|RedirectResponse
     {
         $webinar = $registration->webinar;
-        $meetingLink = $webinar->meeting_link ?: $webinar->registration_url ?: 'https://zoom.us';
+        $meetingLink = $webinar->meeting_link ?: '';
 
-        $template = $request->input('message_template');
-        if (! $template) {
-            $template = "Halo {nama}, berikut link akses webinar *{judul_webinar}*:\n\n🔗 {link_webinar}\n\nSampai jumpa di webinar!";
+        $subject = $request->input('email_subject') ?: $this->defaultSubject();
+        $template = $request->input('message_template') ?: $this->defaultTemplate();
+
+        $result = $this->deliver($registration, $webinar, $subject, $template, $meetingLink);
+
+        $message = $result['success']
+            ? 'Email berhasil dikirim ke ' . $registration->email
+            : 'Gagal mengirim email ke ' . $registration->name . ': ' . $result['error'];
+
+        if ($result['success'] && ! $this->isMailConfigured()) {
+            $message .= ' (mode log, tidak benar-benar terkirim)';
         }
 
-        $message = str_replace(
-            [
-                '{nama}',
-                '{judul_webinar}',
-                '{tanggal}',
-                '{waktu}',
-                '{platform}',
-                '{link_webinar}',
-                '{pembicara}',
-            ],
-            [
-                $registration->name,
-                $webinar->title,
-                $webinar->webinar_date ? $webinar->webinar_date->translatedFormat('d F Y') : '-',
-                $webinar->webinar_date ? $webinar->webinar_date->translatedFormat('H:i') . ' WIB' : '-',
-                $webinar->platform ?? 'Online Meeting',
-                $meetingLink,
-                $webinar->speaker ?? '-',
-            ],
-            $template
-        );
-
-        if (! $registration->phone) {
+        if ($request->expectsJson()) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Nomor WhatsApp tidak tersedia.',
-            ], 422);
+                'status' => $result['success'] ? 'success' : 'error',
+                'message' => $message,
+            ], $result['success'] ? 200 : 422);
         }
 
-        if ($waService->isConfigured()) {
-            $result = $waService->sendMessage($registration->phone, $message);
-
-            if ($result['success']) {
-                $registration->update([
-                    'whatsapp_status' => 'sent',
-                    'whatsapp_sent_at' => now(),
-                    'whatsapp_error' => null,
-                ]);
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Pesan WhatsApp berhasil dikirim ke ' . $registration->name,
-                ]);
-            }
-
-            $registration->update([
-                'whatsapp_status' => 'failed',
-                'whatsapp_error' => $result['error'] ?? 'Pengiriman gagal',
-            ]);
-
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengirim pesan: ' . ($result['error'] ?? 'Terjadi kesalahan.'),
-            ], 500);
-        }
-
-        // Simulated success
-        $registration->update([
-            'whatsapp_status' => 'sent',
-            'whatsapp_sent_at' => now(),
-            'whatsapp_error' => null,
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Pesan berhasil diproses (Simulasi Cloud API).',
-        ]);
+        return back()->with($result['success'] ? 'success' : 'error', $message);
     }
 
     /**
@@ -312,24 +199,25 @@ class WebinarRegistrationController extends Controller
      */
     public function toggleStatus(Request $request, WebinarRegistration $registration): JsonResponse|RedirectResponse
     {
-        $newStatus = $registration->whatsapp_status === 'sent' ? 'pending' : 'sent';
+        $newStatus = $registration->email_status === 'sent' ? 'pending' : 'sent';
         $registration->update([
-            'whatsapp_status' => $newStatus,
-            'whatsapp_sent_at' => $newStatus === 'sent' ? now() : null,
-            'whatsapp_error' => null,
+            'email_status' => $newStatus,
+            'email_sent_at' => $newStatus === 'sent' ? now() : null,
+            'email_error' => null,
         ]);
 
         $statusLabel = $newStatus === 'sent' ? 'Terkirim' : 'Pending';
+        $message = "Status email untuk {$registration->name} diubah menjadi {$statusLabel}.";
 
         if ($request->expectsJson()) {
             return response()->json([
                 'status' => 'success',
                 'new_status' => $newStatus,
-                'message' => "Status WhatsApp untuk {$registration->name} diubah menjadi {$statusLabel}.",
+                'message' => $message,
             ]);
         }
 
-        return back()->with('success', "Status WhatsApp untuk {$registration->name} diubah menjadi {$statusLabel}.");
+        return back()->with('success', $message);
     }
 
     /**
@@ -338,7 +226,7 @@ class WebinarRegistrationController extends Controller
     public function export(Webinar $webinar): StreamedResponse
     {
         $registrations = $webinar->registrations()->latest()->get();
-        $safeTitle = \Illuminate\Support\Str::slug($webinar->title);
+        $safeTitle = Str::slug($webinar->title);
         $filename = "pendaftar-webinar-{$safeTitle}-" . now()->format('Y-m-d_His') . '.csv';
 
         return response()->streamDownload(function () use ($registrations, $webinar) {
@@ -351,21 +239,21 @@ class WebinarRegistrationController extends Controller
             fputcsv($handle, ['Webinar:', $webinar->title]);
             fputcsv($handle, ['Tanggal Pelaksanaan:', $webinar->webinar_date ? $webinar->webinar_date->translatedFormat('d F Y H:i') . ' WIB' : '-']);
             fputcsv($handle, ['Platform:', $webinar->platform ?? '-']);
-            fputcsv($handle, ['Link Webinar:', $webinar->meeting_link ?? $webinar->registration_url ?? '-']);
+            fputcsv($handle, ['Link Webinar:', $webinar->meeting_link ?: '-']);
             fputcsv($handle, []); // Empty row
 
             // Table headers
             fputcsv($handle, [
                 'No',
                 'Nama Lengkap',
-                'No WhatsApp / Telepon',
+                'No Telepon',
                 'Email',
                 'Instansi / Lembaga',
                 'Pekerjaan',
                 'Siapa yang Mereferensikan',
                 'Motivasi Mengikuti',
-                'Status WhatsApp',
-                'Waktu Kirim WA',
+                'Status Email',
+                'Waktu Kirim Email',
                 'Tanggal Mendaftar',
             ]);
 
@@ -379,8 +267,8 @@ class WebinarRegistrationController extends Controller
                     $item->occupation ?? '-',
                     $item->referral_source ?? '-',
                     $item->motivation ?? '-',
-                    strtoupper($item->whatsapp_status),
-                    $item->whatsapp_sent_at ? $item->whatsapp_sent_at->format('d/m/Y H:i:s') : '-',
+                    strtoupper($item->email_status),
+                    $item->email_sent_at ? $item->email_sent_at->format('d/m/Y H:i:s') : '-',
                     $item->created_at->format('d/m/Y H:i:s'),
                 ]);
             }
@@ -389,5 +277,89 @@ class WebinarRegistrationController extends Controller
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    /**
+     * Kirim email link webinar ke satu pendaftar dan simpan hasilnya.
+     *
+     * @return array{success: bool, error?: string}
+     */
+    private function deliver(WebinarRegistration $recipient, Webinar $webinar, string $subject, string $template, string $meetingLink): array
+    {
+        if (! filter_var($recipient->email, FILTER_VALIDATE_EMAIL)) {
+            $error = 'Alamat email tidak valid.';
+            $recipient->update(['email_status' => 'failed', 'email_error' => $error]);
+
+            return ['success' => false, 'error' => $error];
+        }
+
+        try {
+            Mail::to($recipient->email, $recipient->name)->send(new WebinarLinkMail(
+                webinar: $webinar,
+                subjectLine: $this->fillPlaceholders($subject, $recipient, $webinar, $meetingLink),
+                body: $this->fillPlaceholders($template, $recipient, $webinar, $meetingLink),
+                meetingLink: $meetingLink,
+            ));
+        } catch (Throwable $e) {
+            Log::warning('Gagal mengirim email link webinar', [
+                'registration_id' => $recipient->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            $error = Str::limit($e->getMessage(), 500);
+            $recipient->update(['email_status' => 'failed', 'email_error' => $error]);
+
+            return ['success' => false, 'error' => $error];
+        }
+
+        $recipient->update([
+            'email_status' => 'sent',
+            'email_sent_at' => now(),
+            'email_error' => null,
+        ]);
+
+        return ['success' => true];
+    }
+
+    private function fillPlaceholders(string $text, WebinarRegistration $recipient, Webinar $webinar, string $meetingLink): string
+    {
+        return str_replace(
+            ['{nama}', '{judul_webinar}', '{tanggal}', '{waktu}', '{platform}', '{link_webinar}', '{pembicara}'],
+            [
+                $recipient->name,
+                $webinar->title,
+                $webinar->webinar_date ? $webinar->webinar_date->translatedFormat('d F Y') : '-',
+                $webinar->webinar_date ? $webinar->webinar_date->translatedFormat('H:i') . ' WIB' : '-',
+                $webinar->platform ?? 'Online Meeting',
+                $meetingLink ?: '-',
+                $webinar->speaker ?? '-',
+            ],
+            $text
+        );
+    }
+
+    private function isMailConfigured(): bool
+    {
+        return ! in_array(config('mail.default'), self::NON_DELIVERING_MAILERS, true);
+    }
+
+    private function defaultSubject(): string
+    {
+        return 'Link Akses Webinar: {judul_webinar}';
+    }
+
+    private function defaultTemplate(): string
+    {
+        return "Halo {nama},\n\n"
+            . "Terima kasih telah mendaftar webinar \"{judul_webinar}\".\n\n"
+            . "Berikut informasi pelaksanaan webinar:\n"
+            . "Tanggal: {tanggal}\n"
+            . "Waktu: {waktu}\n"
+            . "Narasumber: {pembicara}\n"
+            . "Platform: {platform}\n\n"
+            . "Link Webinar:\n{link_webinar}\n\n"
+            . "Mohon bergabung tepat waktu. Sampai jumpa di ruang webinar!\n\n"
+            . "Salam,\n"
+            . "C-SHIELD Diskominfo Kota Cimahi";
     }
 }
