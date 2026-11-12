@@ -9,19 +9,14 @@
             <div>
                 <h2 class="font-heading text-xl font-bold text-navy-900">Data Pendaftaran Webinar</h2>
                 <p class="mt-1 text-sm text-slate-500">
-                    Kelola data pendaftar webinar, pantau referensi pendaftar, dan kirim link akses webinar via WhatsApp.
+                    Kelola data pendaftar webinar, pantau referensi pendaftar, dan kirim link akses webinar via email.
                 </p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-                @if ($isCloudApiConfigured)
-                    <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                @if ($isMailConfigured)
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700" title="Pengirim: {{ $mailFromAddress }}">
                         <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        WhatsApp Cloud API Aktif
-                    </span>
-                @else
-                    <span class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800" title="Konfigurasikan WHATSAPP_TOKEN & WHATSAPP_PHONE_NUMBER_ID di .env untuk pengiriman otomatis Meta">
-                        <span class="h-2 w-2 rounded-full bg-amber-500"></span>
-                        WhatsApp Cloud API (Belum Dikonfigurasi di .env)
+                        Email Aktif ({{ strtoupper($mailerName) }})
                     </span>
                 @endif
             </div>
@@ -88,10 +83,10 @@
                                         {{ $wb->registrations_count }} Peserta
                                     </span>
                                     <div class="flex items-center gap-2">
-                                        <span class="inline-flex items-center text-emerald-600 font-medium" title="Sudah dikirim WA">
+                                        <span class="inline-flex items-center text-emerald-600 font-medium" title="Sudah dikirim email">
                                             ✓ {{ $wb->sent_count }}
                                         </span>
-                                        <span class="inline-flex items-center text-amber-600 font-medium" title="Pending / Belum dikirim WA">
+                                        <span class="inline-flex items-center text-amber-600 font-medium" title="Pending / Belum dikirim email">
                                             ⏳ {{ $wb->pending_count }}
                                         </span>
                                     </div>
@@ -136,11 +131,11 @@
                                     <button type="button"
                                             onclick="openBroadcastModal()"
                                             class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
-                                        {{-- WhatsApp Icon --}}
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 shrink-0">
-                                            <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.35C9.35 7.35 9.06 7.41 8.82 7.68C8.58 7.94 7.89 8.58 7.89 9.89C7.89 11.2 8.84 12.46 8.98 12.65C9.11 12.83 10.82 15.5 13.49 16.64C15.69 17.59 16.14 17.4 16.62 17.36C17.09 17.31 18.15 16.73 18.37 16.11C18.59 15.49 18.59 14.96 18.53 14.85C18.47 14.74 18.3 14.68 18.04 14.55C17.78 14.42 16.5 13.79 16.26 13.7C16.03 13.62 15.86 13.57 15.69 13.84C15.02 14.68 14.87 14.85 14.73 15.02 14.58 15.05 14.32 14.92C14.06 14.79 12.96 14.43 11.66 13.27C10.65 12.37 9.97 11.26 9.84 11.04C9.7 10.82 9.82 10.7 9.95 10.57C10.07 10.45 10.22 10.26 10.35 10.11C10.48 9.96 10.53 9.85 10.62 9.68C10.71 9.5 10.66 9.35 10.6 9.22C10.53 9.09 10.01 7.81 9.79 7.28C9.58 6.77 9.37 6.84 9.21 6.83C9.06 6.83 8.88 6.83 8.71 6.83L9.53 7.35Z"/>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-4 w-4 shrink-0">
+                                            <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                                            <path d="m3 7 9 6 9-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                                         </svg>
-                                        <span>Kirim Link via WhatsApp</span>
+                                        <span>Kirim Link via Email</span>
                                     </button>
 
                                     <a href="{{ route('admin.webinar-registrations.export', $selectedWebinar) }}"
@@ -161,7 +156,7 @@
                                     <p class="text-lg font-bold text-navy-900">{{ $selectedWebinar->registrations_count }}</p>
                                 </div>
                                 <div class="rounded-lg bg-emerald-50 p-3">
-                                    <p class="text-xs text-emerald-700">Sudah Terkirim WA</p>
+                                    <p class="text-xs text-emerald-700">Sudah Terkirim Email</p>
                                     <p class="text-lg font-bold text-emerald-800">{{ $selectedWebinar->sent_count }}</p>
                                 </div>
                                 <div class="rounded-lg bg-amber-50 p-3">
@@ -186,13 +181,13 @@
                                         <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                                     </svg>
                                     <input type="text" name="search" value="{{ request('search') }}"
-                                           placeholder="Cari nama, WhatsApp, email, referensi..."
+                                           placeholder="Cari nama, email, telepon, referensi..."
                                            class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500">
                                 </div>
 
                                 <select name="status" onchange="this.form.submit()"
                                         class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500">
-                                    <option value="">Semua Status WA</option>
+                                    <option value="">Semua Status Email</option>
                                     <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending (Belum)</option>
                                     <option value="sent" {{ request('status') === 'sent' ? 'selected' : '' }}>Terkirim</option>
                                     <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>Gagal</option>
@@ -222,16 +217,16 @@
                                                        class="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500">
                                             </th>
                                             <th class="px-4 py-3">Nama Pendaftar</th>
-                                            <th class="px-4 py-3">No. WhatsApp</th>
+                                            <th class="px-4 py-3">No. Telepon</th>
                                             <th class="px-4 py-3">Siapa yang Mereferensikan</th>
                                             <th class="px-4 py-3">Instansi / Profesi</th>
-                                            <th class="px-4 py-3 text-center">Status WhatsApp</th>
+                                            <th class="px-4 py-3 text-center">Status Email</th>
                                             <th class="px-4 py-3 text-right">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">
                                         @forelse ($registrations as $index => $reg)
-                                            <tr class="hover:bg-slate-50/70 transition" data-reg-id="{{ $reg->id }}" data-reg-name="{{ $reg->name }}" data-reg-phone="{{ $reg->phone }}">
+                                            <tr class="hover:bg-slate-50/70 transition" data-reg-id="{{ $reg->id }}" data-reg-name="{{ $reg->name }}" data-reg-email="{{ $reg->email }}">
                                                 <td class="px-4 py-3 text-center">
                                                     <input type="checkbox" name="selected_participant[]" value="{{ $reg->id }}"
                                                            onchange="updateSelectionCount()"
@@ -243,13 +238,7 @@
                                                 </td>
                                                 <td class="px-4 py-3">
                                                     @if ($reg->phone)
-                                                        <a href="https://wa.me/{{ $reg->formatted_phone }}" target="_blank"
-                                                           class="inline-flex items-center gap-1 font-mono text-emerald-700 hover:text-emerald-800 hover:underline">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5 text-emerald-600">
-                                                                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/>
-                                                            </svg>
-                                                            {{ $reg->phone }}
-                                                        </a>
+                                                        <span class="font-mono text-slate-700">{{ $reg->phone }}</span>
                                                     @else
                                                         <span class="text-xs text-slate-400">-</span>
                                                     @endif
@@ -271,15 +260,15 @@
                                                     <p class="text-slate-400">{{ $reg->occupation ?: '' }}</p>
                                                 </td>
                                                 <td class="px-4 py-3 text-center">
-                                                    @if ($reg->whatsapp_status === 'sent')
-                                                        <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800" title="{{ $reg->whatsapp_sent_at ? 'Dikirim: ' . $reg->whatsapp_sent_at->format('d/m/Y H:i') : 'Terkirim' }}">
+                                                    @if ($reg->email_status === 'sent')
+                                                        <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800" title="{{ $reg->email_sent_at ? 'Dikirim: ' . $reg->email_sent_at->format('d/m/Y H:i') : 'Terkirim' }}">
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-3 w-3">
                                                                 <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/>
                                                             </svg>
                                                             Terkirim
                                                         </span>
-                                                    @elseif ($reg->whatsapp_status === 'failed')
-                                                        <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800" title="{{ $reg->whatsapp_error }}">
+                                                    @elseif ($reg->email_status === 'failed')
+                                                        <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800" title="{{ $reg->email_error }}">
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-3 w-3">
                                                                 <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/>
                                                             </svg>
@@ -296,19 +285,17 @@
                                                 </td>
                                                 <td class="px-4 py-3 text-right">
                                                     <div class="flex items-center justify-end gap-1.5">
-                                                        {{-- Tombol Kirim WhatsApp Manual / Langsung --}}
-                                                        @if ($reg->phone)
-                                                            @php
-                                                                $cleanLink = $selectedWebinar->meeting_link ?: $selectedWebinar->registration_url ?: 'https://zoom.us';
-                                                                $waMsg = "Halo {$reg->name}, berikut link akses webinar *{$selectedWebinar->title}*:\n\n🔗 {$cleanLink}\n\nSampai jumpa!";
-                                                                $waDirectUrl = "https://wa.me/{$reg->formatted_phone}?text=" . rawurlencode($waMsg);
-                                                            @endphp
-                                                            <a href="{{ $waDirectUrl }}" target="_blank"
-                                                               class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
-                                                               title="Kirim via WhatsApp Web/App">
-                                                                Kirim WA
-                                                            </a>
-                                                        @endif
+                                                        {{-- Tombol Kirim Email ke Satu Peserta --}}
+                                                        <form method="POST" action="{{ route('admin.webinar-registrations.send-single', $reg) }}" class="inline"
+                                                              data-confirm-email="{{ $reg->email }}"
+                                                              onsubmit="return confirm('Kirim email link webinar ke ' + this.dataset.confirmEmail + '?')">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                    class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                                                                    title="Kirim email link webinar ke peserta ini">
+                                                                Kirim Email
+                                                            </button>
+                                                        </form>
 
                                                         {{-- Toggle Status --}}
                                                         <form method="POST" action="{{ route('admin.webinar-registrations.toggle-status', $reg) }}" class="inline">
@@ -316,7 +303,7 @@
                                                             <button type="submit"
                                                                     class="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 transition hover:bg-slate-100"
                                                                     title="Ganti status antara Terkirim dan Pending">
-                                                                {{ $reg->whatsapp_status === 'sent' ? 'Set Pending' : 'Set Terkirim' }}
+                                                                {{ $reg->email_status === 'sent' ? 'Set Pending' : 'Set Terkirim' }}
                                                             </button>
                                                         </form>
                                                     </div>
@@ -343,7 +330,7 @@
         @endif
     </div>
 
-    {{-- ========== MODAL KIRIM LINK WEBINAR VIA WHATSAPP ========== --}}
+    {{-- ========== MODAL KIRIM LINK WEBINAR VIA EMAIL ========== --}}
     @if ($selectedWebinar)
         <div id="broadcastModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-navy-950/60 p-4 backdrop-blur-sm">
             <div class="flex min-h-full items-center justify-center p-2 sm:p-4">
@@ -351,10 +338,11 @@
                     {{-- Header Modal --}}
                     <div class="flex items-center justify-between border-b border-emerald-600 bg-emerald-600 px-6 py-4 text-white">
                         <div class="flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6">
-                                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-6 w-6">
+                                <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                                <path d="m3 7 9 6 9-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <h3 class="font-heading text-lg font-bold">Kirim Link Webinar via WhatsApp</h3>
+                            <h3 class="font-heading text-lg font-bold">Kirim Link Webinar via Email</h3>
                         </div>
                         <button type="button" onclick="closeBroadcastModal()" class="rounded-full bg-white/20 p-1 text-white hover:bg-white/30">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-5 w-5">
@@ -364,7 +352,7 @@
                     </div>
 
                     {{-- Form Kirim --}}
-                    <form method="POST" action="{{ route('admin.webinar-registrations.send-whatsapp', $selectedWebinar) }}" id="broadcastForm" class="p-6 space-y-5">
+                    <form method="POST" action="{{ route('admin.webinar-registrations.send-email', $selectedWebinar) }}" id="broadcastForm" class="p-6 space-y-5">
                         @csrf
 
                         {{-- Input Link Webinar --}}
@@ -380,12 +368,12 @@
                                     </svg>
                                 </div>
                                 <input type="text" id="meeting_link" name="meeting_link" required
-                                       value="{{ old('meeting_link', $selectedWebinar->meeting_link ?: $selectedWebinar->registration_url) }}"
+                                       value="{{ old('meeting_link', $selectedWebinar->meeting_link) }}"
                                        oninput="updatePreview()"
                                        placeholder="https://zoom.us/j/123456789 atau https://meet.google.com/..."
                                        class="block w-full rounded-lg border border-slate-300 pl-10 pr-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono">
                             </div>
-                            <p class="mt-1 text-xs text-slate-500">Link ini akan otomatis disimpan pada webinar dan disisipkan pada pesan.</p>
+                            <p class="mt-1 text-xs text-slate-500">Link ini akan otomatis disimpan pada webinar dan disisipkan pada email.</p>
                         </div>
 
                         {{-- Target Penerima --}}
@@ -424,11 +412,23 @@
                             <div id="selectedIdsContainer"></div>
                         </div>
 
+                        {{-- Subjek Email --}}
+                        <div>
+                            <label for="email_subject" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                Subjek Email <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="email_subject" name="email_subject" required maxlength="255"
+                                   value="{{ old('email_subject', $defaultSubject) }}"
+                                   oninput="updatePreview()"
+                                   class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                            <p class="mt-1 text-xs text-slate-500">Tag seperti <code class="font-mono">{judul_webinar}</code> juga bisa dipakai di subjek.</p>
+                        </div>
+
                         {{-- Template Pesan yang Bisa Diedit --}}
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <label for="message_template" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                                    Template Pesan WhatsApp <span class="text-red-500">*</span>
+                                    Isi Email <span class="text-red-500">*</span>
                                 </label>
                                 <span class="text-xs text-slate-400">Klik tag di bawah untuk menyisipkan</span>
                             </div>
@@ -456,35 +456,38 @@
                                       class="block w-full rounded-lg border border-slate-300 p-3 text-xs sm:text-sm font-sans focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 leading-relaxed">{{ old('message_template', $defaultTemplate) }}</textarea>
                         </div>
 
-                        {{-- PREVIEW SEBELUM MENGIRIM (Realistic WhatsApp Chat Bubble) --}}
+                        {{-- PREVIEW EMAIL SEBELUM MENGIRIM --}}
                         <div>
                             <p class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                                Preview Tampilan Pesan WhatsApp
+                                Preview Email
                             </p>
-                            <div class="rounded-xl border border-slate-200 bg-[#efeae2] p-4">
-                                <div class="max-w-md mx-auto sm:mx-0 rounded-lg bg-white p-3.5 shadow-sm border border-black/5 relative">
-                                    <div class="text-xs font-semibold text-emerald-800 mb-1 flex items-center justify-between">
-                                        <span>C-SHIELD Diskominfo Kota Cimahi</span>
-                                        <span class="text-[10px] text-slate-400">WhatsApp Message</span>
+                            <div class="rounded-xl border border-slate-200 bg-slate-100 p-4">
+                                <div class="mx-auto max-w-md overflow-hidden rounded-lg border border-black/5 bg-white shadow-sm">
+                                    <div class="border-b border-slate-100 px-4 py-2.5 text-xs text-slate-500 space-y-0.5">
+                                        <p><span class="font-semibold text-slate-700">Dari:</span> {{ config('mail.from.name') }} &lt;{{ $mailFromAddress }}&gt;</p>
+                                        <p><span class="font-semibold text-slate-700">Kepada:</span> <span id="emailPreviewTo"></span></p>
+                                        <p><span class="font-semibold text-slate-700">Subjek:</span> <span id="emailPreviewSubject" class="text-slate-800"></span></p>
                                     </div>
-                                    <div id="waPreviewText" class="text-xs sm:text-sm text-slate-800 whitespace-pre-wrap leading-relaxed font-sans">
-                                        {{-- Dynamic Preview Content --}}
+                                    <div class="bg-navy-900 px-4 py-2.5">
+                                        <p class="text-sm font-bold text-white">C-SHIELD</p>
+                                        <p class="text-[10px] text-teal-400">Diskominfo Kota Cimahi</p>
                                     </div>
-                                    <div class="mt-2 text-right">
-                                        <span class="text-[10px] text-slate-400">10:00 ✓✓</span>
+                                    <div id="emailPreviewText" class="px-4 py-3 text-xs sm:text-sm text-slate-800 whitespace-pre-wrap leading-relaxed font-sans break-words"></div>
+                                    <div class="px-4 pb-4 text-center">
+                                        <span class="inline-block rounded-md bg-teal-500 px-4 py-2 text-xs font-bold text-navy-950">Gabung Webinar</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Status WhatsApp Cloud API Notice --}}
-                        <div class="rounded-lg p-3 text-xs {{ $isCloudApiConfigured ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}">
-                            @if ($isCloudApiConfigured)
-                                <p class="font-semibold">✓ WhatsApp Business Cloud API Siap Digunakan</p>
-                                <p class="mt-0.5 text-emerald-700">Pesan akan dikirimkan otomatis melalui Meta Graph API ke nomor WhatsApp masing-masing peserta.</p>
+                        {{-- Status Konfigurasi Email --}}
+                        <div class="rounded-lg p-3 text-xs {{ $isMailConfigured ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}">
+                            @if ($isMailConfigured)
+                                <p class="font-semibold">✓ Pengiriman Email Siap Digunakan</p>
+                                <p class="mt-0.5 text-emerald-700">Email dikirim dari <strong>{{ $mailFromAddress }}</strong> ke alamat email masing-masing peserta.</p>
                             @else
-                                <p class="font-semibold">ℹ Mode Broadcast & Pelacak Status</p>
-                                <p class="mt-0.5">WhatsApp Cloud API belum dikonfigurasi di file <code class="font-mono font-bold">.env</code> (variabel: <code class="font-mono">WHATSAPP_TOKEN</code> &amp; <code class="font-mono">WHATSAPP_PHONE_NUMBER_ID</code>). Sistem akan memperbarui status pendaftar menjadi terkirim dan Anda dapat menggunakan tombol <strong>Kirim WA</strong> langsung di tabel untuk membuka WhatsApp Web/App.</p>
+                                <p class="font-semibold">ℹ Mode Log (Email Tidak Benar-benar Terkirim)</p>
+                                <p class="mt-0.5"><code class="font-mono font-bold">MAIL_MAILER</code> di file <code class="font-mono font-bold">.env</code> masih <code class="font-mono">{{ $mailerName }}</code>, jadi email hanya ditulis ke <code class="font-mono">storage/logs</code>. Atur <code class="font-mono">MAIL_MAILER=smtp</code> beserta <code class="font-mono">MAIL_HOST</code>, <code class="font-mono">MAIL_PORT</code>, <code class="font-mono">MAIL_USERNAME</code>, <code class="font-mono">MAIL_PASSWORD</code> dan <code class="font-mono">MAIL_FROM_ADDRESS</code> untuk pengiriman sungguhan.</p>
                             @endif
                         </div>
 
@@ -500,7 +503,7 @@
                                     <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     <path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                <span>Kirim Pesan Sekarang</span>
+                                <span>Kirim Email Sekarang</span>
                             </button>
                         </div>
                     </form>
@@ -519,7 +522,8 @@
         time: @json($selectedWebinar?->webinar_date ? $selectedWebinar->webinar_date->translatedFormat('H:i') . ' WIB' : '-'),
         platform: @json($selectedWebinar?->platform ?? 'Online Meeting'),
         speaker: @json($selectedWebinar?->speaker ?? '-'),
-        sampleName: @json($registrations->first()?->name ?? 'Budi Santoso')
+        sampleName: @json($registrations->first()?->name ?? 'Budi Santoso'),
+        sampleEmail: @json($registrations->first()?->email ?? 'peserta@example.com')
     };
 
     function openBroadcastModal() {
@@ -553,11 +557,8 @@
         updatePreview();
     }
 
-    function updatePreview() {
-        const template = document.getElementById('message_template')?.value || '';
-        const meetingLink = document.getElementById('meeting_link')?.value || 'https://zoom.us/j/...';
-
-        let preview = template
+    function fillTags(text, meetingLink) {
+        return text
             .replace(/{nama}/g, webinarData.sampleName)
             .replace(/{judul_webinar}/g, webinarData.title)
             .replace(/{tanggal}/g, webinarData.date)
@@ -565,11 +566,21 @@
             .replace(/{platform}/g, webinarData.platform)
             .replace(/{pembicara}/g, webinarData.speaker)
             .replace(/{link_webinar}/g, meetingLink);
+    }
 
-        const previewContainer = document.getElementById('waPreviewText');
-        if (previewContainer) {
-            previewContainer.textContent = preview;
-        }
+    function updatePreview() {
+        const template = document.getElementById('message_template')?.value || '';
+        const subject = document.getElementById('email_subject')?.value || '';
+        const meetingLink = document.getElementById('meeting_link')?.value || 'https://zoom.us/j/...';
+
+        const setText = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+        };
+
+        setText('emailPreviewText', fillTags(template, meetingLink));
+        setText('emailPreviewSubject', fillTags(subject, meetingLink));
+        setText('emailPreviewTo', webinarData.sampleName + ' <' + webinarData.sampleEmail + '>');
     }
 
     // Toggle Select All Checkboxes in Table
@@ -638,7 +649,7 @@
         const btn = document.getElementById('btnSubmitBroadcast');
         if (btn) {
             btn.disabled = true;
-            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Mengirim Pesan...`;
+            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Mengirim Email...`;
         }
     });
 
