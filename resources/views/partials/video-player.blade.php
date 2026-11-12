@@ -40,13 +40,8 @@
             </span>
             <span class="block line-clamp-2 font-heading font-bold leading-snug text-white {{ ($mobileCompact ?? false) ? 'mt-1 text-[10px] [overflow-wrap:anywhere] sm:mt-3 sm:text-sm' : 'mt-3 text-sm' }}">{{ $video->title }}</span>        </div>
     </a>
-@elseif ($youtubeId)
-    <div class="aspect-video overflow-hidden rounded-xl bg-navy-900">
-        <iframe class="h-full w-full" src="https://www.youtube.com/embed/{{ $youtubeId }}" title="{{ $video->title }}" frameborder="0" loading="lazy"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-    </div>
-@elseif ($isInstagram && $compact)
-    {{-- Di daftar video, embed Instagram (portrait) terlalu tinggi; tampilkan kartu pratinjau 16:9 yang menuju halaman detail. --}}
+@elseif (($isInstagram || $youtubeId) && $compact)
+    {{-- Di daftar video, tampilkan kartu pratinjau 16:9 (thumbnail dari link) yang menuju halaman detail, bukan embed. --}}
     <a href="{{ route('videos.show', $video) }}" class="group/ig relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-navy-950 text-white"
        @unless($video->thumbnail) style="background:linear-gradient(135deg,#1E5AA8,#0B2545 72%)" @endunless>
         @if ($video->thumbnail)
@@ -57,8 +52,16 @@
             <span class="mx-auto flex {{ ($mobileCompact ?? false) ? 'h-8 w-8 sm:h-12 sm:w-12' : 'h-12 w-12' }} items-center justify-center rounded-full bg-black/35 ring-1 ring-white/25 backdrop-blur-sm transition group-hover/ig:bg-black/55">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-6 w-6"><path d="M8 5v14l11-7-11-7Z" fill="currentColor"/></svg>
             </span>
-            <span class="block line-clamp-2 font-heading font-bold leading-snug text-white {{ ($mobileCompact ?? false) ? 'mt-1 text-[10px] [overflow-wrap:anywhere] sm:mt-3 sm:text-sm' : 'mt-3 text-sm' }}">{{ $video->title }}</span>        </div>
+            @unless ($video->thumbnail)
+                <span class="block line-clamp-2 font-heading font-bold leading-snug text-white {{ ($mobileCompact ?? false) ? 'mt-1 text-[10px] [overflow-wrap:anywhere] sm:mt-3 sm:text-sm' : 'mt-3 text-sm' }}">{{ $video->title }}</span>
+            @endunless
+        </div>
     </a>
+@elseif ($youtubeId)
+    <div class="aspect-video overflow-hidden rounded-xl bg-navy-900">
+        <iframe class="h-full w-full" src="https://www.youtube.com/embed/{{ $youtubeId }}" title="{{ $video->title }}" frameborder="0" loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    </div>
 @elseif ($isInstagram)
     <div class="mx-auto w-full max-w-sm overflow-hidden rounded-xl">
         <blockquote class="instagram-media" data-instgrm-permalink="{{ $video->video_url }}" data-instgrm-version="14" style="margin:0 auto;width:100%;background:#fff;"></blockquote>
