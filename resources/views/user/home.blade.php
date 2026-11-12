@@ -124,7 +124,7 @@
                         </p>
                         <h3 class="mt-2 font-heading text-lg font-bold text-navy-900">{{ $webinar->title }}</h3>
                         <p class="mt-2 line-clamp-2 text-sm text-slate-500">{{ Str::plainText($webinar->description) }}</p>
-                        <a href="{{ $webinar->registration_url }}" target="_blank" rel="noopener"
+                        <a href="{{ route('webinars.index') }}"
                            class="mt-4 inline-flex items-center gap-1 rounded-md bg-teal-500 px-4 py-2 text-sm font-semibold text-navy-950 hover:bg-teal-400">
                             Register Now
                         </a>
