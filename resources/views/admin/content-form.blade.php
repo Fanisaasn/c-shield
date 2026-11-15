@@ -3,8 +3,8 @@
 @section('content')
 @vite('resources/js/admin-editor.js')
 <form method="POST" enctype="multipart/form-data" action="{{ $item->exists ? route('admin.'.$route.'.update',$item) : route('admin.'.$route.'.store') }}" class="max-w-3xl space-y-5 rounded-xl border border-slate-200 bg-white p-6">@csrf @if($item->exists) @method('PUT') @endif
-<div><label class="text-sm font-medium">Judul</label><input name="title" value="{{ old('title',$item->title) }}" class="mt-1 w-full rounded-md border-slate-300" required></div>
-@if($slug)<div><label class="text-sm font-medium">Slug <span class="text-slate-400">(otomatis bila kosong)</span></label><input name="slug" value="{{ old('slug',$item->slug) }}" class="mt-1 w-full rounded-md border-slate-300"></div>@endif
+<div><label class="text-sm font-medium">Judul</label><input name="title" value="{{ old('title',$item->title) }}" class="mt-1 w-full rounded-md border-slate-300" required>@error('title')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror</div>
+@if($slug)<div><label class="text-sm font-medium">Slug <span class="text-slate-400">(otomatis bila kosong)</span></label><input name="slug" value="{{ old('slug',$item->slug) }}" class="mt-1 w-full rounded-md border-slate-300">@error('slug')<p class="mt-1 text-xs text-red-600">{{ $message === 'validation.unique' || str_contains($message, 'taken') ? 'Slug ini sudah dipakai artikel lain. Ganti slug atau kosongkan agar dibuat otomatis.' : $message }}</p>@enderror</div>@endif
 @if($route === 'articles')
 <div><label class="text-sm font-medium">Ringkasan</label><textarea name="excerpt" class="mt-1 w-full rounded-md border-slate-300">{{ old('excerpt',$item->excerpt) }}</textarea></div>
 @include('admin.partials.rich-editor', ['name' => 'content', 'label' => 'Isi artikel', 'value' => $item->content, 'minHeight' => '18rem'])
@@ -14,6 +14,19 @@
     @error('source_url')
         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
     @enderror
+</div>
+<div>
+    <label class="text-sm font-medium" for="attachment">Lampiran file <span class="text-slate-400">(opsional: PDF, Word, PowerPoint, Excel, TXT, ZIP &middot; maks 20 MB)</span></label>
+    <input id="attachment" type="file" name="attachment" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" class="mt-1 block w-full text-sm">
+    @error('attachment')
+        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+    @enderror
+    @if($item->attachment)
+        <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+            <span>File saat ini: <a href="{{ asset('storage/' . $item->attachment) }}" target="_blank" rel="noopener" class="text-teal-700 underline">{{ $item->attachment_name ?: basename($item->attachment) }}</a></span>
+            <label class="flex items-center gap-1 text-red-600"><input type="checkbox" name="remove_attachment" value="1"> Hapus lampiran</label>
+        </div>
+    @endif
 </div>
 @endif
 @if($route === 'videos')

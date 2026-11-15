@@ -27,6 +27,15 @@
 
         @include('partials.rich-text', ['html' => $article->content, 'class' => 'public-article-content text-base leading-relaxed text-slate-700'])
 
+        @if ($article->attachment)
+            <a href="{{ asset('storage/' . $article->attachment) }}" target="_blank" rel="noopener" download="{{ $article->attachment_name }}"
+               class="mt-8 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 hover:border-teal-300 hover:bg-teal-50">
+                <svg class="h-6 w-6 shrink-0 text-teal-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M6 20h12a2 2 0 002-2V8l-6-6H6a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                <span class="min-w-0 flex-1 truncate font-medium">{{ $article->attachment_name ?: basename($article->attachment) }}</span>
+                <span class="font-semibold text-teal-700">Unduh</span>
+            </a>
+        @endif
+
         <div class="mt-8 flex flex-wrap gap-3">
             @if ($article->source_url)
                 @include('partials.source-link', ['sourceUrl' => $article->source_url])

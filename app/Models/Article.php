@@ -13,6 +13,8 @@ class Article extends Model
         'content',
         'source_url',
         'cover_image',
+        'attachment',
+        'attachment_name',
         'is_published',
         'published_at',
     ];

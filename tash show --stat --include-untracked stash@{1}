@@ -1,0 +1,16 @@
+ .env.example                                       |   4 [31m-[m
+ app/Http/Controllers/Admin/ContentController.php   |   4 [32m+[m[31m-[m
+ app/Http/Controllers/Admin/WebinarController.php   |   2 [32m+[m[31m-[m
+ .../Admin/WebinarRegistrationController.php        | 328 [32m++++++++++[m[31m-----------[m
+ app/Models/WebinarRegistration.php                 |  45 [32m+[m[31m--[m
+ app/Services/WhatsAppCloudService.php              | 132 [31m---------[m
+ config/services.php                                |   6 [31m-[m
+ database/seeders/WebinarRegistrationDemoSeeder.php |  28 [32m+[m[31m-[m
+ resources/views/admin/content-form.blade.php       |  20 [32m+[m[31m-[m
+ resources/views/admin/layouts/app.blade.php        |   2 [32m+[m
+ .../admin/webinar-registrations/index.blade.php    | 179 [32m+++++[m[31m------[m
+ resources/views/user/home.blade.php                |   2 [32m+[m[31m-[m
+ routes/web.php                                     |   2 [32m+[m[31m-[m
+ scripts/railway-media-start.sh                     |   2 [32m+[m[31m-[m
+ tests/Feature/AdminWebinarRegistrationTest.php     |  76 [32m+++[m[31m--[m
+ 15 files changed, 345 insertions(+), 487 deletions(-)

@@ -58,13 +58,24 @@ abstract class ContentController extends Controller
         if ($this->slugField) $rules['slug'] = ['nullable', 'string', 'max:255', 'unique:'.$this->route.',slug'.($item ? ','.$item->id : '')];
         $data = $request->validate($rules, $this->messages);
         $data['is_published'] = $request->boolean('is_published');
-        if ($this->slugField) $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
+        if ($this->slugField) $data['slug'] = $data['slug'] ?: $this->uniqueSlug($data['title'], $item);
         if (array_key_exists('published_at', $data) && !$data['published_at'] && $data['is_published']) $data['published_at'] = now();
         if ($this->uploadField && $request->hasFile($this->uploadField)) {
             $this->deleteUpload($item);
             $data[$this->uploadField] = $request->file($this->uploadField)->store($this->route, 'public');
         }
         return $data;
+    }
+
+    protected function uniqueSlug(string $title, ?Model $item = null): string
+    {
+        $base = Str::slug($title) ?: Str::lower(Str::random(8));
+        $slug = $base;
+        $i = 2;
+        while (($this->model)::where('slug', $slug)->when($item, fn ($q) => $q->whereKeyNot($item->getKey()))->exists()) {
+            $slug = $base.'-'.$i++;
+        }
+        return $slug;
     }
 
     protected function deleteUpload(?Model $item): void
