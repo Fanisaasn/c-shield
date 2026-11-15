@@ -15,19 +15,6 @@
         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
     @enderror
 </div>
-<div>
-    <label class="text-sm font-medium" for="attachment">Lampiran file <span class="text-slate-400">(opsional: PDF, Word, PowerPoint, Excel, TXT, ZIP &middot; maks 20 MB)</span></label>
-    <input id="attachment" type="file" name="attachment" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" class="mt-1 block w-full text-sm">
-    @error('attachment')
-        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-    @enderror
-    @if($item->attachment)
-        <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-            <span>File saat ini: <a href="{{ asset('storage/' . $item->attachment) }}" target="_blank" rel="noopener" class="text-teal-700 underline">{{ $item->attachment_name ?: basename($item->attachment) }}</a></span>
-            <label class="flex items-center gap-1 text-red-600"><input type="checkbox" name="remove_attachment" value="1"> Hapus lampiran</label>
-        </div>
-    @endif
-</div>
 @endif
 @if($route === 'videos')
 @php($selectedVideoType = old('type', $item->type ?: 'normal'))
