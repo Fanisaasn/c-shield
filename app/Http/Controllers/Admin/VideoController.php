@@ -44,6 +44,7 @@ class VideoController extends ContentController
             Video::create($data);
         } catch (Throwable $exception) {
             $this->deleteInteractivePackage($data['interactive_path'] ?? null);
+            $this->deleteVideo($data['video_path'] ?? null);
             throw $exception;
         }
 
@@ -62,6 +63,9 @@ class VideoController extends ContentController
         } catch (Throwable $exception) {
             if (($data['interactive_path'] ?? null) !== $oldInteractivePath) {
                 $this->deleteInteractivePackage($data['interactive_path'] ?? null);
+            }
+            if (($data['video_path'] ?? null) !== $oldVideoPath) {
+                $this->deleteVideo($data['video_path'] ?? null);
             }
             throw $exception;
         }
@@ -124,7 +128,7 @@ class VideoController extends ContentController
 
         unset($data['video'], $data['interactive_zip']);
         $data['is_published'] = $request->boolean('is_published');
-        $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
+        $data['slug'] = $data['slug'] ?: $this->uniqueSlug($data['title'], $item);
 
         if (! $data['published_at'] && $data['is_published']) {
             $data['published_at'] = now();

@@ -63,6 +63,9 @@ abstract class ContentController extends Controller
         if ($this->uploadField && $request->hasFile($this->uploadField)) {
             $this->deleteUpload($item);
             $data[$this->uploadField] = $request->file($this->uploadField)->store($this->route, 'public');
+        } elseif ($this->uploadField && $item && $request->boolean('remove_'.$this->uploadField)) {
+            $this->deleteUpload($item);
+            $data[$this->uploadField] = null;
         }
         return $data;
     }

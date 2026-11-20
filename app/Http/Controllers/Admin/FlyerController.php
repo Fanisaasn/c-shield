@@ -15,8 +15,8 @@ class FlyerController extends ContentController
         'title' => ['required', 'string', 'max:255'],
         'description' => ['nullable', 'string'],
         'source_url' => ['nullable', 'url', 'max:255'],
-        'images' => ['nullable', 'array'],
-        'images.*' => ['image', 'max:20480'],
+        'images' => ['nullable', 'array', 'max:10'],
+        'images.*' => ['image', 'mimes:jpg,jpeg,png,gif,webp', 'max:5120'],
         'is_published' => ['nullable', 'boolean'],
         'published_at' => ['nullable', 'date'],
     ];
@@ -42,7 +42,13 @@ class FlyerController extends ContentController
 
     protected function flyerData(Request $request): array
     {
-        $data = $request->validate($this->rules);
+        $data = $request->validate($this->rules, [
+            'images.max' => 'Maksimal 10 gambar sekali unggah.',
+            'images.*.image' => 'Setiap file galeri harus berupa gambar.',
+            'images.*.mimes' => 'Gambar galeri harus berformat JPG, PNG, GIF, atau WebP.',
+            'images.*.max' => 'Ukuran setiap gambar galeri maksimal 5 MB.',
+            'images.*.uploaded' => 'Gambar gagal diunggah. Pastikan ukurannya tidak melebihi 5 MB.',
+        ]);
         unset($data['images']);
 
         $data['is_published'] = $request->boolean('is_published');

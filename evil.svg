@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" onload="alert(1)">
+<script>alert(document.cookie)</script>
+<rect width="10" height="10" onclick="alert(2)" fill="red"/>
+<a xlink:href="javascript:alert(3)"><text>klik</text></a>
+<a href="https://c-shield.example"><text>ok link</text></a>
+<foreignObject><iframe src="https://evil"/></foreignObject>
+<image href="https://evil.example/track.png"/>
+<animate attributeName="href" to="javascript:alert(4)"/>
+<style>@import url(https://evil/x.css); rect{fill:blue}</style>
+<?php echo 1; ?>
+</svg>

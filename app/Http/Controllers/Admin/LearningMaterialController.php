@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\LearningMaterial;
 use App\Support\InteractivePackage;
+use App\Support\PresentationConverter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,11 +22,13 @@ class LearningMaterialController extends Controller
 
     /**
      * File extension => material type shown to the respondent. PPT/PPTX is
-     * not accepted for new uploads: its pages cannot be tracked in the
-     * browser, so the respondent could not be required to read it to the end.
+     * converted to PDF on upload (see PresentationConverter), because a
+     * presentation's slides cannot be tracked in the browser while PDF pages can.
      */
     private const FILE_TYPES = [
         'pdf' => 'pdf',
+        'ppt' => 'pdf',
+        'pptx' => 'pdf',
         'mp4' => 'video',
         'webm' => 'video',
     ];
@@ -157,9 +160,9 @@ class LearningMaterialController extends Controller
                 'regex:/^\s*(\d+:[0-5]?\d|\d+)\s*$/',
             ],
         ], [
-            'file.required' => 'Unggah file materi (PDF atau video MP4/WebM).',
+            'file.required' => 'Unggah file materi (PDF, PPT/PPTX, atau video MP4/WebM).',
             'file.uploaded' => 'File gagal diunggah. Pastikan ukuran file tidak melebihi batas server.',
-            'file.extensions' => 'File harus berformat PDF, MP4, atau WebM. Untuk PPT/PPTX, simpan dulu sebagai PDF.',
+            'file.extensions' => 'File harus berformat PDF, PPT, PPTX, MP4, atau WebM.',
             'file.max' => 'Ukuran file maksimal 100 MB.',
             'interactive_zip.required' => 'Unggah paket ZIP untuk video interaktif.',
             'interactive_zip.mimes' => 'Paket video interaktif harus berupa file ZIP.',
@@ -189,14 +192,28 @@ class LearningMaterialController extends Controller
         } elseif ($kind === 'file' && $request->hasFile('file')) {
             $file = $request->file('file');
             $extension = strtolower($file->getClientOriginalExtension());
+            $originalName = $file->getClientOriginalName();
 
-            // Store under a random name; the client filename is only kept for display.
-            $newPath = $file->storeAs('learning-materials', Str::random(40).'.'.$extension, 'public');
+            if (in_array($extension, PresentationConverter::EXTENSIONS, true)) {
+                // Presentations are stored as the converted PDF so pages can be tracked.
+                $pdf = PresentationConverter::toPdf($file);
+                try {
+                    $newPath = 'learning-materials/'.Str::random(40).'.pdf';
+                    Storage::disk('public')->putFileAs('learning-materials', new \Illuminate\Http\File($pdf), basename($newPath));
+                } finally {
+                    PresentationConverter::cleanup($pdf);
+                }
+                $originalName = pathinfo($originalName, PATHINFO_FILENAME).'.pdf';
+            } else {
+                // Store under a random name; the client filename is only kept for display.
+                $newPath = $file->storeAs('learning-materials', Str::random(40).'.'.$extension, 'public');
+            }
+
             $attributes += [
                 'file_path' => $newPath,
                 'external_url' => null,
                 'file_type' => self::FILE_TYPES[$extension],
-                'original_name' => mb_substr($file->getClientOriginalName(), 0, 255),
+                'original_name' => mb_substr($originalName, 0, 255),
                 // Measured by the admin's browser from the chosen file; used to check the respondent watched it all.
                 'duration_seconds' => self::FILE_TYPES[$extension] === 'video' ? ($data['duration_seconds'] ?? null) : null,
             ];

@@ -21,4 +21,9 @@ class ArticleController extends ContentController
         'is_published' => ['nullable', 'boolean'],
         'published_at' => ['nullable', 'date'],
     ];
+
+    protected array $messages = [
+        'cover_image.image' => 'Gambar sampul harus berupa file gambar (JPG, PNG, GIF, atau WebP).',
+        'cover_image.max' => 'Ukuran gambar sampul maksimal 2 MB.',
+    ];
 }

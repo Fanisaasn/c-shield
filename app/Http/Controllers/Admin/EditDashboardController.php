@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DashboardSetting;
 use App\Models\DashboardSlide;
+use App\Support\SvgSanitizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,8 @@ use Illuminate\View\View;
 
 class EditDashboardController extends Controller
 {
+    private const INVALID_SVG_MESSAGE = 'File SVG tidak dapat dibaca. Pastikan file adalah SVG yang valid (ekspor ulang dari aplikasi desain), atau gunakan PNG.';
+
     /**
      * Display the Edit Dashboard management page.
      */
@@ -41,18 +44,16 @@ class EditDashboardController extends Controller
 
         $file = $request->file('logo');
 
-        if ($this->isSvgFile($file) && ! $this->validateSvgSecurity($file)) {
-            $errorMsg = 'Berkas SVG logo tidak valid atau mengandung skrip/kode yang tidak aman.';
+        $path = $this->storeImage($file, 'appearance/logo', 'logo_', 'png');
+
+        if ($path === null) {
+            $errorMsg = self::INVALID_SVG_MESSAGE;
             if ($request->expectsJson()) {
                 return response()->json(['status' => 'error', 'message' => $errorMsg], 422);
             }
 
             return back()->withErrors(['logo' => $errorMsg])->withInput();
         }
-
-        $extension = $file->getClientOriginalExtension() ?: 'png';
-        $filename = 'logo_' . Str::random(20) . '.' . strtolower($extension);
-        $path = $file->storeAs('appearance/logo', $filename, 'public');
 
         // Hapus logo lama dari storage jika ada
         $oldLogo = DashboardSetting::getValue('app_logo');
@@ -106,20 +107,19 @@ class EditDashboardController extends Controller
         $data = $request->validate([
             'image' => ['required', 'file', 'mimes:png,jpg,jpeg,webp,svg', 'max:8192'],
             'title' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:1000'],
-            'link_url' => ['nullable', 'url', 'max:255'],
             'is_active' => ['nullable', 'boolean'],
         ], [
             'image.required' => 'Silakan pilih gambar slide terlebih dahulu.',
             'image.mimes' => 'Format gambar slide harus berupa PNG, JPG, JPEG, WebP, atau SVG.',
             'image.max' => 'Ukuran gambar slide maksimal 8MB.',
-            'link_url.url' => 'Format URL tautan tidak valid.',
         ]);
 
         $file = $request->file('image');
 
-        if ($this->isSvgFile($file) && ! $this->validateSvgSecurity($file)) {
-            $errorMsg = 'File SVG slide tidak aman atau mengandung skrip berbahaya.';
+        $path = $this->storeImage($file, 'appearance/slides', 'slide_', 'jpg');
+
+        if ($path === null) {
+            $errorMsg = self::INVALID_SVG_MESSAGE;
             if ($request->expectsJson()) {
                 return response()->json(['status' => 'error', 'message' => $errorMsg], 422);
             }
@@ -127,19 +127,13 @@ class EditDashboardController extends Controller
             return back()->withErrors(['image' => $errorMsg])->withInput();
         }
 
-        $extension = $file->getClientOriginalExtension() ?: 'jpg';
-        $filename = 'slide_' . Str::random(20) . '.' . strtolower($extension);
-        $path = $file->storeAs('appearance/slides', $filename, 'public');
-
         $maxOrder = (int) DashboardSlide::max('sort_order');
 
         $slide = DashboardSlide::create([
             'title' => $data['title'] ?? null,
-            'description' => $data['description'] ?? null,
             'image_path' => $path,
             'sort_order' => $maxOrder + 1,
             'is_active' => $request->boolean('is_active', true),
-            'link_url' => $data['link_url'] ?? null,
         ]);
 
         $msg = 'Slide banner berhasil ditambahkan.';
@@ -164,21 +158,20 @@ class EditDashboardController extends Controller
         $data = $request->validate([
             'image' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,svg', 'max:8192'],
             'title' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:1000'],
-            'link_url' => ['nullable', 'url', 'max:255'],
             'is_active' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:1'],
         ], [
             'image.mimes' => 'Format gambar slide harus berupa PNG, JPG, JPEG, WebP, atau SVG.',
             'image.max' => 'Ukuran gambar slide maksimal 8MB.',
-            'link_url.url' => 'Format URL tautan tidak valid.',
         ]);
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
 
-            if ($this->isSvgFile($file) && ! $this->validateSvgSecurity($file)) {
-                $errorMsg = 'File SVG slide tidak valid atau tidak aman.';
+            $newPath = $this->storeImage($file, 'appearance/slides', 'slide_', 'jpg');
+
+            if ($newPath === null) {
+                $errorMsg = self::INVALID_SVG_MESSAGE;
                 if ($request->expectsJson()) {
                     return response()->json(['status' => 'error', 'message' => $errorMsg], 422);
                 }
@@ -186,18 +179,12 @@ class EditDashboardController extends Controller
                 return back()->withErrors(['image' => $errorMsg])->withInput();
             }
 
-            $extension = $file->getClientOriginalExtension() ?: 'jpg';
-            $filename = 'slide_' . Str::random(20) . '.' . strtolower($extension);
-            $newPath = $file->storeAs('appearance/slides', $filename, 'public');
-
             $oldPath = $slide->image_path;
             $slide->image_path = $newPath;
             $this->deleteStoredFile($oldPath);
         }
 
         $slide->title = $data['title'] ?? null;
-        $slide->description = $data['description'] ?? null;
-        $slide->link_url = $data['link_url'] ?? null;
         $slide->is_active = $request->boolean('is_active');
 
         if (isset($data['sort_order'])) {
@@ -332,45 +319,27 @@ class EditDashboardController extends Controller
     }
 
     /**
-     * Strictly validate SVG file content to prevent XSS and malicious scripts.
+     * Store an uploaded image under a random name. SVG files are cleaned
+     * (scripts, event handlers, external references removed) and the cleaned
+     * markup is what gets stored. Returns null when an SVG is not usable.
      */
-    protected function validateSvgSecurity(UploadedFile $file): bool
+    protected function storeImage(UploadedFile $file, string $directory, string $prefix, string $defaultExtension): ?string
     {
-        $content = file_get_contents($file->getRealPath());
-        if ($content === false) {
-            return false;
-        }
-
-        $dangerousPatterns = [
-            '/<script\b[^>]*>(.*?)<\/script>/is',
-            '/<\?php/i',
-            '/<\?=/i',
-            '/<%/',
-            '/<embed\b/i',
-            '/<object\b/i',
-            '/<foreignObject\b/i',
-            '/<iframe\b/i',
-            '/onload\s*=/i',
-            '/onerror\s*=/i',
-            '/onclick\s*=/i',
-            '/onmouseover\s*=/i',
-            '/javascript\s*:/i',
-            '/data\s*:\s*text\/html/i',
-            '/<!ENTITY/i',
-            '/SYSTEM\s+["\']/i',
-        ];
-
-        foreach ($dangerousPatterns as $pattern) {
-            if (preg_match($pattern, $content)) {
-                return false;
+        if ($this->isSvgFile($file)) {
+            $clean = SvgSanitizer::sanitize((string) file_get_contents($file->getRealPath()));
+            if ($clean === null) {
+                return null;
             }
+
+            $path = $directory.'/'.$prefix.Str::random(20).'.svg';
+            Storage::disk('public')->put($path, $clean);
+
+            return $path;
         }
 
-        if (! str_contains($content, '<svg') || ! str_contains($content, '</svg>')) {
-            return false;
-        }
+        $extension = strtolower($file->getClientOriginalExtension() ?: $defaultExtension);
 
-        return true;
+        return $file->storeAs($directory, $prefix.Str::random(20).'.'.$extension, 'public');
     }
 
     /**

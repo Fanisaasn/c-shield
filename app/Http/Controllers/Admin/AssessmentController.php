@@ -62,6 +62,25 @@ class AssessmentController extends Controller
     }
 
     /**
+     * Delete several questions at once (checked in the question list).
+     */
+    public function destroyQuestions(Request $request): RedirectResponse
+    {
+        $ids = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ], [
+            'ids.required' => 'Pilih minimal satu soal yang akan dihapus.',
+        ])['ids'];
+
+        $questions = AssessmentQuestion::whereIn('id', $ids)->get();
+        // One model at a time so model events / cascades behave like a single delete.
+        $questions->each->delete();
+
+        return redirect()->route('admin.assessments.index')->with('success', $questions->count().' soal berhasil dihapus.');
+    }
+
+    /**
      * Validate a submitted multiple-choice question.
      *
      * Expects `question`, `options[key][text]` (+ `options[key][id]` for an

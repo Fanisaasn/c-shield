@@ -28,7 +28,7 @@
         @endif
 
         <form method="POST" action="{{ route('self-assessment.post.store') }}"
-              onsubmit="return validateQuiz(this);">
+              novalidate onsubmit="return validateQuiz(this);">
             @csrf
 
             @include('user.self-assessment._questions')

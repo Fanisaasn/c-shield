@@ -31,7 +31,7 @@
                                     <input type="hidden" name="direction" value="{{ $direction }}">
                                     <button class="rounded border border-slate-200 px-2 text-slate-500 hover:bg-slate-50 disabled:opacity-30"
                                             title="{{ $direction === 'up' ? 'Naikkan' : 'Turunkan' }}"
-                                            @disabled($direction === 'up' ? $loop->first : $loop->last)>{{ $arrow }}</button>
+                                            @disabled($direction === 'up' ? $loop->parent->first : $loop->parent->last)>{{ $arrow }}</button>
                                 </form>
                             @endforeach
                         </div>

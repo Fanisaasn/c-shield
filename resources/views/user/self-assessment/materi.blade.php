@@ -339,6 +339,26 @@
                             videoId: youtubeHolder.dataset.videoId,
                             playerVars: { rel: 0, playsinline: 1, modestbranding: 1, disablekb: enforce ? 1 : 0 },
                             events: {
+                                // 101/150: the owner blocks playback on other sites; 100: removed/private.
+                                // The video cannot be watched here, so offer YouTube instead of locking the respondent in.
+                                onError: (event) => {
+                                    finished = true;
+                                    const videoUrl = `https://www.youtube.com/watch?v=${youtubeHolder.dataset.videoId}`;
+                                    const reason = event.data === 100
+                                        ? 'Video ini tidak ditemukan atau bersifat privat.'
+                                        : 'Pemilik video tidak mengizinkan video ini diputar di luar YouTube.';
+                                    const frame = document.getElementById('material-youtube');
+                                    const box = document.createElement('div');
+                                    box.className = 'flex h-full flex-col items-center justify-center gap-3 p-6 text-center text-sm text-slate-200';
+                                    box.innerHTML = `<p class="max-w-md" style="color:#e2e8f0"></p><a target="_blank" rel="noopener" class="rounded-md bg-teal-500 px-4 py-2 font-semibold text-navy-950 hover:bg-teal-400">Tonton di YouTube</a>`;
+                                    box.querySelector('p').textContent = `${reason} Silakan tonton langsung di YouTube${enforce ? ', lalu lanjutkan ke materi berikutnya' : ''}.`;
+                                    const link = box.querySelector('a');
+                                    link.href = videoUrl;
+                                    if (enforce) {
+                                        link.addEventListener('click', () => unlock('Setelah selesai menonton di YouTube, Anda dapat melanjutkan.'));
+                                    }
+                                    frame.replaceWith(box);
+                                },
                                 onPlaybackRateChange: () => {
                                     if (enforce && player.getPlaybackRate() !== 1) player.setPlaybackRate(1);
                                 },

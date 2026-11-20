@@ -25,7 +25,7 @@
     <div>
         <label class="text-sm font-medium" for="material-kind">Jenis materi</label>
         <select id="material-kind" name="kind" class="mt-1 w-full rounded-md border-slate-300" required>
-            <option value="file" @selected($kind === 'file')>File (PDF atau video MP4/WebM)</option>
+            <option value="file" @selected($kind === 'file')>File (PDF, PPT/PPTX, atau video MP4/WebM)</option>
             <option value="interactive" @selected($kind === 'interactive')>Video interaktif (HTML/CSS/JS)</option>
             <option value="link" @selected($kind === 'link')>Link video YouTube / Instagram</option>
         </select>
@@ -37,9 +37,9 @@
             File materi
             @if ($material->file_path && ! $material->isInteractive())<span class="text-slate-400">(kosongkan bila tidak ingin mengganti)</span>@endif
         </label>
-        <input id="file" type="file" name="file" accept=".pdf,.mp4,.webm" class="mt-1 block w-full text-sm">
+        <input id="file" type="file" name="file" accept=".pdf,.ppt,.pptx,.mp4,.webm,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,video/mp4,video/webm" class="mt-1 block w-full text-sm">
         <input id="duration-seconds" type="hidden" name="duration_seconds" value="">
-        <p class="mt-1 text-xs text-slate-400">Format: PDF atau video MP4/WebM. Maksimal 100 MB. Untuk PPT/PPTX, simpan dulu sebagai PDF.</p>
+        <p class="mt-1 text-xs text-slate-400">Format: PDF, PPT/PPTX, atau video MP4/WebM. Maksimal 100 MB. File PPT/PPTX otomatis diubah menjadi PDF agar halaman yang dibaca peserta bisa dilacak.</p>
         @error('file')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
     </div>
 
@@ -66,6 +66,7 @@
             <input id="external-url" type="url" name="external_url" value="{{ old('external_url', $material->external_url) }}"
                    placeholder="https://youtube.com/watch?v=... atau https://instagram.com/reel/..." class="mt-1 w-full rounded-md border-slate-300">
             <p class="mt-1 text-xs text-slate-400">YouTube (video, Shorts) atau Instagram (post/reel publik).</p>
+            <p id="youtube-check" class="mt-2 hidden rounded-md px-3 py-2 text-xs" role="status"></p>
             @error('external_url')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
         </div>
         <div>
@@ -119,7 +120,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fill in a YouTube video's length by briefly loading it in a hidden player.
     const youtubeId = (url) => (url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i) || [])[1];
     let probeHolder = null;
+    const youtubeCheck = document.getElementById('youtube-check');
+    const showYoutubeError = (message) => {
+        youtubeCheck.textContent = message;
+        youtubeCheck.className = 'mt-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700';
+    };
+    const youtubeErrors = {
+        2: 'Link YouTube tidak valid. Periksa kembali link-nya.',
+        5: 'Video ini tidak dapat diputar di browser. Pilih video lain.',
+        100: 'Video tidak ditemukan atau bersifat privat. Pastikan video publik / tidak dihapus.',
+        101: 'Pemilik video tidak mengizinkan video ini diputar di situs lain, sehingga responden tidak bisa menontonnya di C-SHIELD. Pilih video lain.',
+        150: 'Pemilik video tidak mengizinkan video ini diputar di situs lain, sehingga responden tidak bisa menontonnya di C-SHIELD. Pilih video lain.',
+    };
     const probeYoutube = (id) => {
+        youtubeCheck.className = 'mt-2 hidden';
         const run = () => {
             probeHolder?.remove();
             probeHolder = document.createElement('div');
@@ -127,12 +141,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const target = document.createElement('div');
             probeHolder.appendChild(target);
             document.body.appendChild(probeHolder);
+            let settled = false;
             const player = new YT.Player(target, {
                 videoId: id,
+                playerVars: { mute: 1, playsinline: 1 },
                 events: {
+                    // Embedding restrictions are only reported once playback is attempted.
                     onReady: () => {
                         const seconds = Math.floor(player.getDuration());
+                        if (seconds > 0 && !linkDuration.value) linkDuration.value = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+                        player.mute();
+                        player.playVideo();
+                    },
+                    onStateChange: (event) => {
+                        if (settled || ![YT.PlayerState.PLAYING, YT.PlayerState.BUFFERING].includes(event.data)) return;
+                        settled = true;
+                        const seconds = Math.floor(player.getDuration());
                         if (seconds > 0) linkDuration.value = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+                        player.destroy();
+                    },
+                    onError: (event) => {
+                        if (settled) return;
+                        settled = true;
+                        showYoutubeError(youtubeErrors[event.data] || 'Video YouTube ini tidak bisa diputar di C-SHIELD. Pilih video lain.');
                         player.destroy();
                     },
                 },
@@ -149,8 +180,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     urlInput.addEventListener('change', () => {
         const id = youtubeId(urlInput.value);
-        if (id) probeYoutube(id);
+        if (id) {
+            linkDuration.value = '';
+            probeYoutube(id);
+        } else {
+            youtubeCheck.className = 'mt-2 hidden';
+        }
     });
+    // Editing an existing YouTube material: check it right away.
+    if (youtubeId(urlInput.value) && kind.value === 'link') probeYoutube(youtubeId(urlInput.value));
 
     // Measure a chosen video's length so the server can check respondents watched it in full.
     fileInput.addEventListener('change', () => {

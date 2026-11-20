@@ -74,6 +74,19 @@ class SelfAssessmentController extends Controller
             'education' => 'required|string|max:255',
             'domicile' => ['required', Rule::in(AssessmentUser::domicileOptions())],
             'occupation_status' => 'required|string|max:255',
+        ], [
+            'name.required' => 'Nama / inisial wajib diisi.',
+            'phone_last_digits.required' => '4 digit terakhir nomor HP wajib diisi.',
+            'phone_last_digits.digits' => 'Isi tepat 4 digit angka terakhir nomor HP.',
+            'gender.required' => 'Pilih jenis kelamin.',
+            'age.required' => 'Usia wajib diisi.',
+            'age.integer' => 'Usia harus berupa angka.',
+            'age.min' => 'Usia minimal 5 tahun.',
+            'age.max' => 'Usia maksimal 120 tahun.',
+            'education.required' => 'Pilih pendidikan terakhir.',
+            'domicile.required' => 'Pilih domisili (kecamatan).',
+            'domicile.in' => 'Pilih domisili dari daftar yang tersedia.',
+            'occupation_status.required' => 'Pilih status / pekerjaan.',
         ]);
 
         $user = AssessmentUser::create($validated);

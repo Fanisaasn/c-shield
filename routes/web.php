@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\LearningMaterialController as AdminLearningMateri
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\WebinarRegistrationController as AdminWebinarRegistrationController;
 use App\Http\Controllers\Admin\EditDashboardController as AdminEditDashboardController;
+use App\Http\Controllers\Admin\EditorUploadController as AdminEditorUploadController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\FlyerController;
 use App\Http\Controllers\HomeController;
@@ -69,6 +70,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('auth:admin')->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::post('editor-uploads', [AdminEditorUploadController::class, 'store'])->name('editor-uploads.store');
         Route::resource('articles', AdminArticleController::class)->parameters(['articles' => 'item'])->except('show');
         Route::resource('videos', AdminVideoController::class)->parameters(['videos' => 'item'])->except('show');
         Route::resource('flyers', AdminFlyerController::class)->parameters(['flyers' => 'item'])->except('show');
@@ -76,6 +78,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('assessments', [AdminAssessmentController::class, 'index'])->name('assessments.index');
         Route::post('assessments/questions', [AdminAssessmentController::class, 'storeQuestion'])->name('assessments.questions.store');
         Route::put('assessments/questions/{question}', [AdminAssessmentController::class, 'updateQuestion'])->name('assessments.questions.update');
+        Route::delete('assessments/questions', [AdminAssessmentController::class, 'destroyQuestions'])->name('assessments.questions.bulk-destroy');
         Route::delete('assessments/questions/{question}', [AdminAssessmentController::class, 'destroyQuestion'])->name('assessments.questions.destroy');
         Route::get('materi-belajar', [AdminLearningMaterialController::class, 'index'])->name('learning-material.index');
         Route::get('materi-belajar/tambah', [AdminLearningMaterialController::class, 'create'])->name('learning-material.create');

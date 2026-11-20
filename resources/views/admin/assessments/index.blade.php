@@ -25,10 +25,35 @@
         <span class="text-xs text-slate-500">{{ $questions->count() }} soal</span>
     </div>
 
+    @if ($questions->isNotEmpty())
+        {{-- Checkboxes in each question point here via form="bulk-delete-form" (the edit forms prevent nesting). --}}
+        <form id="bulk-delete-form" method="POST" action="{{ route('admin.assessments.questions.bulk-destroy') }}"
+              class="sticky top-0 z-10 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5">
+            @csrf
+            @method('DELETE')
+            <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+                <input type="checkbox" id="select-all-questions" class="rounded border-slate-300 text-teal-600 focus:ring-teal-500">
+                Pilih semua
+            </label>
+            <div class="flex items-center gap-3">
+                <span id="selected-count" class="text-xs text-slate-500">Belum ada soal dipilih</span>
+                <button type="submit" id="bulk-delete-button" disabled
+                        class="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-slate-300">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V7"/></svg>
+                    Hapus terpilih
+                </button>
+            </div>
+        </form>
+        @error('ids')<p class="mt-2 text-xs text-red-600">{{ $message }}</p>@enderror
+    @endif
+
     <ol class="mt-4 space-y-4">
         @forelse ($questions as $question)
-            <li class="rounded-lg border border-slate-200 p-4">
+            <li class="rounded-lg border border-slate-200 p-4 has-[.bulk-question:checked]:border-red-300 has-[.bulk-question:checked]:bg-red-50/40">
                 <div class="flex items-start gap-3">
+                    <input type="checkbox" form="bulk-delete-form" name="ids[]" value="{{ $question->id }}"
+                           data-answers="{{ $question->answers_count }}" aria-label="Pilih soal {{ $loop->iteration }}"
+                           class="bulk-question mt-1.5 rounded border-slate-300 text-red-600 focus:ring-red-500">
                     <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy-900 text-xs font-bold text-white">{{ $loop->iteration }}</span>
                     <div class="min-w-0 flex-1">
                         <p class="text-sm font-medium text-navy-900">{{ $question->question }}</p>
@@ -79,6 +104,45 @@
         @endforelse
     </ol>
 </section>
+
+@if ($questions->isNotEmpty())
+<script>
+    (() => {
+        const form = document.getElementById('bulk-delete-form');
+        const all = document.getElementById('select-all-questions');
+        const boxes = Array.from(document.querySelectorAll('.bulk-question'));
+        const count = document.getElementById('selected-count');
+        const button = document.getElementById('bulk-delete-button');
+
+        const refresh = () => {
+            const checked = boxes.filter((box) => box.checked).length;
+            all.checked = checked === boxes.length;
+            all.indeterminate = checked > 0 && checked < boxes.length;
+            count.textContent = checked ? `${checked} soal dipilih` : 'Belum ada soal dipilih';
+            button.disabled = checked === 0;
+            button.lastChild.textContent = checked ? ` Hapus terpilih (${checked})` : ' Hapus terpilih';
+        };
+
+        all.addEventListener('change', () => {
+            boxes.forEach((box) => { box.checked = all.checked; });
+            refresh();
+        });
+        boxes.forEach((box) => box.addEventListener('change', refresh));
+
+        form.addEventListener('submit', (event) => {
+            const checked = boxes.filter((box) => box.checked);
+            const answered = checked.filter((box) => Number(box.dataset.answers) > 0).length;
+            let message = `Hapus ${checked.length} soal terpilih?`;
+            if (answered) {
+                message += `\n\n${answered} di antaranya sudah pernah dijawab responden. Menghapusnya juga menghapus jawaban tersebut dari riwayat responden.`;
+            }
+            if (!checked.length || !confirm(message)) event.preventDefault();
+        });
+
+        refresh();
+    })();
+</script>
+@endif
 
 @endsection
 

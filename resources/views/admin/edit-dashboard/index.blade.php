@@ -418,23 +418,6 @@
                                     @endif
                                 </div>
 
-                                @if ($slide->description)
-                                    <p class="text-xs text-slate-500 line-clamp-2 max-w-xl">
-                                        {{ $slide->description }}
-                                    </p>
-                                @endif
-
-                                @if ($slide->link_url)
-                                    <div class="flex items-center gap-1 text-[11px] text-teal-700 font-mono">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-3 w-3 shrink-0">
-                                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                                        </svg>
-                                        <a href="{{ $slide->link_url }}" target="_blank" rel="noopener noreferrer" class="hover:underline truncate max-w-xs">
-                                            {{ $slide->link_url }}
-                                        </a>
-                                    </div>
-                                @endif
                             </div>
                         </div>
 
@@ -467,8 +450,6 @@
                                     onclick="openEditSlideModal({{ json_encode([
                                         'id' => $slide->id,
                                         'title' => $slide->title,
-                                        'description' => $slide->description,
-                                        'link_url' => $slide->link_url,
                                         'sort_order' => $slide->sort_order,
                                         'is_active' => $slide->is_active,
                                         'image_url' => $slide->image_url,
@@ -544,21 +525,10 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Slide (Opsional)</label>
-                    <input type="text" name="title" placeholder="Contoh: Cimahi Cyber Security Hub"
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Slide (Opsional)</label>
+                    <input type="text" name="title" placeholder="Contoh: Banner Hari Keamanan Siber"
                            class="w-full text-xs rounded-lg border border-slate-300">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Deskripsi Singkat (Opsional)</label>
-                    <textarea name="description" rows="2" placeholder="Keterangan singkat mengenai banner..."
-                              class="w-full text-xs rounded-lg border border-slate-300"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">URL Tautan / Link (Opsional)</label>
-                    <input type="url" name="link_url" placeholder="https://..."
-                           class="w-full text-xs rounded-lg border border-slate-300">
+                    <p class="mt-1 text-[11px] text-slate-500">Hanya sebagai penanda di halaman admin, tidak tampil di Beranda.</p>
                 </div>
 
                 <div class="flex items-center gap-2 pt-1">
@@ -623,28 +593,16 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Slide</label>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Slide</label>
                     <input type="text" id="edit-slide-title" name="title"
                            class="w-full text-xs rounded-lg border border-slate-300">
+                    <p class="mt-1 text-[11px] text-slate-500">Hanya sebagai penanda di halaman admin, tidak tampil di Beranda.</p>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Deskripsi Singkat</label>
-                    <textarea id="edit-slide-desc" name="description" rows="2"
-                              class="w-full text-xs rounded-lg border border-slate-300"></textarea>
-                </div>
-
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">URL Tautan</label>
-                        <input type="url" id="edit-slide-link" name="link_url" placeholder="https://..."
-                               class="w-full text-xs rounded-lg border border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Urutan (Sort Order)</label>
-                        <input type="number" id="edit-slide-order" name="sort_order" min="1"
-                               class="w-full text-xs rounded-lg border border-slate-300">
-                    </div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Urutan (Sort Order)</label>
+                    <input type="number" id="edit-slide-order" name="sort_order" min="1"
+                           class="w-40 text-xs rounded-lg border border-slate-300">
                 </div>
 
                 <div class="flex items-center gap-2 pt-1">
@@ -784,8 +742,6 @@
         form.action = data.update_url;
 
         document.getElementById('edit-slide-title').value = data.title || '';
-        document.getElementById('edit-slide-desc').value = data.description || '';
-        document.getElementById('edit-slide-link').value = data.link_url || '';
         document.getElementById('edit-slide-order').value = data.sort_order || 1;
         document.getElementById('edit-slide-active').checked = !!data.is_active;
 

@@ -27,9 +27,13 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('self-assessment.store') }}" class="rounded-xl border border-slate-200 bg-white p-6 sm:p-8"
-              onsubmit="this.querySelector('button[type=submit]').disabled = true; this.querySelector('button[type=submit]').textContent = 'Memproses...';">
+        <form id="respondent-form" method="POST" action="{{ route('self-assessment.store') }}" novalidate class="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
             @csrf
+
+            <div id="form-alert" role="alert" class="{{ $errors->any() ? 'flex' : 'hidden' }} mb-6 items-start gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8v4m0 4h.01"/></svg>
+                <span>Data diri belum lengkap. Lengkapi kolom yang ditandai merah untuk melanjutkan.</span>
+            </div>
 
             <div class="space-y-5">
                 <div>
@@ -128,5 +132,88 @@
             </button>
         </form>
     </section>
+
+    <script>
+        (() => {
+            const form = document.getElementById('respondent-form');
+            const alertBox = document.getElementById('form-alert');
+            const messages = {
+                name: 'Nama / inisial wajib diisi.',
+                phone_last_digits: '4 digit terakhir nomor HP wajib diisi.',
+                gender: 'Pilih jenis kelamin.',
+                age: 'Usia wajib diisi.',
+                education: 'Pilih pendidikan terakhir.',
+                domicile: 'Pilih domisili (kecamatan).',
+                occupation_status: 'Pilih status / pekerjaan.',
+            };
+
+            const fieldBox = (name) => form.querySelector(`[name="${name}"]`).closest('.space-y-5 > div');
+
+            const errorFor = (name) => {
+                const value = name === 'gender'
+                    ? form.querySelector('[name="gender"]:checked')?.value
+                    : form.elements[name].value.trim();
+                if (!value) return messages[name];
+                if (name === 'phone_last_digits' && !/^\d{4}$/.test(value)) return 'Isi tepat 4 digit angka terakhir nomor HP.';
+                if (name === 'age' && (!/^\d+$/.test(value) || value < 5 || value > 120)) return 'Isi usia dengan angka antara 5 dan 120.';
+                return null;
+            };
+
+            const showError = (name, message) => {
+                const box = fieldBox(name);
+                // The server-rendered message (after a failed submit) is replaced by the live one.
+                box.querySelectorAll('p.text-red-600').forEach((p) => p.remove());
+                box.querySelectorAll('input:not([type=radio]), select').forEach((el) => {
+                    el.classList.toggle('border-red-500', Boolean(message));
+                    el.classList.toggle('border-slate-300', !message);
+                    el.setAttribute('aria-invalid', message ? 'true' : 'false');
+                });
+                if (message) {
+                    const p = document.createElement('p');
+                    p.className = 'mt-1 text-xs text-red-600';
+                    p.textContent = message;
+                    box.appendChild(p);
+                }
+            };
+
+            form.addEventListener('submit', (event) => {
+                const invalid = Object.keys(messages).filter((name) => {
+                    const message = errorFor(name);
+                    showError(name, message);
+                    return message;
+                });
+
+                if (invalid.length) {
+                    event.preventDefault();
+                    alertBox.classList.replace('hidden', 'flex');
+                    const first = form.querySelector(`[name="${invalid[0]}"]`);
+                    fieldBox(invalid[0]).scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    first.focus({ preventScroll: true });
+                    return;
+                }
+
+                const button = form.querySelector('button[type=submit]');
+                button.disabled = true;
+                button.textContent = 'Memproses...';
+            });
+
+            // Clear a field's warning as soon as it is filled in.
+            Object.keys(messages).forEach((name) => {
+                form.querySelectorAll(`[name="${name}"]`).forEach((el) => {
+                    el.addEventListener(el.tagName === 'SELECT' || el.type === 'radio' ? 'change' : 'input', () => {
+                        if (fieldBox(name).querySelector('p.text-red-600') && !errorFor(name)) showError(name, null);
+                        if (!form.querySelector('p.text-red-600')) alertBox.classList.replace('flex', 'hidden');
+                    });
+                });
+            });
+
+            // Server-side errors: mark the fields too.
+            form.querySelectorAll('p.text-red-600').forEach((p) => {
+                p.closest('.space-y-5 > div')?.querySelectorAll('input:not([type=radio]), select').forEach((el) => {
+                    el.classList.replace('border-slate-300', 'border-red-500');
+                });
+            });
+        })();
+    </script>
 
 @endsection
